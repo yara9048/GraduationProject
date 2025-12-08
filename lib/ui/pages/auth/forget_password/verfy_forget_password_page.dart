@@ -23,7 +23,7 @@ class _VerifyForgetPasswordPageState extends State<VerifyForgetPasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: authPagesTemplate(
+      body: AuthPagesTemplate(
         text1: "أدخل الرمز المرسل إلى بريدك الالكتروني",
         size1: 17,
         size2: 17,
@@ -34,7 +34,7 @@ class _VerifyForgetPasswordPageState extends State<VerifyForgetPasswordPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                OTPInput(
+                OtpInputTemplate(
                   numberOfFields: 4,
                   fieldWidth: 75,
                   fieldHeight: 80,

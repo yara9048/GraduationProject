@@ -23,7 +23,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: authPagesTemplate(
+      body: AuthPagesTemplate(
         text1: "!أهلاً بك ",
         size1: 17,
         size2: 17,

@@ -21,7 +21,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: authPagesTemplate(
+      body: AuthPagesTemplate(
         text1: "قم بإدخال كلمة المرور الجديدة",
         text2: " ",
         size1:17,

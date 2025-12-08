@@ -1,10 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/ui/pages/auth/sign_up/sign_up_page.dart';
-
-import '../../../Widgets/auth_pages_template.dart';
-import '../../../Widgets/Button_template.dart';
-import '../../../Widgets/otp_input_template.dart';
+import 'package:graduationprojct/ui/widgets/auth_pages_template.dart';
+import 'package:graduationprojct/ui/widgets/otp_input_template.dart';
+import 'package:graduationprojct/ui/widgets/Button_template.dart';
 
 class VerifyEmailPage extends StatefulWidget {
   const VerifyEmailPage({super.key});
@@ -23,7 +22,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: authPagesTemplate(
+      body: AuthPagesTemplate(
         text1: "أدخل الرمز المرسل إلى بريدك الالكتروني",
         size1: 17,
         size2: 17,
@@ -34,7 +33,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                OTPInput(
+                OtpInputTemplate(
                   numberOfFields: 4,
                   fieldWidth: 75,
                   fieldHeight: 80,

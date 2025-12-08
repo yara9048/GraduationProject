@@ -21,7 +21,7 @@ class _SignInPageState extends State<SignInPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: authPagesTemplate(
+      body: AuthPagesTemplate(
         text1: "مرحبا بعودتك",
         text2: "يرجى ادخال بياناتك لتسجيل الدخول",
         size1: 17,
