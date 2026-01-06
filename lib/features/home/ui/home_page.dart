@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
-// Assuming TextFieldTemplate is defined correctly and accessible
-import '../../../Widgets/text_field_template.dart';
-import '../../../widgets/course_card.dart';
-import '../../../widgets/course_card_template.dart';
-import '../../../widgets/progress_line.dart';
+import '../../auth/ui/widgets/course_card_template.dart';
+import '../../auth/ui/widgets/text_field_template.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

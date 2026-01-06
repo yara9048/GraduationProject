@@ -1,9 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../../../Widgets/auth_pages_template.dart';
-import '../../../Widgets/button_template.dart';
-import '../../../Widgets/otp_input_template.dart';
+import '../../widgets/auth_pages_template.dart';
+import '../../widgets/button_template.dart';
+import '../../widgets/otp_input_template.dart';
 import '../sign_up/verify_email_page.dart';
 import 'new_password_page.dart';
 

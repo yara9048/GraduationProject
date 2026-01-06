@@ -1,9 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import '../../../Widgets/auth_pages_template.dart';
-import '../../../Widgets/button_template.dart';
-import '../../../Widgets/text_field_template.dart';
-import '../../home/home_page.dart';
+import '../../../../home/ui/home_page.dart';
+import '../../widgets/auth_pages_template.dart';
+import '../../widgets/button_template.dart';
+import '../../widgets/text_field_template.dart';
 import '../forget_password/forget_password_page.dart';
 import '../sign_up/sign_up_page.dart';
 

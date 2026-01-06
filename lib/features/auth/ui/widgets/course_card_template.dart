@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:graduationprojct/ui/widgets/progress_line.dart';
+import 'package:graduationprojct/features/auth/ui/widgets/progress_line.dart';
 
 class CourseCardTemplate extends StatelessWidget {
   final String imagePath;
