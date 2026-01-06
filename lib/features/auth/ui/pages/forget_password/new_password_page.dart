@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../../Widgets/auth_pages_template.dart';
-import '../../../Widgets/Button_template.dart';
+import '../../../Widgets/button_template.dart';
 import '../../../Widgets/text_field_template.dart';
 import '../sign_up/sign_up_page.dart';
 

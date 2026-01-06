@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:graduationprojct/ui/pages/auth/sign_up/sign_up_page.dart';
 import 'package:graduationprojct/ui/widgets/auth_pages_template.dart';
 import 'package:graduationprojct/ui/widgets/otp_input_template.dart';
-import 'package:graduationprojct/ui/widgets/Button_template.dart';
+import 'package:graduationprojct/ui/widgets/button_template.dart';
 
 class VerifyEmailPage extends StatefulWidget {
   const VerifyEmailPage({super.key});

@@ -1,8 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../../Widgets/auth_pages_template.dart';
-import '../../../Widgets/Button_template.dart';
+import '../../../Widgets/button_template.dart';
 import '../../../Widgets/text_field_template.dart';
+import '../../home/home_page.dart';
 import '../forget_password/forget_password_page.dart';
 import '../sign_up/sign_up_page.dart';
 
@@ -124,9 +125,10 @@ class _SignInPageState extends State<SignInPage> {
                   text: "تسجيل الدخول",
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      print("✅ Validation Passed");
-                      print("Email: ${emailController.text}");
-                      print("Password: ${passwordController.text}");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => HomePage()),
+                      );
                     }
                   },
                 ),
