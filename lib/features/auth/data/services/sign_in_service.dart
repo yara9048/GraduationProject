@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:graduationprojct/core/end_points.dart';
-import '../../../../core/dio.dart';
+import '../../../../../core/dio.dart';
 import '../models/sign_in_model.dart';
 
 class SignInService {
   final DioHelper _dio = DioHelper();
 
-  Future<SignUpModel> login({
+  Future<SignInModel> signIn({
     required String email,
     required String password,
   }) async {
@@ -20,18 +20,20 @@ class SignInService {
       );
 
       if (response.statusCode == 200) {
-        return SignUpModel.fromJson(response.data);
-      } else if (response.statusCode == 400) {
-        throw Exception("Wrong login data");
+        return SignInModel.fromJson(response.data);
       } else {
-        throw Exception('Failed with status code: ${response.statusCode}');
+        throw Exception('فشل مع: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      throw e.response?.data['message'] ??
-          e.response?.data['error'] ??
-          'Login failed';
+      if (e.response != null && e.response!.statusCode == 400) {
+        throw 'بيانات الادخال خاطئة';
+      } else {
+        throw e.response?.data['message'] ??
+            e.response?.data['error'] ??
+            'خطأ غير متوقع';
+      }
     } catch (e) {
-      throw 'Unexpected error: $e';
+      throw 'خطأ: $e';
     }
   }
 }

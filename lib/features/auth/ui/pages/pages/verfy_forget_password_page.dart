@@ -78,7 +78,7 @@ class _VerifyForgetPasswordPageState extends State<VerifyForgetPasswordPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => const VerifyEmailPage()),
+                                  builder: (_) => const VerifyEmailPage(email: '',)),
                             );
                           },
                       ),

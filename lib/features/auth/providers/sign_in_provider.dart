@@ -1,12 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/models/sign_up_model.dart';
-import '../data/services/sign_up_service.dart';
+import '../data/models/sign_in_model.dart';
+import '../data/services/sign_in_service.dart';
 
-
-class AuthProvider with ChangeNotifier {
-  final AuthService _service = AuthService();
+class SignInProvider with ChangeNotifier {
+  final SignInService _service = SignInService();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -23,12 +22,13 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      SignUpModel user = await _service.login(
+      SignInModel user = await _service.signIn(
         email: email,
         password: password,
       );
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
+      print(user.access);
       await prefs.setString('auth_token', user.access);
 
       _isSuccess = true;

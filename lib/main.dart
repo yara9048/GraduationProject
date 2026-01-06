@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/auth/providers/resend_otp_provider.dart';
+import 'package:graduationprojct/features/auth/providers/sign_up_provider.dart';
+import 'package:graduationprojct/features/auth/ui/pages/sign_up/splash_page.dart';
+import 'package:provider/provider.dart';
 
-import 'features/auth/ui/pages/sign_up/splash_page.dart';
+import 'features/auth/providers/sign_in_provider.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -10,9 +15,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: SplashPage(),
+    return  MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => SignInProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SignUpProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ResendOtpProvider(),
+        ),
+      ],
+
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: const SplashPage(),
+      ),
     );
   }
 }

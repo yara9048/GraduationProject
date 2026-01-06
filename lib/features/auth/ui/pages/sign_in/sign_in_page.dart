@@ -1,10 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../home/ui/home_page.dart';
+import '../../../providers/sign_in_provider.dart';
 import '../../widgets/auth_pages_template.dart';
 import '../../widgets/button_template.dart';
+import '../../widgets/snack_bar.dart';
 import '../../widgets/text_field_template.dart';
-import '../forget_password/forget_password_page.dart';
+import '../pages/forget_password_page.dart';
 import '../sign_up/sign_up_page.dart';
 
 class SignInPage extends StatefulWidget {
@@ -120,16 +123,35 @@ class _SignInPageState extends State<SignInPage> {
                 ),
 
                 const SizedBox(height: 60),
+                Consumer<SignInProvider>(
+                  builder: (context, authProvider, child) {
+                    return authProvider.isLoading
+                        ? const CircularProgressIndicator(
+                      color: Color(0xff2A9D8F),
+                    )
+                        : ButtonTemplate(
+                      text: "تسجيل الدخول",
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          await authProvider.login(
+                            emailController.text,
+                            passwordController.text,
+                          );
 
-                ButtonTemplate(
-                  text: "تسجيل الدخول",
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => HomePage()),
-                      );
-                    }
+                          if (authProvider.isSuccess) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (_) => HomePage()),
+                            );
+                          } else if (authProvider.errorMessage != null) {
+                            MySnackBar.show(
+                              context,
+                              message: authProvider.errorMessage!,
+                            );
+                          }
+                        }
+                      },
+                    );
                   },
                 ),
 

@@ -1,15 +1,22 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/auth/providers/resend_otp_provider.dart';
 import 'package:graduationprojct/features/auth/ui/pages/sign_up/sign_up_page.dart';
+import 'package:provider/provider.dart';
 
 import '../../widgets/auth_pages_template.dart';
 import '../../widgets/button_template.dart';
 import '../../widgets/otp_input_template.dart';
+import '../../widgets/snack_bar.dart';
 
 
-class VerifyEmailPage extends StatefulWidget {
-  const VerifyEmailPage({super.key});
+  class VerifyEmailPage extends StatefulWidget {
+  final String email;
 
+  const VerifyEmailPage({
+  super.key,
+  required this.email,
+  });
   @override
   State<VerifyEmailPage> createState() => _VerifyEmailPageState();
 }
@@ -55,36 +62,52 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
 
                 const SizedBox(height: 35),
 
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    style: const TextStyle(
-                        fontSize: 17, fontFamily: "Tajawal"),
-                    children: [
-                      const TextSpan(
-                        text: "لم يصلك الرمز؟",
-                        style: TextStyle(
-                            color: Colors.black38,
-                            fontFamily: "Tajawal",
-                            fontSize: 15),
-                      ),
-                      TextSpan(
-                        text: " إعادة ارسال الرمز",
+                Consumer<ResendOtpProvider>(
+                  builder: (context, authProvider, child) {
+                    return authProvider.isLoading
+                        ? const CircularProgressIndicator(
+                      color: Color(0xff2A9D8F),
+                    )
+                        : RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
                         style: const TextStyle(
-                            color: Color(0xffE9C46A),
-                            fontFamily: "Tajawal",
-                            fontSize: 15),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const VerifyEmailPage()),
-                            );
-                          },
+                          fontSize: 15,
+                          fontFamily: "Tajawal",
+                        ),
+                        children: [
+                          const TextSpan(
+                            text: "لم يصلك الرمز؟",
+                            style: TextStyle(color: Colors.black38),
+                          ),
+                          TextSpan(
+                            text: " إعادة ارسال الرمز",
+                            style: const TextStyle(
+                              color: Color(0xffE9C46A),
+                              fontWeight: FontWeight.bold,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () async {
+                                final success =
+                                await authProvider.resendotp(widget.email);
+                                if (authProvider.isSuccess) {
+                                  MySnackBar.show(
+                                    context,
+                                    message: "تم إرسال الرمز مرة أخرى",
+                                  );
+                                } else {
+                                  MySnackBar.show(
+                                    context,
+                                    message: authProvider.errorMessage ??
+                                        "حدث خطأ، حاول مرة أخرى",
+                                  );
+                                }
+                              },
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 90),

@@ -1,25 +1,25 @@
 // To parse this JSON data, do
 //
-//     final signUpModel = signUpModelFromJson(jsonString);
+//     final signInModel = signInModelFromJson(jsonString);
 
 import 'dart:convert';
 
-SignUpModel signUpModelFromJson(String str) => SignUpModel.fromJson(json.decode(str));
+SignInModel signInModelFromJson(String str) => SignInModel.fromJson(json.decode(str));
 
-String signUpModelToJson(SignUpModel data) => json.encode(data.toJson());
+String signInModelToJson(SignInModel data) => json.encode(data.toJson());
 
-class SignUpModel {
+class SignInModel {
   String access;
   String refresh;
   User user;
 
-  SignUpModel({
+  SignInModel({
     required this.access,
     required this.refresh,
     required this.user,
   });
 
-  factory SignUpModel.fromJson(Map<String, dynamic> json) => SignUpModel(
+  factory SignInModel.fromJson(Map<String, dynamic> json) => SignInModel(
     access: json["access"],
     refresh: json["refresh"],
     user: User.fromJson(json["user"]),
