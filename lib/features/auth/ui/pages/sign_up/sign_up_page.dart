@@ -50,36 +50,6 @@ class _SignUpPageState extends State<SignUpPage> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              "الاسم",
-                              style: TextStyle(
-                                color: Color(0xff1A2429),
-                                fontSize: 17,
-                                fontFamily: "Tajawal",
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            SizedBox(height: isValidationActive? 0:5,),
-                            TextFieldTemplate(
-                              controller: firstNameController,
-                              size2: 17,
-                              size: 16,
-                              hint: "اسمك",
-                              icon: Icons.person,
-                              validator: (value) {
-                                if (!isValidationActive) return null;
-                                if (value == null || value.isEmpty) return "الحقل فارغ";
-                                return null;
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 20),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
                               "الكنية",
                               style: TextStyle(
                                 color: Color(0xff1A2429),
@@ -95,6 +65,36 @@ class _SignUpPageState extends State<SignUpPage> {
                               size: 16,
                               hint: "كنيتك",
                               icon: Icons.person_outline,
+                              validator: (value) {
+                                if (!isValidationActive) return null;
+                                if (value == null || value.isEmpty) return "الحقل فارغ";
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 20),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              "الاسم",
+                              style: TextStyle(
+                                color: Color(0xff1A2429),
+                                fontSize: 17,
+                                fontFamily: "Tajawal",
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(height: isValidationActive? 0:5,),
+                            TextFieldTemplate(
+                              controller: firstNameController,
+                              size2: 17,
+                              size: 16,
+                              hint: "اسمك",
+                              icon: Icons.person,
                               validator: (value) {
                                 if (!isValidationActive) return null;
                                 if (value == null || value.isEmpty) return "الحقل فارغ";

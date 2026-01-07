@@ -1,13 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../home/ui/home_page.dart';
+import '../../../../home/ui/pages/home_page.dart';
 import '../../../providers/sign_in_provider.dart';
 import '../../widgets/auth_pages_template.dart';
 import '../../widgets/button_template.dart';
 import '../../widgets/snack_bar.dart';
 import '../../widgets/text_field_template.dart';
-import '../pages/forget_password_page.dart';
+import '../forget_password/forget_password_page.dart';
 import '../sign_up/sign_up_page.dart';
 
 class SignInPage extends StatefulWidget {

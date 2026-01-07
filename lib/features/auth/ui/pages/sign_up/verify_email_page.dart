@@ -1,6 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/auth/providers/resend_otp_provider.dart';
+import 'package:graduationprojct/features/auth/providers/send_otp_provider.dart';
+import 'package:graduationprojct/features/auth/ui/pages/sign_in/sign_in_page.dart';
 import 'package:graduationprojct/features/auth/ui/pages/sign_up/sign_up_page.dart';
 import 'package:provider/provider.dart';
 
@@ -112,17 +114,40 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
 
                 const SizedBox(height: 90),
 
-                ButtonTemplate(
-                  text: "تأكيد حساب",
-                  onPressed: () {
-                    if (_otpValue.length != 4) {
-                      setState(() => _otpError = true);
-                      return;
-                    }
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                          return const SignUpPage();
-                        }));
+                Consumer<SendOtpProvider>(
+                  builder: (context, authProvider, child) {
+                    return authProvider.isLoading
+                        ? const CircularProgressIndicator(color: Color(0xff2A9D8F))
+                        : ButtonTemplate(
+                      text: "تأكيد حساب",
+                      onPressed: () async {
+                        print(_otpValue);
+
+                        if (_otpValue.length != 4) {
+                          setState(() => _otpError = true);
+                          return;
+                        }
+
+                        setState(() => _otpError = false);
+
+                        await authProvider.sendotp(
+                          email: widget.email,
+                          code: _otpValue,
+                        );
+
+                        if (authProvider.isSuccess) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const SignInPage()),
+                          );
+                        } else {
+                          MySnackBar.show(
+                            context,
+                            message: authProvider.errorMessage ?? "حدث خطأ، حاول مرة أخرى",
+                          );
+                        }
+                      },
+                    );
                   },
                 ),
 

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/home/ui/widgets/subjects_card.dart';
 
-import '../../auth/ui/widgets/course_card_template.dart';
-import '../../auth/ui/widgets/text_field_template.dart';
+import '../../../auth/ui/widgets/course_card_template.dart';
+import '../../../auth/ui/widgets/text_field_template.dart';
+import 'course_view.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -56,7 +58,6 @@ class _HomePageState extends State<HomePage> {
                 size2: 21,
                 icon: Icons.search,
               ),
-
               SizedBox(height: 30),
               Padding(
                 padding: const EdgeInsets.only(right: 30.0),
@@ -98,19 +99,71 @@ class _HomePageState extends State<HomePage> {
                           fontSize: 18,
                         ),
                       ),
-                      Text(
-                        "عرض الكل",
-                        style: TextStyle(
-                          color: Color(0xffE9C46A),
-                          fontWeight: FontWeight.bold,
-                          fontFamily: "Tajawal",
-                          fontSize: 18,
+                      GestureDetector(
+                        onTap: (){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => CourseView()),
+                          );
+                        },
+                        child: Text(
+                          "عرض الكل",
+                          style: TextStyle(
+                            color: Color(0xffE9C46A),
+                            fontWeight: FontWeight.bold,
+                            fontFamily: "Tajawal",
+                            fontSize: 18,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),]
+              ),
+
+            Padding(padding: const EdgeInsets.only(top: 10),
+            child:SizedBox(
+              height: 110,
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    SubjectsCard(
+                      title: "القانون المدني",
+                      imagePath: 'assets/Images/Group 47.png',
+                      textColor: Color(0xffA67500),
+                      width: 220,
+
+                    ),
+                    SubjectsCard(
+                      title: "قانون أصول المحاكمات الجزئية",
+                      imagePath: 'assets/Images/Group 43.png',
+                      textColor: Color(0xff009A87),
+                      width: 220,
+                      width2: 160,
+                      top:5,
+                      size:24
+                    ),
+
+                    SubjectsCard(
+                      title:  "قانون العقوبات العام 3"       ,
+                      imagePath: 'assets/Images/Group 42.png',
+                      textColor: Color(0xffE76F51),
+                      width: 220,
+                      width2: 150,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            )
+
+
+
+            ]
           ),
         ],
       ),

@@ -1,14 +1,20 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/auth/providers/password_send_otp_prvider.dart';
+import 'package:provider/provider.dart';
 
+import '../../../providers/send_otp_provider.dart';
 import '../../widgets/auth_pages_template.dart';
 import '../../widgets/button_template.dart';
 import '../../widgets/otp_input_template.dart';
+import '../../widgets/snack_bar.dart';
 import '../sign_up/verify_email_page.dart';
 import 'new_password_page.dart';
 
 class VerifyForgetPasswordPage extends StatefulWidget {
-  const VerifyForgetPasswordPage({super.key});
+  final String email;
+
+  const VerifyForgetPasswordPage({super.key, required this.email});
 
   @override
   State<VerifyForgetPasswordPage> createState() => _VerifyForgetPasswordPageState();
@@ -88,17 +94,40 @@ class _VerifyForgetPasswordPageState extends State<VerifyForgetPasswordPage> {
 
                 const SizedBox(height: 90),
 
-                ButtonTemplate(
-                  text: "متابعة",
-                  onPressed: () {
-                    if (_otpValue.length != 4) {
-                      setState(() => _otpError = true);
-                      return;
-                    }
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                          return const NewPasswordPage();
-                        }));
+                Consumer<PasswordSendOtpPrvider>(
+                  builder: (context, authProvider, child) {
+                    return authProvider.isLoading
+                        ? const CircularProgressIndicator(color: Color(0xff2A9D8F))
+                        : ButtonTemplate(
+                      text: "متابعة",
+                      onPressed: () async {
+                        print(_otpValue);
+
+                        if (_otpValue.length != 4) {
+                          setState(() => _otpError = true);
+                          return;
+                        }
+
+                        setState(() => _otpError = false);
+
+                        await authProvider.sendotp(
+                          email: widget.email,
+                          code: _otpValue,
+                        );
+
+                        if (authProvider.isSuccess) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => NewPasswordPage(email: widget.email)),
+                          );
+                        } else {
+                          MySnackBar.show(
+                            context,
+                            message: authProvider.errorMessage ?? "حدث خطأ، حاول مرة أخرى",
+                          );
+                        }
+                      },
+                    );
                   },
                 ),
 

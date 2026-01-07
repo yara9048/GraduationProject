@@ -1,13 +1,18 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/auth/providers/new_password_provider.dart';
+import 'package:graduationprojct/features/auth/ui/pages/sign_in/sign_in_page.dart';
+import 'package:provider/provider.dart';
 
 import '../../widgets/auth_pages_template.dart';
 import '../../widgets/button_template.dart';
+import '../../widgets/snack_bar.dart';
 import '../../widgets/text_field_template.dart';
 import '../sign_up/sign_up_page.dart';
 
 class NewPasswordPage extends StatefulWidget {
-  const NewPasswordPage({super.key});
+  final String email;
+  const NewPasswordPage({super.key, required this.email});
 
   @override
   State<NewPasswordPage> createState() => _NewPasswordPageState();
@@ -93,12 +98,30 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                     },
                   ),
                   SizedBox(height: 35),
-                  ButtonTemplate(
-                    text: "تعديل كلمة المرور",
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        Navigator.push(context, MaterialPageRoute(builder: (context){return SignUpPage();}));
-                      }
+                  Consumer<NewPasswordProvider>(
+                    builder: (context, authProvider, child) {
+                      return authProvider.isLoading
+                          ? const CircularProgressIndicator(color: Color(0xff2A9D8F))
+                          : ButtonTemplate(
+                        text: "تعديل كلمة المرور",
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            await authProvider.newPassword(
+                              email:widget.email,
+                              password1: passwordController.text,
+                              password2:passwordVerifyingController.text,
+                            );
+                            if (authProvider.isSuccess) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (_) => SignInPage()),
+                              );
+                            } else if (authProvider.errorMessage != null) {
+                              MySnackBar.show(context, message: authProvider.errorMessage!);
+                            }
+                          }
+                        },
+                      );
                     },
                   ),
 

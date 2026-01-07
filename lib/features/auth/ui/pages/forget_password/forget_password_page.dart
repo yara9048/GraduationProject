@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/auth/providers/reset_password_request_provider.dart';
+import 'package:provider/provider.dart';
 
 
 import '../../widgets/auth_pages_template.dart';
 import '../../widgets/button_template.dart';
+import '../../widgets/snack_bar.dart';
 import '../../widgets/text_field_template.dart';
 import 'verfy_forget_password_page.dart';
 
@@ -49,14 +52,28 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                     },
                   ),
                   SizedBox(height: 40),
-                  ButtonTemplate(
-                    text: "متابعة",
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        print("✅ Validation Passed");
-                        print("Email: ${emailController.text}");
-                        Navigator.push(context, MaterialPageRoute(builder: (context){return VerifyForgetPasswordPage();}));
-                      }
+                  Consumer<ResetPasswordRequestProvider>(
+                    builder: (context, authProvider, child) {
+                      return authProvider.isLoading
+                          ? const CircularProgressIndicator(color: Color(0xff2A9D8F))
+                          : ButtonTemplate(
+                        text: "متابعة",
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            await authProvider.resetPasswordRequest(
+                              email: emailController.text,
+                            );
+                            if (authProvider.isSuccess) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (_) => VerifyForgetPasswordPage(email: emailController.text,)),
+                              );
+                            } else if (authProvider.errorMessage != null) {
+                              MySnackBar.show(context, message: authProvider.errorMessage!);
+                            }
+                          }
+                        },
+                      );
                     },
                   ),
 
