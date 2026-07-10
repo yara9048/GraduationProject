@@ -77,13 +77,20 @@ class CourseCardTemplate extends StatelessWidget {
 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: Text(
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.access_time,
+                    color: Color(0xff92A1A1),
+                    size: 17,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
                     durationText,
+                    textAlign: TextAlign.right,
                     style: const TextStyle(
                       fontSize: 15,
                       fontFamily: "Tajawal",
@@ -91,14 +98,8 @@ class CourseCardTemplate extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                const SizedBox(width: 5),
-                const Icon(
-                  Icons.access_time,
-                  color: Color(0xff92A1A1),
-                  size: 17,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -110,11 +111,8 @@ class CourseCardTemplate extends StatelessWidget {
               right: 12,
               bottom: 20,
             ),
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: CustomProgressLine(progress: progress),
+            child:CustomProgressLine(progress: progress),
             ),
-          ),
         ],
       ),
     );

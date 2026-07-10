@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../pages/video_page.dart';
+import '../pages/videos_page.dart';
 
 class SubjectsCard extends StatelessWidget {
   final String title;

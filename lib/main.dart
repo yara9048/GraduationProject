@@ -10,6 +10,9 @@ import 'package:provider/provider.dart';
 
 import 'features/auth/providers/send_otp_provider.dart';
 import 'features/auth/providers/sign_in_provider.dart';
+import 'features/home/ui/pages/chat_page.dart';
+import 'features/home/ui/pages/mcq_page.dart';
+import 'features/home/ui/pages/summary_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -49,7 +52,7 @@ class MyApp extends StatelessWidget {
 
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: const HomePage(),
+        home: const ChatPage(),
       ),
     );
   }

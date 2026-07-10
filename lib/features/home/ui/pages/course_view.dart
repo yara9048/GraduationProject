@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:graduationprojct/features/home/ui/widgets/subjects_card.dart';
-
-import '../../../auth/ui/widgets/course_card_template.dart';
-import '../../../auth/ui/widgets/text_field_template.dart';
-import 'course_view.dart';
+import 'package:graduationprojct/features/home/ui/widgets/subjects_card_template.dart';
 
 class CourseView extends StatefulWidget {
   const CourseView({super.key});
@@ -29,9 +25,24 @@ class _CourseViewState extends State<CourseView> {
                     left: 0,
                     child: Image.asset('assets/Images/Ellipse 4.png'),
                   ),
+
+                  Positioned(
+                    top: 55,
+                    right: 16,
+                    child: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        textDirection: TextDirection.rtl,
+                        color: Color(0xff2A9D8F),
+                        size: 30,
+                      ),
+                    ),
+                  ),
+
                   Positioned(
                     top: 50,
-                    right: 30,
+                    right: 70,
                     child: Text(
                       "مسار",
                       style: TextStyle(
@@ -52,12 +63,13 @@ class _CourseViewState extends State<CourseView> {
                 ],
               ),
             ),
+
             Expanded(
               child: MediaQuery.removePadding(
                 removeTop: true,
                 context: context,
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: ListView(
                     children: [
                       SizedBox(
@@ -103,7 +115,7 @@ class _CourseViewState extends State<CourseView> {
                       SizedBox(
                         height: 90,
                         child: SubjectsCard(
-                          title: "قانون التجارة البحرية ",
+                          title: "قانون التجارة البحرية",
                           imagePath: 'assets/Images/Group 51.png',
                           textColor: Color(0xffA67500),
                           width: 300,
