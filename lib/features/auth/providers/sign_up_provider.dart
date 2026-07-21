@@ -13,7 +13,7 @@ class SignUpProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isSuccess => _isSuccess;
 
-  Future<void> register({required String email, required String password1, required String password2,required String firstName ,required String lastName}) async {
+  Future<void> register({required String email, required String password1, required String password2,required String firstName ,required String lastName, required String major}) async {
     _isLoading = true;
     _errorMessage = null;
     _isSuccess = false;
@@ -22,7 +22,7 @@ class SignUpProvider with ChangeNotifier {
     try {
       SignUpModel user = await _service.signUp(
         email: email,
-        password1: password1, firstName: firstName, lastName: lastName, password2: password2,
+        password1: password1, firstName: firstName, lastName: lastName, password2: password2,major: major
 
       );
 

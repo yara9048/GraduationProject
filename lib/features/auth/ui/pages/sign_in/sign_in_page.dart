@@ -165,9 +165,9 @@ class _SignInPageState extends State<SignInPage> {
                       const TextSpan(
                         text: "ليس لديك حساب؟ ",
                         style: TextStyle(
-                          color: Colors.black38,
+                          color: Colors.black,
                           fontFamily: "Tajawal",
-                          fontSize: 17,
+                          fontSize: 19,
                         ),
                       ),
                       TextSpan(
@@ -175,7 +175,8 @@ class _SignInPageState extends State<SignInPage> {
                         style: const TextStyle(
                           color: Color(0xffE9C46A),
                           fontFamily: "Tajawal",
-                          fontSize: 17,
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold
                         ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {

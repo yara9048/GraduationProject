@@ -37,6 +37,7 @@ class SummaryCard extends StatelessWidget {
             body,
             style: const TextStyle(
               fontSize: 16,
+              fontFamily: "Tajawal",
               color: Color(0xff181C1F),
               height: 1.7,
             ),

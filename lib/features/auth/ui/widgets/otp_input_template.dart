@@ -125,7 +125,9 @@ class _OtpInputTemplateState extends State<OtpInputTemplate> {
             padding: const EdgeInsets.only(top: 8.0),
             child: Text(
               widget.errorText!,
-              style: const TextStyle(color: Color(0xffE76F51), fontSize: 14),
+              style: const TextStyle(
+                  fontFamily: "Tajawal",
+                  color: Color(0xffE76F51), fontSize: 14),
             ),
           )
       ],

@@ -26,7 +26,7 @@ class AuthPagesTemplate extends StatelessWidget {
         ),
         child,
         Positioned(
-          right: 40,
+          right: 30,
           top: 50,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -52,14 +52,14 @@ class AuthPagesTemplate extends StatelessWidget {
               ),
               Text( text1,
                 style: TextStyle(
-                  color: Colors.black38,
+                  color: Colors.black,
                   fontSize: size1,
                   fontFamily: "Tajawal",
                 ),
               ),
               Text( text2,
                 style: TextStyle(
-                  color: Colors.black38,
+                  color: Colors.black,
                   fontSize: size2,
                   fontFamily: "Tajawal",
                 ),

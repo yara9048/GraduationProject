@@ -10,6 +10,7 @@ class SignUpService {
     required String email,
     required String firstName,
     required String lastName,
+    required String major,
     required String password1,
     required String password2,
   }) async {
@@ -22,6 +23,7 @@ class SignUpService {
           'password2': password2,
           'last_name': lastName,
           'first_name': firstName,
+          'major': major
         },
       );
 

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/home/ui/pages/profile_page.dart';
 import 'package:graduationprojct/features/home/ui/widgets/new_added_course_template.dart';
 import 'package:graduationprojct/features/home/ui/widgets/subjects_card_template.dart';
+import 'package:provider/provider.dart';
 
+import '../../../auth/providers/profile_provider.dart';
 import '../widgets/course_card_template.dart';
 import '../../../auth/ui/widgets/text_field_template.dart';
 import '../widgets/section_title_template.dart';
@@ -31,31 +34,86 @@ class _HomePageState extends State<HomePage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      top: 50,
-                      right: 30,
-                      bottom: 30,
-                    ),
-                    child: Text(
-                      "مسار",
-                      style: TextStyle(
-                        fontSize: 43,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xff2A9D8F),
-                        fontFamily: "Tajawal",
-                        shadows: [
-                          Shadow(
-                            offset: Offset(-1, 4),
-                            blurRadius: 16,
-                            color: Colors.black26,
+                Row(
+                  children: [
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          top: 50,
+                          right: 30,
+                          bottom: 30,
+                        ),
+                        child: Text(
+                          "مسار",
+                          style: TextStyle(
+                            fontSize: 43,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xff2A9D8F),
+                            fontFamily: "Tajawal",
+                            shadows: [
+                              Shadow(
+                                offset: Offset(-1, 4),
+                                blurRadius: 16,
+                                color: Colors.black26,
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 220,top: 18),
+                      child: Consumer<ProfileProvider>(
+                        builder: (context, provider, child) {
+                          return GestureDetector(
+                            onTap: provider.isLoading
+                                ? null
+                                : () async {
+                              await provider.getProfile();
+
+                              if (provider.isSuccess) {
+                                Navigator.of(context, rootNavigator: true).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const ProfilePage(),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(provider.errorMessage ?? "حدث خطأ"),
+                                  ),
+                                );
+                              }
+                            },
+                            child: Container(
+                              width: 48,
+                              height: 48,
+                              decoration: const BoxDecoration(
+                                color: Color(0xff2A9D8F),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: provider.isLoading
+                                    ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                                    : const Icon(
+                                  Icons.person_outline_outlined,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    )                 ],
                 ),
 
                 TextFieldTemplate(
@@ -168,16 +226,12 @@ class _HomePageState extends State<HomePage> {
                           title: 'مقدمة في قانون أصول المحاكمات الجزائية',
                           duration: '2 ساعة',
                           color: Color(0xffE76F51),
-                          onPlayPressed: () {},
-                          onDetailsPressed: () {},
                         ),
                         NewAddedCourseTemplate(
                           imagePath: 'assets/Images/download (2) 1.png',
                           title: 'مقدمة في قانون أصول المحاكمات الجزائية',
                           duration: '2 ساعة',
                           color: Color(0xffE2A9D8F),
-                          onPlayPressed: () {},
-                          onDetailsPressed: () {},
                         ),
                       ],
                     ),

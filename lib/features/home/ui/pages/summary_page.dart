@@ -86,6 +86,7 @@ class SummaryPage extends StatelessWidget {
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: Color(0xff181C1F),
+                            fontFamily: "Tajawal",
                           ),
                         ),
                         SizedBox(height: 6),
@@ -93,6 +94,7 @@ class SummaryPage extends StatelessWidget {
                           "ملخص الدرس",
                           style: TextStyle(
                             fontSize: 15,
+                            fontFamily: "Tajawal",
                             color: Colors.grey,
                           ),
                         ),
@@ -160,14 +162,16 @@ class SummaryPage extends StatelessWidget {
                                 Center(
                                   child: Text(
                                     "ملخص مبسط",
-                                    style: TextStyle(fontSize: 18),
+                                    style: TextStyle(fontSize: 18,                              fontFamily: "Tajawal",
+                                    ),
                                   ),
                                 ),
 
                                 Center(
                                   child: Text(
                                     "خريطة ذهنية",
-                                    style: TextStyle(fontSize: 18),
+                                    style: TextStyle(fontSize: 18,                              fontFamily: "Tajawal",
+                                    ),
                                   ),
                                 ),
                               ],

@@ -9,10 +9,7 @@ class DioHelper {
   DioHelper._internal() {
     _dio = Dio(
       BaseOptions(
-        baseUrl: 'https://kenan.graduate.sheenvalue.com/ar/api',
-        headers: {
-          'Accept': 'application/json',
-        },
+        baseUrl: 'http://144.91.84.194:8459/en/api/',
       ),
     );
 
@@ -23,6 +20,8 @@ class DioHelper {
       ),
     );
   }
+
+
 
   Future<Response> get(
       String endpoint, {

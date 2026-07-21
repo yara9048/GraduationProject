@@ -23,6 +23,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController secondNameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController passwordVerifyingController = TextEditingController();
+  final TextEditingController majorController = TextEditingController();
   bool isValidationActive = false;
 
   @override
@@ -31,17 +32,15 @@ class _SignUpPageState extends State<SignUpPage> {
       backgroundColor: Colors.white,
       body: AuthPagesTemplate(
         text1: "!أهلاً بك ",
-        size1: 17,
-        size2: 17,
+        size1: 18,
+        size2: 18,
         text2: ".قم بإنشاء حسابك الآن لتبدأ رحلتك التعليمية معنا",
         child: Center(
           child: Padding(
-            padding: EdgeInsets.only(top: 90, right: 20),
-            child: Form(
+            padding: const EdgeInsets.only(right: 20, left: 20,top: 185),            child: Form(
               key: _formKey,
               child: Column(
                 children: [
-                  SizedBox(height: isValidationActive? 100: 110),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -133,6 +132,32 @@ class _SignUpPageState extends State<SignUpPage> {
                       return null;
                     },
                   ),
+                  SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      "الاختصاص",
+                      style: TextStyle(
+                        color: Color(0xff1A2429),
+                        fontSize: 17,
+                        fontFamily: "Tajawal",
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  TextFieldTemplate(
+                    controller: majorController,
+                    size2: 17,
+                    size: 16,
+                    hint: "تخصصك الأكاديمي",
+                    icon: Icons.email_outlined,
+                    validator: (value) {
+                      if (!isValidationActive) return null;
+                      if (value == null || value.isEmpty) return "الحقل فارغ";
+                      return null;
+                    },
+                  ),
                   SizedBox(height: isValidationActive? 10: 20),
                   Align(
                     alignment: Alignment.centerRight,
@@ -187,7 +212,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: isValidationActive?20: 40),
+                  SizedBox(height: isValidationActive?10: 30),
                   Consumer<SignUpProvider>(
                     builder: (context, authProvider, child) {
                       return authProvider.isLoading
@@ -200,11 +225,12 @@ class _SignUpPageState extends State<SignUpPage> {
                           });
                           if (_formKey.currentState!.validate()) {
                             await authProvider.register(
-                              email: emailController.text,
-                              password1: passwordController.text,
-                              password2:passwordVerifyingController.text,
-                              firstName: firstNameController.text,
-                              lastName: secondNameController.text,
+                                email: emailController.text,
+                                password1: passwordController.text,
+                                password2:passwordVerifyingController.text,
+                                firstName: firstNameController.text,
+                                lastName: secondNameController.text,
+                                major: majorController.text
                             );
                             if (authProvider.isSuccess) {
                               Navigator.pushReplacement(
@@ -219,8 +245,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       );
                     },
                   ),
-
-                  SizedBox(height: 15),
+                  SizedBox(height: 20,),
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
@@ -228,11 +253,11 @@ class _SignUpPageState extends State<SignUpPage> {
                       children: [
                         TextSpan(
                           text: "لديك حساب مسبقاً؟ ",
-                          style: TextStyle(color: Colors.black38, fontFamily: "Tajawal", fontSize: 17),
+                          style: TextStyle(color: Colors.black, fontFamily: "Tajawal", fontSize: 19),
                         ),
                         TextSpan(
                           text: "تسجيل الدخول",
-                          style: TextStyle(color: Color(0xffE9C46A), fontFamily: "Tajawal", fontSize: 17),
+                          style: TextStyle(color: Color(0xffE9C46A), fontFamily: "Tajawal", fontSize: 19,fontWeight: FontWeight.bold),
                           recognizer: TapGestureRecognizer()..onTap = () {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => SignInPage()));
                           },
@@ -240,13 +265,13 @@ class _SignUpPageState extends State<SignUpPage> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 50),
-                ],
+                  SizedBox(height: 30),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/home/ui/pages/video_details_page.dart';
 import 'package:graduationprojct/features/home/ui/widgets/subjects_card_template.dart';
 
 import '../widgets/new_added_course_template.dart';
@@ -91,16 +92,12 @@ class _VideoPageState extends State<VideoPage> {
                     title: 'مقدمة في قانون أصول المحاكمات الجزائية',
                     duration: '2 ساعة',
                     color: Color(0xffE76F51),
-                    onPlayPressed: () {},
-                    onDetailsPressed: () {},
                   ),
                   NewAddedCourseTemplate(
                     imagePath: 'assets/Images/download (2) 1.png',
                     title: 'مقدمة في قانون أصول المحاكمات الجزائية',
                     duration: '2 ساعة',
                     color: Color(0xffE2A9D8F),
-                    onPlayPressed: () {},
-                    onDetailsPressed: () {},
                   ),
 
                 ],

@@ -101,6 +101,7 @@ class _McqScreenState extends State<McqScreen> {
                                 color: Color(0xff1A2429),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
+                                fontFamily: "Tajawal"
                               ),
                             ),
 
@@ -111,12 +112,14 @@ class _McqScreenState extends State<McqScreen> {
                                 Text(
                                   "20%",
                                   style: TextStyle(
+                                    fontFamily: "Tajawal",
                                     color: Colors.teal,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 Spacer(),
-                                Text("السؤال 1 من 10"),
+                                Text("السؤال 1 من 10",style: TextStyle(                              fontFamily: "Tajawal",
+                                ),),
                               ],
                             ),
 
@@ -154,6 +157,7 @@ class _McqScreenState extends State<McqScreen> {
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         fontSize: 20,
+                                        fontFamily: "Tajawal",
                                         color: Color(0xff181C1F),
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -202,6 +206,7 @@ class _McqScreenState extends State<McqScreen> {
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
                                               fontSize: 19,
+                                              fontFamily: "Tajawal",
                                               fontWeight: selected
                                                   ? FontWeight.bold
                                                   : FontWeight.w500,

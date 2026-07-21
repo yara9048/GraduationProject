@@ -68,7 +68,7 @@ class _TextFieldTemplateState extends State<TextFieldTemplate> {
               color: Color(0xffE76F51),
               fontWeight: FontWeight.w600,
             ),
-            prefixIcon: Icon(
+            suffixIcon: Icon(
               widget.icon,
               color: isFocused ? const Color(0xff2A9D8F) : Colors.black26,
               size: 27,
