@@ -7,6 +7,7 @@ import 'package:graduationprojct/features/auth/providers/resend_otp_provider.dar
 import 'package:graduationprojct/features/auth/providers/reset_password_request_provider.dart';
 import 'package:graduationprojct/features/auth/providers/sign_up_provider.dart';
 import 'package:graduationprojct/features/auth/ui/pages/sign_up/splash_page.dart';
+import 'package:graduationprojct/features/home/providers/display_playlists_provider.dart';
 import 'package:graduationprojct/features/home/ui/pages/home_page.dart';
 import 'package:provider/provider.dart';
 
@@ -67,6 +68,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => EditProfileProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => DisplayPlaylistsProvider(),
         ),
       ],
 

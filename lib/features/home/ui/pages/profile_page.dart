@@ -14,7 +14,6 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ProfileProvider>();
-    final editProvider = context.watch<EditProfileProvider>();
     final firstNameController = TextEditingController();
     final secondNamecontroller = TextEditingController();
     final majorController = TextEditingController();

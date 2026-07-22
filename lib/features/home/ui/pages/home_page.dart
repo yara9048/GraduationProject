@@ -5,10 +5,12 @@ import 'package:graduationprojct/features/home/ui/widgets/subjects_card_template
 import 'package:provider/provider.dart';
 
 import '../../../auth/providers/profile_provider.dart';
+import '../../providers/display_playlists_provider.dart';
 import '../widgets/course_card_template.dart';
 import '../../../auth/ui/widgets/text_field_template.dart';
 import '../widgets/section_title_template.dart';
 import 'course_view.dart';
+import 'display_playlists_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,7 +21,39 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<DisplayPlaylistsProvider>().getPlayLists();
+    });
+  }
   Widget build(BuildContext context) {
+    final provider = context.watch<DisplayPlaylistsProvider>();
+    final playlists = provider.playlists;
+
+    if (provider.isLoading) {
+      return const Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: Color(0xff2A9D8F),
+              ),
+            ),
+          )
+      );
+    }
+    if (playlists.isEmpty) {
+      return const Scaffold(
+        body: Center(
+          child: Text("لا توجد بيانات"),
+        ),
+      );
+    }
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -132,20 +166,62 @@ class _HomePageState extends State<HomePage> {
                     child: ListView(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(right: 30),
-                          child: const SectionTitle(title: "تتابعه الآن :"),
+                          padding: const EdgeInsets.only(right: 30,left: 30),
+                          child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const SectionTitle(
+                                    title: "تتابعه الان  :",
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => DisplayPlaylistsPage(),
+                                        ),
+                                      );
+                                    },
+                                    child: Text(
+                                      "عرض الكل",
+                                      style: TextStyle(
+                                        color: Color(0xffE9C46A),
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: "Tajawal",
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                          ),
                         ),
 
                         const SizedBox(height: 10),
 
                         Padding(
                           padding: const EdgeInsets.only(right: 20, left: 20),
-                          child: CourseCardTemplate(
-                            imagePath:
-                                'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
-                            title: 'حقوق المرأة في المجتمع السوري',
-                            durationText: '2 ساعة',
-                            progress: 0.2,
+                          child: Container(
+                            height: 320,
+                            width: 10000,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.only(bottom: 20),
+                              itemCount: 2,
+                              itemBuilder: (context, index) {
+                                final playlist = playlists[index];
+                                return  Padding(
+                                  padding: const EdgeInsets.only(left: 16, ),
+                                  child: CourseCardTemplate(
+                                    imagePath:
+                                    'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
+                                    title: playlist.name,
+                                    durationText: "${playlist.totalDuration ?? 0} دقيقة",
+                                    progress: playlist.completionRate / 100,
+                                    description: playlist.description,
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                         ),
 
@@ -153,7 +229,7 @@ class _HomePageState extends State<HomePage> {
                           padding: const EdgeInsets.only(
                             right: 30,
                             left: 30,
-                            top: 40,
+                            top: 10,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
