@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/auth/providers/edit_profile_provider.dart';
 import 'package:graduationprojct/features/auth/providers/new_password_provider.dart';
 import 'package:graduationprojct/features/auth/providers/password_send_otp_prvider.dart';
 import 'package:graduationprojct/features/auth/providers/profile_provider.dart';
@@ -64,11 +65,14 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => LogoutProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => EditProfileProvider(),
+        ),
       ],
 
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: const SignInPage(),
+        home: const HomePage(),
       ),
     );
   }

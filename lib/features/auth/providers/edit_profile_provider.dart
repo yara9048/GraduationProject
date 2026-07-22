@@ -1,33 +1,27 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
+import 'package:graduationprojct/features/auth/data/models/edit_profile_model.dart';
+import 'package:graduationprojct/features/auth/data/services/edit_profile_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/models/profile_model.dart';
-import '../data/services/profile_service.dart';
-
-class ProfileProvider with ChangeNotifier {
-  final ProfileService _service = ProfileService();
+class EditProfileProvider with ChangeNotifier {
+  final EditProfileService _service = EditProfileService();
 
   bool _isLoading = false;
   String? _errorMessage;
   bool _isSuccess = false;
 
-  ProfileModel? _profile;
-
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isSuccess => _isSuccess;
 
-  ProfileModel? get profile => _profile;
-
-  Future<void> getProfile() async {
+  Future<void> editProfile({String? firstName, String? secondName, String? major}) async {
     _isLoading = true;
     _errorMessage = null;
     _isSuccess = false;
     notifyListeners();
 
     try {
+
       final prefs = await SharedPreferences.getInstance();
 
       final token = prefs.getString("auth_token");
@@ -36,7 +30,10 @@ class ProfileProvider with ChangeNotifier {
         throw Exception("Authentication token not found");
       }
 
-      _profile = await _service.getProfile(token);
+      EditProfileModel user = await _service.editProfile(
+        firstName: firstName,secondName: secondName, major: major,token:  token
+      );
+
 
       _isSuccess = true;
     } catch (e) {
@@ -47,12 +44,10 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
   }
 
-
   void reset() {
     _isLoading = false;
     _errorMessage = null;
     _isSuccess = false;
-    _profile = null;
     notifyListeners();
   }
 }

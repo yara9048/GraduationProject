@@ -48,4 +48,19 @@ class DioHelper {
       options: options,
     );
   }
+
+  Future<Response> put(
+      String endpoint, {
+        dynamic data,
+        Map<String, dynamic>? query,
+        Options? options,
+      }) async {
+    return _dio.put(
+      endpoint,
+      data: data,
+      queryParameters: query,
+      options: options,
+    );
+  }
+
 }
