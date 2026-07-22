@@ -7,7 +7,12 @@ import 'package:graduationprojct/features/auth/providers/resend_otp_provider.dar
 import 'package:graduationprojct/features/auth/providers/reset_password_request_provider.dart';
 import 'package:graduationprojct/features/auth/providers/sign_up_provider.dart';
 import 'package:graduationprojct/features/auth/ui/pages/sign_up/splash_page.dart';
+import 'package:graduationprojct/features/home/providers/add_playlist_to_fav_provider.dart';
+import 'package:graduationprojct/features/home/providers/add_video_to_fav_provider.dart';
+import 'package:graduationprojct/features/home/providers/display_facourite_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_playlists_provider.dart';
+import 'package:graduationprojct/features/home/providers/display_videos_provider.dart';
+import 'package:graduationprojct/features/home/providers/filtered_playlist_provider.dart';
 import 'package:graduationprojct/features/home/ui/pages/home_page.dart';
 import 'package:provider/provider.dart';
 
@@ -15,6 +20,7 @@ import 'features/auth/providers/log_out_provider.dart';
 import 'features/auth/providers/send_otp_provider.dart';
 import 'features/auth/providers/sign_in_provider.dart';
 import 'features/auth/ui/pages/sign_in/sign_in_page.dart';
+import 'features/home/providers/video_details_function_provider.dart';
 import 'features/home/providers/video_details_provider.dart';
 import 'features/home/ui/pages/chat_page.dart';
 import 'features/home/ui/pages/mcq_page.dart';
@@ -57,11 +63,13 @@ class MyApp extends StatelessWidget {
           create: (_) => PasswordSendOtpPrvider(),
         ),
         ChangeNotifierProvider(
+          create: (_) => VideoDetailsFunctionProvider(),
+        ),
+        ChangeNotifierProvider(
           create: (_) => VideoDetailsProvider(),
         ),
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(),
-
         ),
         ChangeNotifierProvider(
           create: (_) => LogoutProvider(),
@@ -72,6 +80,21 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => DisplayPlaylistsProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => AddPlaylistToFavProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => DisplayVideosProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => FilteredPlaylistProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AddVideoToFavProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => DisplayFavouriteProvider(),
+        )
       ],
 
       child: MaterialApp(

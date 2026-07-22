@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
-Widget profileItem(IconData icon, String title) {
+Widget profileItem(
+    IconData icon,
+    String title, {
+      required VoidCallback onTap,
+    }) {
   return Container(
     height: 60,
     margin: const EdgeInsets.only(bottom: 12),
@@ -10,9 +14,8 @@ Widget profileItem(IconData icon, String title) {
       boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(0.12),
-          offset: const Offset(0, 6), // الظل للأسفل
+          offset: const Offset(0, 6),
           blurRadius: 10,
-          spreadRadius: 0,
         ),
       ],
     ),
@@ -21,9 +24,18 @@ Widget profileItem(IconData icon, String title) {
         icon,
         color: const Color(0xff2A9D8F),
       ),
-      title: Text(title),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 18),
-      onTap: () {},
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontFamily: "Tajawal",
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        size: 18,
+      ),
+      onTap: onTap,
     ),
   );
 }

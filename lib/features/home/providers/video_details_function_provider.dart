@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class VideoDetailsProvider with ChangeNotifier {
+class VideoDetailsFunctionProvider with ChangeNotifier {
   double _watchProgress = 0.0;
 
   double get watchProgress => _watchProgress;

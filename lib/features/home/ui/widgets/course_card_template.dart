@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/auth/ui/widgets/progress_line.dart';
+import 'package:provider/provider.dart';
 
+import '../../../auth/ui/widgets/snack_bar.dart';
+import '../../providers/add_playlist_to_fav_provider.dart';
 import '../pages/display_videos_page.dart';
 
-class CourseCardTemplate extends StatelessWidget {
+class CourseCardTemplate extends StatefulWidget {
   final String imagePath;
+  final int playlistId;
   final String description;
-
   final String title;
   final String durationText;
   final double progress;
@@ -15,6 +18,7 @@ class CourseCardTemplate extends StatelessWidget {
 
   const CourseCardTemplate({
     super.key,
+    required this.playlistId,
     required this.imagePath,
     required this.description,
     required this.title,
@@ -25,14 +29,27 @@ class CourseCardTemplate extends StatelessWidget {
   });
 
   @override
+  State<CourseCardTemplate> createState() => _CourseCardTemplateState();
+}
+
+class _CourseCardTemplateState extends State<CourseCardTemplate> {
+  bool isFavorite = false;
+
+  @override
   Widget build(BuildContext context) {
+    final favProvider = Provider.of<AddPlaylistToFavProvider>(context);
     return GestureDetector(
-      onTap: (){ Navigator.push(context, MaterialPageRoute(builder: (context){
-        return DisplayVideosPage();
-      }));},
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DisplayVideosPage(id: widget.playlistId,),
+          ),
+        );
+      },
       child: Container(
-        width: width,
-        height: height,
+        width: widget.width,
+        height: widget.height,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -47,19 +64,68 @@ class CourseCardTemplate extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-              child: SizedBox(
-                height: 160,
-                width: double.infinity,
-                child: Image.asset(
-                  imagePath,
-                  fit: BoxFit.cover,
+            // الصورة مع زر المفضلة
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                  child: SizedBox(
+                    height: 160,
+                    width: double.infinity,
+                    child: Image.asset(
+                      widget.imagePath,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
-              ),
+
+                Positioned(
+                  top: 12,
+                  left: 10,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      onPressed: () async {
+                        setState(() {
+                          isFavorite = !isFavorite;
+                        });
+
+                        await favProvider.addPlaylistToFav(
+                          id: widget.playlistId,
+                        );
+
+                        if (favProvider.isSuccess) {
+                          MySnackBar.show(
+                            context,
+                            message: favProvider.response!.status.toString(),
+                          );}
+                         else if (favProvider.errorMessage != null) {
+                          setState(() {
+                            print(widget.playlistId);
+                            isFavorite = !isFavorite;
+                          });
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(favProvider.errorMessage!),
+                            ),
+                          );
+                        }
+                      },
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
 
             Padding(
@@ -71,7 +137,7 @@ class CourseCardTemplate extends StatelessWidget {
               child: Align(
                 alignment: Alignment.topRight,
                 child: Text(
-                  title,
+                  widget.title,
                   textAlign: TextAlign.right,
                   style: const TextStyle(
                     fontSize: 19,
@@ -86,7 +152,7 @@ class CourseCardTemplate extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: Text(
-                description,
+                widget.description,
                 textAlign: TextAlign.right,
                 style: const TextStyle(
                   fontSize: 15,
@@ -111,7 +177,7 @@ class CourseCardTemplate extends StatelessWidget {
                     ),
                     const SizedBox(width: 5),
                     Text(
-                      durationText,
+                      widget.durationText,
                       textAlign: TextAlign.right,
                       style: const TextStyle(
                         fontSize: 15,
@@ -124,15 +190,18 @@ class CourseCardTemplate extends StatelessWidget {
                 ),
               ),
             ),
+
             Padding(
               padding: const EdgeInsets.only(
                 left: 10,
                 right: 10,
                 bottom: 20,
-                top: 7
+                top: 7,
               ),
-              child:CustomProgressLine(progress: progress),
+              child: CustomProgressLine(
+                progress: widget.progress,
               ),
+            ),
           ],
         ),
       ),

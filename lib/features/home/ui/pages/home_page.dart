@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/home/providers/filtered_playlist_provider.dart';
 import 'package:graduationprojct/features/home/ui/pages/profile_page.dart';
 import 'package:graduationprojct/features/home/ui/widgets/new_added_course_template.dart';
 import 'package:graduationprojct/features/home/ui/widgets/subjects_card_template.dart';
@@ -26,11 +27,14 @@ class _HomePageState extends State<HomePage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DisplayPlaylistsProvider>().getPlayLists();
+      context.read<FilteredPlaylistProvider>().getFilteredPlaylists();
     });
   }
   Widget build(BuildContext context) {
     final provider = context.watch<DisplayPlaylistsProvider>();
     final playlists = provider.playlists;
+    final filterProvider = context.watch<FilteredPlaylistProvider>();
+    final filteredPlaylists = filterProvider.filtered_playlists;
 
     if (provider.isLoading) {
       return const Scaffold(
@@ -54,6 +58,20 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
+    if (filterProvider.isLoading) {
+      return const Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: Color(0xff2A9D8F),
+              ),
+            ),
+          )
+      );
+    }
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -212,6 +230,7 @@ class _HomePageState extends State<HomePage> {
                                 return  Padding(
                                   padding: const EdgeInsets.only(left: 16, ),
                                   child: CourseCardTemplate(
+                                    playlistId: playlist.id,
                                     imagePath:
                                     'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
                                     title: playlist.name,
@@ -295,20 +314,34 @@ class _HomePageState extends State<HomePage> {
 
                         Padding(
                           padding: const EdgeInsets.only(right: 30, top: 35),
-                          child: const SectionTitle(title: "المضاف حديثا :"),
+                          child: const SectionTitle(title: "خصيصا لك :"),
                         ),
-                        NewAddedCourseTemplate(
-                          imagePath: 'assets/Images/700ccaab9d6c5bae720cc6ee03954b805e4c490e.jpg',
-                          title: 'مقدمة في قانون أصول المحاكمات الجزائية',
-                          duration: '2 ساعة',
-                          color: Color(0xffE76F51),
-                        ),
-                        NewAddedCourseTemplate(
-                          imagePath: 'assets/Images/download (2) 1.png',
-                          title: 'مقدمة في قانون أصول المحاكمات الجزائية',
-                          duration: '2 ساعة',
-                          color: Color(0xffE2A9D8F),
-                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 20.0),
+                          child: SizedBox(
+                            height: filteredPlaylists.isEmpty ? 60 : 330,
+                            child: filteredPlaylists.isEmpty
+                                ? const Center(
+                              child: Text("لا توجد بيانات"),
+                            )
+                                : ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: filteredPlaylists.length,
+                              itemBuilder: (context, index) {
+                                final playlist = filteredPlaylists[index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(left: 16),
+                                  child: NewAddedCourseTemplate(
+                                    imagePath: 'assets/Images/700ccaab9d6c5bae720cc6ee03954b805e4c490e.jpg',
+                                    title: playlist.name,
+                                    duration: playlist.totalDuration.toString(),
+                                    color: const Color(0xffE76F51),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        )
                       ],
                     ),
                   ),

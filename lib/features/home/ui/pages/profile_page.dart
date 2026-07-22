@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/auth/providers/edit_profile_provider.dart';
 import 'package:graduationprojct/features/auth/ui/pages/sign_in/sign_in_page.dart';
+import 'package:graduationprojct/features/home/ui/pages/favourite_page.dart';
 import 'package:provider/provider.dart';
 import '../../../auth/providers/log_out_provider.dart';
 import '../../../auth/providers/profile_provider.dart';
@@ -384,6 +385,7 @@ class ProfilePage extends StatelessWidget {
                     profileItem(
                       Icons.school_outlined,
                       "الدورات المسجلة",
+                      onTap: (){}
                     ),
 
                     const SizedBox(height: 5),
@@ -391,6 +393,7 @@ class ProfilePage extends StatelessWidget {
                     profileItem(
                       Icons.favorite_border,
                       "المفضلة",
+                      onTap: (){Navigator.push(context, MaterialPageRoute(builder: (context){return FavouritePage();}));}
                     ),
 
                     const SizedBox(height: 25),

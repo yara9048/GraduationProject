@@ -20,9 +20,10 @@ class NewAddedCourseTemplate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 20,left: 20,top: 20),
+      padding: const EdgeInsets.only(left: 20,top: 20,bottom: 20),
       child: Container(
-        width: 290,
+        width: 380,
+        height: 300,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(22),
@@ -129,12 +130,7 @@ class NewAddedCourseTemplate extends StatelessWidget {
 
                     ElevatedButton(
                       onPressed :(){
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => VideoDetailsPage(),
-                          ),
-                        );
+
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: color,

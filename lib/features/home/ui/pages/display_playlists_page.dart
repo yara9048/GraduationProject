@@ -101,6 +101,7 @@ class _DisplayPlaylistsPageState extends State<DisplayPlaylistsPage> {
                   return  Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: CourseCardTemplate(
+                      playlistId: playlist.id,
                       imagePath:
                       'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
                       title: playlist.name,
