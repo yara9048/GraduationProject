@@ -1,13 +1,62 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/home/data/models/ai_features_model.dart';
+import 'package:graduationprojct/features/home/providers/ai_features_provider.dart';
+import 'package:graduationprojct/features/home/ui/widgets/summary_card_template.dart';
+import 'package:provider/provider.dart';
 
-import '../widgets/summary_card_template.dart';
+class SummaryPage extends StatefulWidget {
+  final int id;
+  final String name;
 
-class SummaryPage extends StatelessWidget {
-  const SummaryPage({super.key});
+  const SummaryPage({
+    super.key,
+    required this.id,
+    required this.name,
+  });
+
+  @override
+  State<SummaryPage> createState() => _SummaryPageState();
+}
+
+class _SummaryPageState extends State<SummaryPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AiFeaturesProvider>().getAiFeatures(
+        videoId: widget.id,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<AiFeaturesProvider>();
+
+    if (provider.isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 3,
+            color: Color(0xff2A9D8F),
+          ),
+        ),
+      );
+    }
+
+    if (provider.errorMessage != null) {
+      return Scaffold(
+        body: Center(
+          child: Text(provider.errorMessage!),
+        ),
+      );
+    }
+
+    final academic = provider.getSummaryByType("academic");
+    final simple = provider.getSummaryByType("simple");
+    final mindMap = provider.getSummaryByType("mind_map");
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -21,7 +70,6 @@ class SummaryPage extends StatelessWidget {
                 'assets/Images/Ellipse 4.png',
               ),
             ),
-
             Positioned(
               bottom: 0,
               right: 0,
@@ -29,7 +77,6 @@ class SummaryPage extends StatelessWidget {
                 'assets/Images/Ellipse 7.png',
               ),
             ),
-
             SafeArea(
               child: Column(
                 children: [
@@ -41,7 +88,9 @@ class SummaryPage extends StatelessWidget {
                           top: 20,
                           right: 16,
                           child: IconButton(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
                             icon: const Icon(
                               Icons.arrow_back_ios_new_rounded,
                               textDirection: TextDirection.rtl,
@@ -50,7 +99,6 @@ class SummaryPage extends StatelessWidget {
                             ),
                           ),
                         ),
-
                         const Positioned(
                           top: 20,
                           right: 70,
@@ -75,27 +123,27 @@ class SummaryPage extends StatelessWidget {
                     ),
                   ),
 
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Column(
                       children: [
                         Text(
-                          "مقدمة في قانون أصول المحاكمات الجزائرية",
+                          widget.name,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 22,
+                          style: const TextStyle(
+                            fontSize: 26,
                             fontWeight: FontWeight.bold,
                             color: Color(0xff181C1F),
                             fontFamily: "Tajawal",
                           ),
                         ),
-                        SizedBox(height: 6),
-                        Text(
+                        const SizedBox(height: 6),
+                        const Text(
                           "ملخص الدرس",
                           style: TextStyle(
                             fontSize: 15,
                             fontFamily: "Tajawal",
-                            color: Colors.grey,
+                            color: Color(0xff1A2429),
                           ),
                         ),
                       ],
@@ -110,10 +158,9 @@ class SummaryPage extends StatelessWidget {
                       child: Column(
                         children: [
                           Padding(
-                            padding:
-                            const EdgeInsets.symmetric(horizontal: 20),
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Container(
-                              height: 35,
+                              height: 40,
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(30),
@@ -128,8 +175,9 @@ class SummaryPage extends StatelessWidget {
                               child: const TabBar(
                                 indicator: BoxDecoration(
                                   color: Color(0xff2A9D8F),
-                                  borderRadius:
-                                  BorderRadius.all(Radius.circular(25)),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(25),
+                                  ),
                                 ),
                                 indicatorSize: TabBarIndicatorSize.tab,
                                 dividerColor: Colors.transparent,
@@ -137,7 +185,7 @@ class SummaryPage extends StatelessWidget {
                                 unselectedLabelColor: Colors.grey,
                                 labelStyle: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                  fontSize: 15,
                                 ),
                                 tabs: [
                                   Tab(text: "ملخص أكاديمي"),
@@ -150,28 +198,45 @@ class SummaryPage extends StatelessWidget {
 
                           const SizedBox(height: 20),
 
-                          const Expanded(
+                          Expanded(
                             child: TabBarView(
                               children: [
-                                Padding(
-                                  padding:
-                                  EdgeInsets.symmetric(horizontal: 16),
-                                  child: SummaryCard(),
-                                ),
-
-                                Center(
+                                academic != null
+                                    ? SingleChildScrollView(
+                                  padding: const EdgeInsets.all(16),
+                                  child: SummaryCard(
+                                    data: provider.getSummaryText(academic),
+                                  )
+                                )
+                                    : const Center(
                                   child: Text(
-                                    "ملخص مبسط",
-                                    style: TextStyle(fontSize: 18,                              fontFamily: "Tajawal",
-                                    ),
+                                    "لا يوجد ملخص أكاديمي",
                                   ),
                                 ),
 
-                                Center(
+                                simple != null
+                                    ? SingleChildScrollView(
+                                  padding: const EdgeInsets.all(16),
+                                  child: SummaryCard(
+                                    data: provider.getSummaryText(simple),
+                                  ),
+                                )
+                                    : const Center(
                                   child: Text(
-                                    "خريطة ذهنية",
-                                    style: TextStyle(fontSize: 18,                              fontFamily: "Tajawal",
-                                    ),
+                                    "لا يوجد ملخص مبسط",
+                                  ),
+                                ),
+
+                                mindMap != null
+                                    ? SingleChildScrollView(
+                                  padding: const EdgeInsets.all(16),
+                                  child: SummaryCard(
+                                    data: provider.getSummaryText(mindMap),
+                                  ),
+                                )
+                                    : const Center(
+                                  child: Text(
+                                    "لا توجد خريطة ذهنية",
                                   ),
                                 ),
                               ],

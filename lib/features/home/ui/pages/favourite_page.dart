@@ -140,7 +140,7 @@ class _FavouritePageState extends State<FavouritePage> {
                           width: 300,
                           child: VideoCardTemplate(
                             onTap: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (Context){return VideoDetailsPage(videoId: video.id,);}));
+                              Navigator.push(context, MaterialPageRoute(builder: (Context){return VideoDetailsPage(videoId: video.id,videoName: video.videoDetail!.title,);}));
                             },                            imagePath: "assets/Images/photo_2026-07-23_00-20-19.jpg",
                             title: video.videoDetail!.title,
                             description: video.videoDetail!.description,
@@ -156,7 +156,6 @@ class _FavouritePageState extends State<FavouritePage> {
 
                   const SizedBox(height: 30),
 
-                  /// كورسات
                   const Align(
                     alignment: Alignment.centerRight,
                     child: Text(

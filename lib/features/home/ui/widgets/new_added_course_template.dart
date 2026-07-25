@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/home/ui/pages/display_videos_page.dart';
 
 import '../pages/video_details_page.dart';
 import '../pages/videos_page.dart';
 
 class NewAddedCourseTemplate extends StatelessWidget {
+  final int id;
   final String imagePath;
   final String title;
   final String duration;
@@ -11,6 +13,7 @@ class NewAddedCourseTemplate extends StatelessWidget {
 
   const NewAddedCourseTemplate({
     super.key,
+    required this.id,
     required this.imagePath,
     required this.color,
     required this.title,
@@ -130,7 +133,7 @@ class NewAddedCourseTemplate extends StatelessWidget {
 
                     ElevatedButton(
                       onPressed :(){
-
+                       Navigator.push(context, MaterialPageRoute(builder: (context){return DisplayVideosPage(id: id);}));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: color,

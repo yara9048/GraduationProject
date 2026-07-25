@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/filtered_playlist_provider.dart';
-import 'package:graduationprojct/features/home/ui/pages/profile_page.dart';
+import 'package:graduationprojct/features/auth/ui/pages/profile/profile_page.dart';
 import 'package:graduationprojct/features/home/ui/widgets/new_added_course_template.dart';
 import 'package:graduationprojct/features/home/ui/widgets/subjects_card_template.dart';
 import 'package:provider/provider.dart';
@@ -332,6 +332,7 @@ class _HomePageState extends State<HomePage> {
                                 return Padding(
                                   padding: const EdgeInsets.only(left: 16),
                                   child: NewAddedCourseTemplate(
+                                    id: playlist.id,
                                     imagePath: 'assets/Images/700ccaab9d6c5bae720cc6ee03954b805e4c490e.jpg',
                                     title: playlist.name,
                                     duration: playlist.totalDuration.toString(),

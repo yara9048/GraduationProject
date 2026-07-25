@@ -3,11 +3,11 @@ import 'package:graduationprojct/features/auth/providers/edit_profile_provider.d
 import 'package:graduationprojct/features/auth/ui/pages/sign_in/sign_in_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/favourite_page.dart';
 import 'package:provider/provider.dart';
-import '../../../auth/providers/log_out_provider.dart';
-import '../../../auth/providers/profile_provider.dart';
-import '../../../auth/ui/widgets/button_template.dart';
-import '../../../auth/ui/widgets/snack_bar.dart';
-import '../widgets/profile_item.dart';
+import '../../../providers/log_out_provider.dart';
+import '../../../providers/profile_provider.dart';
+import '../../widgets/button_template.dart';
+import '../../widgets/snack_bar.dart';
+import '../../widgets/profile_item.dart';
 
 
 class ProfilePage extends StatelessWidget {
@@ -30,10 +30,43 @@ class ProfilePage extends StatelessWidget {
     }
 
     if (profile == null) {
-      return const Scaffold(
-        body: Center(
-          child: Text("لا توجد بيانات"),
-        ),
+      return Scaffold(
+        body: Stack(
+          children: [
+            Positioned(
+              top: 0,
+              left: 0,
+              child: Image.asset(
+                'assets/Images/Ellipse 4.png',
+              ),
+            ),
+
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Image.asset(
+                'assets/Images/Ellipse 7.png',
+              ),
+            ),
+
+            SafeArea(
+              child: Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Color(0xff2A9D8F),
+                    size: 30,
+                  ),
+                ),
+              ),
+            ),
+            Center(
+              child: Text("لا توجد بيانات"),
+            ),
+          ],
+        )
       );
     }
 

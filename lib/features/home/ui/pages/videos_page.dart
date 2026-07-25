@@ -88,12 +88,14 @@ class _VideoPageState extends State<VideoPage> {
                 child: ListView(
                 children: [
                   NewAddedCourseTemplate(
+                    id: 1,
                     imagePath: 'assets/Images/700ccaab9d6c5bae720cc6ee03954b805e4c490e.jpg',
                     title: 'مقدمة في قانون أصول المحاكمات الجزائية',
                     duration: '2 ساعة',
                     color: Color(0xffE76F51),
                   ),
                   NewAddedCourseTemplate(
+                    id: 1,
                     imagePath: 'assets/Images/download (2) 1.png',
                     title: 'مقدمة في قانون أصول المحاكمات الجزائية',
                     duration: '2 ساعة',

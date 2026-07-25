@@ -1,24 +1,66 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../providers/ai_features_provider.dart';
 
 class McqScreen extends StatefulWidget {
-  const McqScreen({super.key});
+  final int videoId;
+  final String videoName;
+  const McqScreen({super.key, required this.videoName, required this.videoId});
 
   @override
   State<McqScreen> createState() => _McqScreenState();
 }
 
 class _McqScreenState extends State<McqScreen> {
-  String? selectedAnswer = "قاضي التحقيق";
+  int currentQuestion = 0;
+  String? selectedAnswer;
+  double progress = 0;
+  final Map<int, String> userAnswers = {};
 
-  final List<String> answers = [
-    "النيابة العامة التمييزية",
-    "قاضي التحقيق",
-    "الضابطة العدلية",
-    "المحكمة الابتدائية",
-  ];
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AiFeaturesProvider>().getAiFeatures(
+        videoId: widget.videoId,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<AiFeaturesProvider>();
+
+    if (provider.isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator(
+          strokeWidth: 3,
+          color: Color(0xff2A9D8F),
+        ),),
+      );
+    }
+
+    if (provider.errorMessage != null) {
+      return Scaffold(
+        body: Center(
+          child: Text(provider.errorMessage!),
+        ),
+      );
+    }
+
+    if (provider.mcqs.isEmpty) {
+      return const Scaffold(
+        body: Center(
+          child: Text("لا توجد أسئلة"),
+        ),
+      );
+    }
+
+    final question = provider.mcqs[currentQuestion];
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -94,31 +136,32 @@ class _McqScreenState extends State<McqScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            const Text(
-                              "اختبار: قانون أصول المحاكمات الجزئية",
+                            Text(
+                              "اختبار: ${widget.videoName}",
                               textDirection: TextDirection.rtl,
-                              style: TextStyle(
-                                color: Color(0xff1A2429),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                fontFamily: "Tajawal"
+                              style: const TextStyle(
+                                  color: Color(0xff1A2429),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  fontFamily: "Tajawal"
                               ),
                             ),
 
                             const SizedBox(height: 20),
 
                             Row(
-                              children: const [
-                                Text(
-                                  "20%",
-                                  style: TextStyle(
+                              children: [
+                                 Text(
+                                  "${(progress * 100).toStringAsFixed(0)}%",
+                                  style: const TextStyle(
                                     fontFamily: "Tajawal",
                                     color: Colors.teal,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Spacer(),
-                                Text("السؤال 1 من 10",style: TextStyle(                              fontFamily: "Tajawal",
+                                const Spacer(),
+                                Text(                    "السؤال ${currentQuestion + 1} من ${provider.mcqs.length}",
+                                    style: const TextStyle(                              fontFamily: "Tajawal",
                                 ),),
                               ],
                             ),
@@ -127,15 +170,16 @@ class _McqScreenState extends State<McqScreen> {
 
                             ClipRRect(
                               borderRadius: BorderRadius.circular(20),
-                              child: const Directionality(
+                              child: Directionality(
                                 textDirection: TextDirection.rtl,
                                 child: LinearProgressIndicator(
-                                  value: 0.2,
+                                  value: progress,
                                   minHeight: 8,
-                                  valueColor: AlwaysStoppedAnimation(
+                                  borderRadius: BorderRadius.circular(20),
+                                  backgroundColor: const Color(0xffE0E0E0),
+                                  valueColor: const AlwaysStoppedAnimation(
                                     Color(0xff2A9D8F),
                                   ),
-                                  backgroundColor: Color(0xffE0E0E0),
                                 ),
                               ),
                             ),
@@ -152,22 +196,23 @@ class _McqScreenState extends State<McqScreen> {
                                 padding: const EdgeInsets.all(20),
                                 child: Column(
                                   children: [
-                                    const Text(
-                                      "ما هي الجهة المختصة بإصدار مذكرة التوقيف في الجنايات وفقاً لقانون أصول المحاكمات الجزائية؟",
+                                    Text(
+                                      question.question,
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 20,
-                                        fontFamily: "Tajawal",
-                                        color: Color(0xff181C1F),
                                         fontWeight: FontWeight.bold,
+                                        fontFamily: "Tajawal",
                                       ),
                                     ),
 
                                     const SizedBox(height: 20),
 
-                                    ...answers.map((answer) {
+                                    ...question.options.map((option) {
+
                                       final selected =
-                                          selectedAnswer == answer;
+                                          selectedAnswer == option;
+
 
                                       return Container(
                                         margin: const EdgeInsets.only(
@@ -187,7 +232,7 @@ class _McqScreenState extends State<McqScreen> {
                                           BorderRadius.circular(14),
                                         ),
                                         child: RadioListTile<String>(
-                                          value: answer,
+                                          value: option,
                                           groupValue: selectedAnswer,
                                           radioScaleFactor: 1.3,
                                           fillColor:
@@ -202,16 +247,14 @@ class _McqScreenState extends State<McqScreen> {
                                           activeColor:
                                           const Color(0xff2A9D8F),
                                           title: Text(
-                                            answer,
+                                            option,
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
                                               fontSize: 19,
                                               fontFamily: "Tajawal",
-                                              fontWeight: selected
-                                                  ? FontWeight.bold
-                                                  : FontWeight.w500,
-                                              color:
-                                              const Color(0xff181C1F),
+                                              fontWeight:
+                                              selected ? FontWeight.bold : FontWeight.w500,
+                                              color: const Color(0xff181C1F),
                                             ),
                                           ),
                                           controlAffinity:
@@ -237,10 +280,149 @@ class _McqScreenState extends State<McqScreen> {
                                 width: 240,
                                 height: 52,
                                 child: ElevatedButton.icon(
-                                  onPressed: () {},
+                                  onPressed: selectedAnswer == null
+                                      ? null
+                                      : () {
+                                    userAnswers[question.id] = selectedAnswer!;
+
+                                    if (currentQuestion < provider.mcqs.length - 1) {
+                                      setState(() {
+                                        currentQuestion++;
+                                        progress = currentQuestion / provider.mcqs.length;
+
+                                        selectedAnswer =
+                                        userAnswers[provider.mcqs[currentQuestion].id];
+                                      });
+                                    } else {
+                                      setState(() {
+                                        progress = 1;
+                                      });
+                                      int score = 0;
+
+                                      for (final q in provider.mcqs) {
+                                        if (userAnswers[q.id] == q.answer) {
+                                          score++;
+                                        }
+                                      }
+                                      String message;
+
+                                      if (score == provider.mcqs.length) {
+                                        message = "ممتاز! أجبت على جميع الأسئلة بشكل صحيح";
+                                      } else if (score >= provider.mcqs.length / 2) {
+                                        message =
+                                        "أحسنت! أجبت على $score من ${provider.mcqs.length} بشكل صحيح";
+                                      } else {
+                                        message =
+                                        "لا بأس، أجبت على $score من ${provider.mcqs.length} بشكل صحيح. حاول مرة أخرى 💪";
+                                      }
+
+                                      final isCorrect = selectedAnswer == question.answer;
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (_) => Dialog(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(24),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(24),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Container(
+                                                  width: 80,
+                                                  height: 80,
+                                                  decoration: BoxDecoration(
+                                                    color: isCorrect
+                                                        ? Colors.green.withOpacity(.12)
+                                                        : Colors.red.withOpacity(.12),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Icon(
+                                                    isCorrect
+                                                        ? Icons.check_circle_rounded
+                                                        : Icons.cancel_rounded,
+                                                    size: 60,
+                                                    color: isCorrect ? Colors.green : Colors.red,
+                                                  ),
+                                                ),
+
+                                                const SizedBox(height: 20),
+
+                                                 Text(
+                                                  isCorrect? "أحسنت الاجابة صحيحة " : "الاجابة خاطئة",
+                                                  style: TextStyle(
+                                                    fontFamily: "Tajawal",
+                                                    fontSize: 24,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Color(0xff1A2429),
+                                                  ),
+                                                ),
+
+                                                const SizedBox(height: 10),
+
+                                                Text(
+                                                  message,
+                                                  textAlign: TextAlign.center,
+                                                  style: const TextStyle(
+                                                    fontFamily: "Tajawal",
+                                                    fontSize: 18,
+                                                    color: Colors.black87,
+                                                  ),
+                                                ),
+
+                                                const SizedBox(height: 25),
+
+                                                LinearProgressIndicator(
+                                                  value: score / provider.mcqs.length,
+                                                  minHeight: 10,
+                                                  borderRadius: BorderRadius.circular(20),
+                                                  backgroundColor: Colors.grey.shade300,
+                                                  valueColor: const AlwaysStoppedAnimation(
+                                                    Color(0xff2A9D8F),
+                                                  ),
+                                                ),
+
+                                                const SizedBox(height: 25),
+
+                                                SizedBox(
+                                                  width: double.infinity,
+                                                  height: 50,
+                                                  child: ElevatedButton(
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor: const Color(0xff2A9D8F),
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(15),
+                                                      ),
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: const Text(
+                                                      "إنهاء",
+                                                      style: TextStyle(
+                                                        fontFamily: "Tajawal",
+                                                        fontSize: 18,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
                                   icon: const Icon(Icons.arrow_back),
-                                  label: const Text(
-                                    "التالي",
+                                  label:  Text(
+                                    currentQuestion ==
+                                        provider.mcqs.length - 1
+                                        ? "إنهاء"
+                                        : "التالي",
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -276,3 +458,7 @@ class _McqScreenState extends State<McqScreen> {
     );
   }
 }
+
+
+
+

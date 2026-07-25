@@ -13,6 +13,8 @@ import 'package:graduationprojct/features/home/providers/display_facourite_provi
 import 'package:graduationprojct/features/home/providers/display_playlists_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_videos_provider.dart';
 import 'package:graduationprojct/features/home/providers/filtered_playlist_provider.dart';
+import 'package:graduationprojct/features/home/providers/ai_features_provider.dart';
+import 'package:graduationprojct/features/home/providers/playlist_details_provider.dart';
 import 'package:graduationprojct/features/home/ui/pages/home_page.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +26,7 @@ import 'features/home/providers/video_details_function_provider.dart';
 import 'features/home/providers/video_details_provider.dart';
 import 'features/home/ui/pages/chat_page.dart';
 import 'features/home/ui/pages/mcq_page.dart';
-import 'features/home/ui/pages/profile_page.dart';
+import 'features/auth/ui/pages/profile/profile_page.dart';
 import 'features/home/ui/pages/summary_page.dart';
 import 'features/home/ui/pages/video_details_page.dart';
 
@@ -67,6 +69,8 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => VideoDetailsProvider(),
+        ), ChangeNotifierProvider(
+          create: (_) => AiFeaturesProvider(),
         ),
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(),
@@ -94,6 +98,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => DisplayFavouriteProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => PlaylistDetailsProvider(),
         )
       ],
 

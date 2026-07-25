@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/display_videos_provider.dart';
+import 'package:graduationprojct/features/home/providers/playlist_details_provider.dart';
 import 'package:graduationprojct/features/home/ui/pages/video_details_page.dart';
+import 'package:graduationprojct/features/home/ui/widgets/course_info_dialog_template.dart';
 import 'package:provider/provider.dart';
 
 import '../widgets/video_card_template.dart';
@@ -20,6 +22,7 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DisplayVideosProvider>().getVideos(id: widget.id);
+      context.read<PlaylistDetailsProvider>().getDetails(id: widget.id);
     });
   }
   Widget build(BuildContext context) {
@@ -27,8 +30,11 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
     final provider = context.watch<DisplayVideosProvider>();
     final videos = provider.videos;
 
+    final provider2 = context.watch<PlaylistDetailsProvider>();
+    final course = provider2.playListDetails;
+
     if (provider.isLoading) {
-      return const Scaffold(
+      return Scaffold(
           backgroundColor: Colors.white,
           body: Center(
             child: SizedBox(
@@ -43,11 +49,49 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
       );
     }
     if (videos.isEmpty) {
-      return const Scaffold(
-        body: Center(
-          child: Text("لا توجد بيانات"),
-        ),
-      );
+      return Scaffold(
+          backgroundColor: Colors.white,
+          body: Stack(
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                child: Image.asset('assets/Images/Ellipse 4.png'),
+              ),
+               Positioned(
+                bottom: 0,
+                right: 0,
+                child: Image.asset('assets/Images/Ellipse 7.png'),
+              ),
+               Positioned(
+                top: 55,
+                right: 16,
+                child: IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Row(
+                    children: [
+                      Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        textDirection: TextDirection.rtl,
+                        color: Color(0xff2A9D8F),
+                        size: 30,
+                      ),
+                      SizedBox(width: 20,),
+
+                      Text("فيديوهات قائمة التشفيل",style: TextStyle(fontWeight: FontWeight.bold,
+                          color: Color(0xff2A9D8F),
+                          fontFamily: "Tajawal",fontSize: 22),),
+
+                    ],
+                  ),
+                ),),
+              const Center(
+                child: Text("لا توجد بيانات"),
+              ),
+            ],
+          ),
+
+    );
     }
 
 
@@ -88,8 +132,29 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
 
                     ],
                   ),
-                ),
-              ),
+                ),),
+                Positioned(
+                  top: 48,
+                  left: 10,
+                  child: IconButton(
+                    onPressed: () {
+                        if (course == null) return;
+
+                        showDialog(
+                          context: context,
+                          builder: (_) => CourseInfoDialogTemplate(
+                            course: course,
+                          ),
+                        );
+
+                    },
+                    icon: Icon(
+                      Icons.info_outline,
+                      textDirection: TextDirection.rtl,
+                      color: Color(0xff2A9D8F),
+                      size: 40,
+                    ),
+              ),),
               Positioned(
                 top: 150,
                 left: 16,
@@ -111,7 +176,7 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                         views: video.views,
                         status: video.status,
                         onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (Context){return VideoDetailsPage(videoId: video.id,);}));
+                          Navigator.push(context, MaterialPageRoute(builder: (Context){return VideoDetailsPage(videoId: video.id,videoName: video.title,);}));
                         },
                       ),
                     );
