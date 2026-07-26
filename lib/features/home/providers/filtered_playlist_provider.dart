@@ -34,21 +34,29 @@ class FilteredPlaylistProvider with ChangeNotifier {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-
       final token = prefs.getString("auth_token");
 
       if (token == null || token.isEmpty) {
         throw Exception("Authentication token not found");
       }
-      _filtered_playlists = await _service.getFilteredPlayLists(token);
 
+      final result = await _service.getFilteredPlayLists(token);
+
+      _filtered_playlists = result;
       _isSuccess = true;
-    } catch (e) {
-      _errorMessage = e.toString();
-    }
 
-    _isLoading = false;
-    notifyListeners();
+      debugPrint(
+        "PROVIDER RESULT LENGTH => ${_filtered_playlists.length}",
+      );
+    } catch (e, stackTrace) {
+      _errorMessage = e.toString();
+
+      debugPrint("FILTERED PLAYLIST ERROR => $e");
+      debugPrintStack(stackTrace: stackTrace);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
 

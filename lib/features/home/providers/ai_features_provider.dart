@@ -74,7 +74,23 @@ class AiFeaturesProvider with ChangeNotifier {
 
     return summary.data.toString();
   }
+  String getMindMapUrl(dynamic summary) {
+    if (summary == null) {
+      return "";
+    }
 
+    final data = summary.data;
+
+    if (data is Map<String, dynamic>) {
+      return data["plantuml_url"]?.toString() ?? "";
+    }
+
+    if (data is Map) {
+      return data["plantuml_url"]?.toString() ?? "";
+    }
+
+    return "";
+  }
   void reset() {
     _isLoading = false;
     _isSuccess = false;

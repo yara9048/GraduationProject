@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/filtered_playlist_provider.dart';
 import 'package:graduationprojct/features/auth/ui/pages/profile/profile_page.dart';
+import 'package:graduationprojct/features/home/ui/pages/notification_page.dart';
 import 'package:graduationprojct/features/home/ui/widgets/new_added_course_template.dart';
 import 'package:graduationprojct/features/home/ui/widgets/subjects_card_template.dart';
 import 'package:provider/provider.dart';
@@ -28,6 +29,7 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DisplayPlaylistsProvider>().getPlayLists();
       context.read<FilteredPlaylistProvider>().getFilteredPlaylists();
+
     });
   }
   Widget build(BuildContext context) {
@@ -36,42 +38,6 @@ class _HomePageState extends State<HomePage> {
     final filterProvider = context.watch<FilteredPlaylistProvider>();
     final filteredPlaylists = filterProvider.filtered_playlists;
 
-    if (provider.isLoading) {
-      return const Scaffold(
-          body: Center(
-            child: SizedBox(
-              width: 28,
-              height: 28,
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                color: Color(0xff2A9D8F),
-              ),
-            ),
-          )
-      );
-    }
-    if (playlists.isEmpty) {
-      return const Scaffold(
-        body: Center(
-          child: Text("لا توجد بيانات"),
-        ),
-      );
-    }
-
-    if (filterProvider.isLoading) {
-      return const Scaffold(
-          body: Center(
-            child: SizedBox(
-              width: 28,
-              height: 28,
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                color: Color(0xff2A9D8F),
-              ),
-            ),
-          )
-      );
-    }
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -82,6 +48,20 @@ class _HomePageState extends State<HomePage> {
               top: 0,
               left: 0,
               child: Image.asset('assets/Images/Ellipse 4.png'),
+            ),
+            Positioned(
+              top: 45,
+              left: 8,
+              child: IconButton(
+                onPressed: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context){return NotificationPage();}));
+                },
+                icon: Icon(
+                  Icons.notifications_none_outlined,
+                  color: const Color(0xff2A9D8F),
+                  size: 46,
+                ),
+              ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -97,7 +77,7 @@ class _HomePageState extends State<HomePage> {
                           bottom: 30,
                         ),
                         child: Text(
-                          "مسار",
+                          "لمّاح ",
                           style: TextStyle(
                             fontSize: 43,
                             fontWeight: FontWeight.bold,
@@ -114,68 +94,10 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 220,top: 18),
-                      child: Consumer<ProfileProvider>(
-                        builder: (context, provider, child) {
-                          return GestureDetector(
-                            onTap: provider.isLoading
-                                ? null
-                                : () async {
-                              await provider.getProfile();
-
-                              if (provider.isSuccess) {
-                                Navigator.of(context, rootNavigator: true).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => const ProfilePage(),
-                                  ),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(provider.errorMessage ?? "حدث خطأ"),
-                                  ),
-                                );
-                              }
-                            },
-                            child: Container(
-                              width: 48,
-                              height: 48,
-                              decoration: const BoxDecoration(
-                                color: Color(0xff2A9D8F),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: provider.isLoading
-                                    ? const SizedBox(
-                                  width: 22,
-                                  height: 22,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                                    : const Icon(
-                                  Icons.person_outline_outlined,
-                                  color: Colors.white,
-                                  size: 30,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      )
-                    )                 ],
+                                 ],
                 ),
 
-                TextFieldTemplate(
-                  hint: 'ابحث هنا',
-                  size: 20,
-                  size2: 21,
-                  icon: Icons.search,
-                ),
 
-                const SizedBox(height: 30),
 
                 Expanded(
                   child: MediaQuery.removePadding(
@@ -217,27 +139,74 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(height: 10),
 
                         Padding(
-                          padding: const EdgeInsets.only(right: 20, left: 20),
-                          child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: SizedBox(
                             height: 320,
-                            width: 10000,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.only(bottom: 20),
-                              itemCount: 2,
-                              itemBuilder: (context, index) {
-                                final playlist = playlists[index];
-                                return  Padding(
-                                  padding: const EdgeInsets.only(left: 16, ),
-                                  child: CourseCardTemplate(
-                                    playlistId: playlist.id,
-                                    imagePath:
-                                    'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
-                                    title: playlist.name,
-                                    durationText: "${playlist.totalDuration ?? 0} دقيقة",
-                                    progress: playlist.completionRate / 100,
-                                    description: playlist.description,
-                                  ),
+                            child: Builder(
+                              builder: (context) {
+                                if (provider.isLoading) {
+                                  return const Center(
+                                    child: SizedBox(
+                                      width: 28,
+                                      height: 28,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 3,
+                                        color: Color(0xff2A9D8F),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                if (provider.errorMessage != null) {
+                                  return Center(
+                                    child: Text(
+                                      provider.errorMessage!,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontFamily: "Tajawal",
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                if (playlists.isEmpty) {
+                                  return const Center(
+                                    child: Text(
+                                      "لا توجد بيانات",
+                                      style: TextStyle(
+                                        fontFamily: "Tajawal",
+                                        fontSize: 16,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                return ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  padding: const EdgeInsets.only(bottom: 20),
+                                  itemCount: playlists.length > 2
+                                      ? 2
+                                      : playlists.length,
+                                  itemBuilder: (context, index) {
+                                    final playlist = playlists[index];
+
+                                    return Padding(
+                                      padding: const EdgeInsets.only(left: 16),
+                                      child: CourseCardTemplate(
+                                        playlistId: playlist.id,
+                                        imagePath:
+                                        'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
+                                        title: playlist.name,
+                                        durationText:
+                                        "${playlist.totalDuration ?? 0} دقيقة",
+                                        progress:
+                                        playlist.completionRate / 100,
+                                        description: playlist.description,
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                             ),

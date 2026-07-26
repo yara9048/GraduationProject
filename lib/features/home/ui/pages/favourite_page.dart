@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/display_videos_provider.dart';
+import 'package:graduationprojct/features/home/ui/pages/search_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/video_details_page.dart';
 import 'package:provider/provider.dart';
 
@@ -37,6 +38,7 @@ class _FavouritePageState extends State<FavouritePage> {
 
     if (provider.isLoading) {
       return const Scaffold(
+        backgroundColor: Colors.white,
         body: Center(
           child: CircularProgressIndicator(
             strokeWidth: 3,
@@ -98,10 +100,24 @@ class _FavouritePageState extends State<FavouritePage> {
                       fontWeight: FontWeight.bold,
                       color: Color(0xff2A9D8F),
                       fontFamily: "Tajawal",
-                      fontSize: 24,
+                      fontSize: 28,
                     ),
                   ),
                 ],
+              ),
+            ),
+            Positioned(
+              top: 50,
+              left: 8,
+              child: IconButton(
+                onPressed: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context){return SearchPage();}));
+                },
+                icon: Icon(
+                  Icons.search,
+                  color: const Color(0xff2A9D8F),
+                  size: 40,
+                ),
               ),
             ),
 
@@ -129,7 +145,6 @@ class _FavouritePageState extends State<FavouritePage> {
                     height: 280,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      reverse: true,
                       itemCount: favouriteVideos.length,
                       separatorBuilder: (_, __) =>
                       const SizedBox(width: 16),
@@ -139,15 +154,46 @@ class _FavouritePageState extends State<FavouritePage> {
                         return SizedBox(
                           width: 300,
                           child: VideoCardTemplate(
+                            key: ValueKey(
+                              video.videoDetail!.id,
+                            ),
+
+                            videoId: video.videoDetail!.id,
+
                             onTap: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (Context){return VideoDetailsPage(videoId: video.id,videoName: video.videoDetail!.title,);}));
-                            },                            imagePath: "assets/Images/photo_2026-07-23_00-20-19.jpg",
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) {
+                                    return VideoDetailsPage(
+                                      videoId: video.videoDetail!.id,
+                                      videoName: video.videoDetail!.title,
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+
+                            imagePath:
+                            'assets/Images/photo_2026-07-23_00-20-19.jpg',
+
                             title: video.videoDetail!.title,
-                            description: video.videoDetail!.description,
+
+                            description:
+                            video.videoDetail!.description,
+
                             duration:
-                            "${video.videoDetail!.duration} دقيقة",
+                            '${video.videoDetail!.duration} دقيقة',
+
                             views: video.videoDetail!.views,
+
                             status: video.videoDetail!.status,
+
+                            onRemovedFromFavourite: () async {
+                              await context
+                                  .read<DisplayFavouriteProvider>()
+                                  .getFavourites();
+                            },
                           ),
                         );
                       },
@@ -171,29 +217,42 @@ class _FavouritePageState extends State<FavouritePage> {
 
                   const SizedBox(height: 14),
 
-                  ListView.separated(
-                    itemCount: favouritePlaylists.length,
-                    shrinkWrap: true,
-                    physics:
-                    const NeverScrollableScrollPhysics(),
-                    separatorBuilder: (_, __) =>
-                    const SizedBox(height: 18),
-                    itemBuilder: (context, index) {
-                      final playlist = favouritePlaylists[index];
+                  SizedBox(
+                    height: 280,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: favouritePlaylists.length,
+                      separatorBuilder: (_, __) =>
+                      const SizedBox(width: 16),
+                      itemBuilder: (context, index) {
+                        final playlist = favouritePlaylists[index];
 
-                      return CourseCardTemplate(
-                        playlistId: playlist.playlistDetail!.id,
-                        imagePath: 'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
-                        title: playlist.playlistDetail!.name,
-                        description:
-                        playlist.playlistDetail!.description,
-                        durationText:
-                        "${playlist.playlistDetail!.totalDuration} دقيقة",
-                        progress:
-                        playlist.playlistDetail!.completionRate /
-                            100,
-                      );
-                    },
+                        return SizedBox(
+                          width: 400,
+                          child: CourseCardTemplate(
+                            key: ValueKey(
+                              playlist.playlistDetail!.id,
+                            ),
+                            playlistId: playlist.playlistDetail!.id,
+                            imagePath:
+                            'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
+                            title: playlist.playlistDetail!.name,
+                            description:
+                            playlist.playlistDetail!.description,
+                            durationText:
+                            "${playlist.playlistDetail!.totalDuration} دقيقة",
+                            progress:
+                            playlist.playlistDetail!.completionRate / 100,
+
+                            onRemovedFromFavourite: () async {
+                              await context
+                                  .read<DisplayFavouriteProvider>()
+                                  .getFavourites();
+                            },
+                          )
+                        );
+                      },
+                    ),
                   ),
 
                   const SizedBox(height: 100),

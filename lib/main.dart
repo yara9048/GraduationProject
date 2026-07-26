@@ -22,9 +22,11 @@ import 'features/auth/providers/log_out_provider.dart';
 import 'features/auth/providers/send_otp_provider.dart';
 import 'features/auth/providers/sign_in_provider.dart';
 import 'features/auth/ui/pages/sign_in/sign_in_page.dart';
+import 'features/home/providers/main_navigation_provider.dart';
 import 'features/home/providers/video_details_function_provider.dart';
 import 'features/home/providers/video_details_provider.dart';
 import 'features/home/ui/pages/chat_page.dart';
+import 'features/home/ui/pages/main_navigation_page.dart';
 import 'features/home/ui/pages/mcq_page.dart';
 import 'features/auth/ui/pages/profile/profile_page.dart';
 import 'features/home/ui/pages/summary_page.dart';
@@ -101,12 +103,15 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => PlaylistDetailsProvider(),
-        )
+        ),
+        ChangeNotifierProvider(
+          create: (_) => MainNavigationProvider(),
+        ),
       ],
 
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: const HomePage(),
+        home: const MainNavigationPage(),
       ),
     );
   }

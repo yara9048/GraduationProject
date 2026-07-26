@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class VideoCardTemplate extends StatelessWidget {
+import '../../../auth/ui/widgets/snack_bar.dart';
+import '../../providers/add_video_to_fav_provider.dart';
+
+class VideoCardTemplate extends StatefulWidget {
+  final int videoId;
   final String imagePath;
   final String description;
   final String title;
@@ -9,8 +15,12 @@ class VideoCardTemplate extends StatelessWidget {
   final String status;
   final VoidCallback? onTap;
 
+  /// يتم استدعاؤها عندما يُحذف الفيديو من المفضلة.
+  final VoidCallback? onRemovedFromFavourite;
+
   const VideoCardTemplate({
     super.key,
+    required this.videoId,
     required this.imagePath,
     required this.description,
     required this.title,
@@ -18,21 +28,149 @@ class VideoCardTemplate extends StatelessWidget {
     required this.views,
     required this.status,
     this.onTap,
+    this.onRemovedFromFavourite,
   });
+
+  @override
+  State<VideoCardTemplate> createState() =>
+      _VideoCardTemplateState();
+}
+
+class _VideoCardTemplateState extends State<VideoCardTemplate> {
+  bool isFavorite = false;
+  bool isFavoriteLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavoriteStatus();
+  }
+
+  Future<int?> _getUserPk(
+      SharedPreferences prefs,
+      ) async {
+    return prefs.getInt('user_pk') ??
+        int.tryParse(
+          prefs.getString('user_pk') ?? '',
+        );
+  }
+
+  Future<void> _loadFavoriteStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final int? userPk = await _getUserPk(prefs);
+
+    if (userPk == null) {
+      return;
+    }
+
+    final String key =
+        'fav_video_${userPk}_${widget.videoId}';
+
+    final bool savedStatus =
+        prefs.getBool(key) ?? false;
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      isFavorite = savedStatus;
+    });
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (isFavoriteLoading) {
+      return;
+    }
+
+    final bool previousStatus = isFavorite;
+
+    // Optimistic update
+    setState(() {
+      isFavorite = !isFavorite;
+      isFavoriteLoading = true;
+    });
+
+    final favProvider =
+    context.read<AddVideoToFavProvider>();
+
+    await favProvider.addVidToFav(
+      id: widget.videoId,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    if (favProvider.isSuccess) {
+      final prefs =
+      await SharedPreferences.getInstance();
+
+      final int? userPk = await _getUserPk(prefs);
+
+      bool savedStatus = isFavorite;
+
+      if (userPk != null) {
+        final String key =
+            'fav_video_${userPk}_${widget.videoId}';
+
+        /*
+         * إذا كان الـProvider يحفظ الحالة داخل
+         * SharedPreferences، نقرأها منه.
+         */
+        savedStatus =
+            prefs.getBool(key) ?? isFavorite;
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        isFavorite = savedStatus;
+        isFavoriteLoading = false;
+      });
+
+      MySnackBar.show(
+        context,
+        message:
+        favProvider.response?.status.toString() ??
+            'تم تحديث المفضلة',
+      );
+
+      if (!savedStatus) {
+        widget.onRemovedFromFavourite?.call();
+      }
+    } else {
+      setState(() {
+        isFavorite = previousStatus;
+        isFavoriteLoading = false;
+      });
+
+      MySnackBar.show(
+        context,
+        message: favProvider.errorMessage ??
+            'حدث خطأ أثناء تحديث المفضلة',
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
+      padding: const EdgeInsets.only(
+        bottom: 10,
+      ),
       child: GestureDetector(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(.4),
+                color: Colors.black.withOpacity(0.4),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -40,7 +178,8 @@ class VideoCardTemplate extends StatelessWidget {
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+            CrossAxisAlignment.start,
             children: [
               Stack(
                 alignment: Alignment.center,
@@ -49,16 +188,18 @@ class VideoCardTemplate extends StatelessWidget {
                     height: 130,
                     width: double.infinity,
                     child: Image.asset(
-                      imagePath,
+                      widget.imagePath,
                       fit: BoxFit.cover,
                     ),
                   ),
 
+                  // زر تشغيل الفيديو
                   Container(
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(.9),
+                      color:
+                      Colors.white.withOpacity(0.9),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -68,25 +209,74 @@ class VideoCardTemplate extends StatelessWidget {
                     ),
                   ),
 
+                  // حالة الفيديو
                   Positioned(
                     top: 8,
                     right: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding:
+                      const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
                         color: const Color(0xff2A9D8F),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius:
+                        BorderRadius.circular(10),
                       ),
                       child: Text(
-                        status,
+                        widget.status,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          fontFamily: "Tajawal",
+                          fontFamily: 'Tajawal',
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // زر المفضلة
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      width: 43,
+                      height: 43,
+                      decoration: BoxDecoration(
+                        color:
+                        Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 6,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: isFavoriteLoading
+                            ? null
+                            : _toggleFavorite,
+                        icon: isFavoriteLoading
+                            ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child:
+                          CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.red,
+                          ),
+                        )
+                            : Icon(
+                          isFavorite
+                              ? Icons.favorite
+                              : Icons
+                              .favorite_border,
+                          color: Colors.red,
+                          size: 25,
                         ),
                       ),
                     ),
@@ -97,35 +287,35 @@ class VideoCardTemplate extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(10),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment:
+                  CrossAxisAlignment.end,
                   children: [
-                    // العنوان
                     Text(
-                      title,
+                      widget.title,
                       textAlign: TextAlign.right,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        fontFamily: "Tajawal",
+                        fontFamily: 'Tajawal',
                         color: Color(0xff264653),
                       ),
                     ),
 
                     const SizedBox(height: 4),
 
-                    // الوصف
-                    if (description.isNotEmpty)
+                    if (widget.description.isNotEmpty)
                       Text(
-                        description,
+                        widget.description,
                         textAlign: TextAlign.right,
                         maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        overflow:
+                        TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 18,
                           color: Colors.black,
-                          fontFamily: "Tajawal",
+                          fontFamily: 'Tajawal',
                         ),
                       ),
 
@@ -140,17 +330,16 @@ class VideoCardTemplate extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          "$views",
+                          '${widget.views}',
                           style: const TextStyle(
                             color: Color(0xffA67500),
-                            fontWeight: FontWeight.w600,
-                            fontFamily: "Tajawal",
+                            fontWeight:
+                            FontWeight.w600,
+                            fontFamily: 'Tajawal',
                             fontSize: 16,
                           ),
                         ),
-
                         const Spacer(),
-
                         const Icon(
                           Icons.access_time_rounded,
                           size: 20,
@@ -158,11 +347,12 @@ class VideoCardTemplate extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          duration,
+                          widget.duration,
                           style: const TextStyle(
                             color: Color(0xff92A1A1),
-                            fontWeight: FontWeight.w600,
-                            fontFamily: "Tajawal",
+                            fontWeight:
+                            FontWeight.w600,
+                            fontFamily: 'Tajawal',
                             fontSize: 16,
                           ),
                         ),

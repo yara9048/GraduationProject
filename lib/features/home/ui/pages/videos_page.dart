@@ -47,7 +47,7 @@ class _VideoPageState extends State<VideoPage> {
                     top: 50,
                     right: 70,
                     child: Text(
-                      "مسار",
+                      "لمّاح ",
                       style: TextStyle(
                         fontSize: 43,
                         fontWeight: FontWeight.bold,

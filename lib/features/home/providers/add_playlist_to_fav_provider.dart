@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:graduationprojct/features/home/data/models/add_playlist_to_fav_model.dart';
-import 'package:graduationprojct/features/home/data/services/add_playlist_to_fav_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../data/models/add_playlist_to_fav_model.dart';
+import '../data/services/add_playlist_to_fav_service.dart';
 
 class AddPlaylistToFavProvider with ChangeNotifier {
   final AddPlaylistToFavService _service = AddPlaylistToFavService();
@@ -30,9 +31,14 @@ class AddPlaylistToFavProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
 
       final token = prefs.getString("auth_token");
+      final userPk = prefs.getInt("user_pk");
 
       if (token == null || token.isEmpty) {
         throw Exception("Authentication token not found");
+      }
+
+      if (userPk == null) {
+        throw Exception("User PK not found");
       }
 
       _response = await _service.addToFavPlaylist(
@@ -40,13 +46,18 @@ class AddPlaylistToFavProvider with ChangeNotifier {
         token: token,
       );
 
+      await prefs.setBool(
+        "fav_playlist_${userPk}_$id",
+        _response!.status == "added to favorites",
+      );
+
       _isSuccess = true;
     } catch (e) {
       _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
 
   void reset() {

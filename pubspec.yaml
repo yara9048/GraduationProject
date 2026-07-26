@@ -39,6 +39,9 @@ dependencies:
   shared_preferences: ^2.5.4
   video_player: 2.9.1
   chewie: ^1.10.0
+  flutter_svg: ^2.0.10+1
+  flutter_markdown: ^0.7.7+1
+  custom_navigation_bar:
 
 dev_dependencies:
   flutter_test:

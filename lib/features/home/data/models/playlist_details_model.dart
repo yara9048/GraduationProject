@@ -1,26 +1,24 @@
-// To parse this JSON data, do
-//
-//     final playListDetailsModel = playListDetailsModelFromJson(jsonString);
-
 import 'dart:convert';
 
-PlayListDetailsModel playListDetailsModelFromJson(String str) => PlayListDetailsModel.fromJson(json.decode(str));
+PlayListDetailsModel playListDetailsModelFromJson(String str) =>
+    PlayListDetailsModel.fromJson(json.decode(str));
 
-String playListDetailsModelToJson(PlayListDetailsModel data) => json.encode(data.toJson());
+String playListDetailsModelToJson(PlayListDetailsModel data) =>
+    json.encode(data.toJson());
 
 class PlayListDetailsModel {
-  int id;
-  String name;
-  String description;
-  String category;
-  dynamic thumbnail;
-  int totalVideoCount;
-  double totalDuration;
-  int studentsCount;
-  int completionRate;
-  int rating;
-  DateTime createdAt;
-  DateTime updatedAt;
+  final int id;
+  final String name;
+  final String description;
+  final String category;
+  final dynamic thumbnail;
+  final int totalVideoCount;
+  final double totalDuration;
+  final int studentsCount;
+  final double completionRate;
+  final double rating;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   PlayListDetailsModel({
     required this.id,
@@ -37,33 +35,62 @@ class PlayListDetailsModel {
     required this.updatedAt,
   });
 
-  factory PlayListDetailsModel.fromJson(Map<String, dynamic> json) => PlayListDetailsModel(
-    id: json["id"],
-    name: json["name"],
-    description: json["description"],
-    category: json["category"],
-    thumbnail: json["thumbnail"],
-    totalVideoCount: json["total_video_count"],
-    totalDuration: json["total_duration"]?.toDouble(),
-    studentsCount: json["students_count"],
-    completionRate: json["completion_rate"],
-    rating: json["rating"],
-    createdAt: DateTime.parse(json["created_at"]),
-    updatedAt: DateTime.parse(json["updated_at"]),
-  );
+  factory PlayListDetailsModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
+    return PlayListDetailsModel(
+      id: (json["id"] as num).toInt(),
+      name: json["name"]?.toString() ?? "",
+      description:
+      json["description"]?.toString() ?? "",
+      category:
+      json["category"]?.toString() ?? "",
+      thumbnail: json["thumbnail"],
 
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "name": name,
-    "description": description,
-    "category": category,
-    "thumbnail": thumbnail,
-    "total_video_count": totalVideoCount,
-    "total_duration": totalDuration,
-    "students_count": studentsCount,
-    "completion_rate": completionRate,
-    "rating": rating,
-    "created_at": createdAt.toIso8601String(),
-    "updated_at": updatedAt.toIso8601String(),
-  };
+      totalVideoCount:
+      (json["total_video_count"] as num)
+          .toInt(),
+
+      totalDuration:
+      (json["total_duration"] as num)
+          .toDouble(),
+
+      studentsCount:
+      (json["students_count"] as num)
+          .toInt(),
+
+      completionRate:
+      (json["completion_rate"] as num)
+          .toDouble(),
+
+      rating:
+      (json["rating"] as num)
+          .toDouble(),
+
+      createdAt: DateTime.parse(
+        json["created_at"].toString(),
+      ),
+
+      updatedAt: DateTime.parse(
+        json["updated_at"].toString(),
+      ),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "id": id,
+      "name": name,
+      "description": description,
+      "category": category,
+      "thumbnail": thumbnail,
+      "total_video_count": totalVideoCount,
+      "total_duration": totalDuration,
+      "students_count": studentsCount,
+      "completion_rate": completionRate,
+      "rating": rating,
+      "created_at": createdAt.toIso8601String(),
+      "updated_at": updatedAt.toIso8601String(),
+    };
+  }
 }

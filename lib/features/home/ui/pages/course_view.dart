@@ -44,7 +44,7 @@ class _CourseViewState extends State<CourseView> {
                     top: 50,
                     right: 70,
                     child: Text(
-                      "مسار",
+                      "لمّاح ",
                       style: TextStyle(
                         fontSize: 43,
                         fontWeight: FontWeight.bold,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/display_videos_provider.dart';
 import 'package:graduationprojct/features/home/providers/playlist_details_provider.dart';
+import 'package:graduationprojct/features/home/ui/pages/playlist_details_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/video_details_page.dart';
 import 'package:graduationprojct/features/home/ui/widgets/course_info_dialog_template.dart';
 import 'package:provider/provider.dart';
@@ -70,17 +71,19 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                   onPressed: () => Navigator.pop(context),
                   icon: const Row(
                     children: [
+                      Text("فيديوهات قائمة التشفيل",style: TextStyle(fontWeight: FontWeight.bold,
+                          color: Color(0xff2A9D8F),
+                          fontFamily: "Tajawal",fontSize: 22),),
+                      SizedBox(width: 20,),
+
                       Icon(
                         Icons.arrow_back_ios_new_rounded,
                         textDirection: TextDirection.rtl,
                         color: Color(0xff2A9D8F),
                         size: 30,
                       ),
-                      SizedBox(width: 20,),
 
-                      Text("فيديوهات قائمة التشفيل",style: TextStyle(fontWeight: FontWeight.bold,
-                          color: Color(0xff2A9D8F),
-                          fontFamily: "Tajawal",fontSize: 22),),
+
 
                     ],
                   ),
@@ -133,28 +136,44 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                     ],
                   ),
                 ),),
-                Positioned(
-                  top: 48,
-                  left: 10,
-                  child: IconButton(
-                    onPressed: () {
-                        if (course == null) return;
-
-                        showDialog(
-                          context: context,
-                          builder: (_) => CourseInfoDialogTemplate(
-                            course: course,
-                          ),
-                        );
-
-                    },
-                    icon: Icon(
-                      Icons.info_outline,
-                      textDirection: TextDirection.rtl,
+              Positioned(
+                top: 48,
+                left: 10,
+                child: provider2.isLoading
+                    ? const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
                       color: Color(0xff2A9D8F),
-                      size: 40,
                     ),
-              ),),
+                  ),
+                )
+                    : IconButton(
+                  onPressed: provider2.isLoading || course == null
+                      ? null
+                      : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PlaylistDetailsPage(
+                          course: course,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: Icon(
+                    Icons.info_outline,
+                    textDirection: TextDirection.rtl,
+                    color: course == null
+                        ? Colors.grey
+                        : const Color(0xff2A9D8F),
+                    size: 40,
+                  ),
+                ),
+              ),
               Positioned(
                 top: 150,
                 left: 16,
@@ -177,7 +196,7 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                         status: video.status,
                         onTap: () {
                           Navigator.push(context, MaterialPageRoute(builder: (Context){return VideoDetailsPage(videoId: video.id,videoName: video.title,);}));
-                        },
+                        }, videoId: video.id,
                       ),
                     );
                   },

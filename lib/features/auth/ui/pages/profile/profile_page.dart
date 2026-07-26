@@ -3,70 +3,494 @@ import 'package:graduationprojct/features/auth/providers/edit_profile_provider.d
 import 'package:graduationprojct/features/auth/ui/pages/sign_in/sign_in_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/favourite_page.dart';
 import 'package:provider/provider.dart';
+
 import '../../../providers/log_out_provider.dart';
 import '../../../providers/profile_provider.dart';
 import '../../widgets/button_template.dart';
-import '../../widgets/snack_bar.dart';
 import '../../widgets/profile_item.dart';
+import '../../widgets/snack_bar.dart';
 
+class ProfilePage extends StatefulWidget {
+  final VoidCallback? onBack;
+  final VoidCallback? onFavouritePressed;
+  final VoidCallback? onCoursesPressed;
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  const ProfilePage({
+    super.key,
+    this.onBack,
+    this.onFavouritePressed,
+    this.onCoursesPressed,
+  });
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final TextEditingController firstNameController =
+  TextEditingController();
+
+  final TextEditingController secondNameController =
+  TextEditingController();
+
+  final TextEditingController majorController =
+  TextEditingController();
+
+  final GlobalKey<FormState> nameFormKey =
+  GlobalKey<FormState>();
+
+  final GlobalKey<FormState> majorFormKey =
+  GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      context.read<ProfileProvider>().getProfile();
+    });
+  }
+
+  @override
+  void dispose() {
+    firstNameController.dispose();
+    secondNameController.dispose();
+    majorController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _refreshProfile() async {
+    await context.read<ProfileProvider>().getProfile();
+  }
+
+  void _goBack() {
+    if (widget.onBack != null) {
+      widget.onBack!.call();
+      return;
+    }
+
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _showEditNameDialog() async {
+    final profile =
+        context.read<ProfileProvider>().profile;
+
+    if (profile == null) return;
+
+    firstNameController.text = profile.firstName;
+    secondNameController.text = profile.lastName;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Center(
+              child: Text(
+                'تعديل الاسم',
+                style: TextStyle(
+                  fontSize: 26,
+                  color: Color(0xff181C1F),
+                  fontFamily: 'Tajawal',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            content: Form(
+              key: nameFormKey,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: firstNameController,
+                      cursorColor: const Color(0xff2A9D8F),
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value == null ||
+                            value.trim().isEmpty) {
+                          return 'الاسم مطلوب';
+                        }
+
+                        return null;
+                      },
+                      decoration: _inputDecoration(
+                        hintText: 'الاسم',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextFormField(
+                      controller: secondNameController,
+                      cursorColor: const Color(0xff2A9D8F),
+                      validator: (value) {
+                        if (value == null ||
+                            value.trim().isEmpty) {
+                          return 'الكنية مطلوبة';
+                        }
+
+                        return null;
+                      },
+                      decoration: _inputDecoration(
+                        hintText: 'الكنية',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actionsAlignment: MainAxisAlignment.center,
+            actions: [
+              SizedBox(
+                width: double.infinity,
+                child: Consumer<EditProfileProvider>(
+                  builder: (
+                      context,
+                      editProvider,
+                      child,
+                      ) {
+                    if (editProvider.isLoading) {
+                      return const Center(
+                        child: SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: Color(0xff2A9D8F),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return ButtonTemplate(
+                      text: 'تعديل',
+                      onPressed: () async {
+                        if (!(nameFormKey.currentState
+                            ?.validate() ??
+                            false)) {
+                          return;
+                        }
+
+                        await editProvider.editProfile(
+                          firstName:
+                          firstNameController.text.trim(),
+                          secondName:
+                          secondNameController.text.trim(),
+                        );
+
+                        if (!mounted) return;
+
+                        if (editProvider.isSuccess) {
+                          await _refreshProfile();
+
+                          if (!mounted) return;
+
+                          Navigator.of(dialogContext).pop();
+                        } else if (editProvider.errorMessage !=
+                            null) {
+                          MySnackBar.show(
+                            context,
+                            message:
+                            editProvider.errorMessage!,
+                          );
+                        }
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showEditMajorDialog() async {
+    final profile =
+        context.read<ProfileProvider>().profile;
+
+    if (profile == null) return;
+
+    majorController.text = profile.major;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Center(
+              child: Text(
+                'تعديل الاختصاص',
+                style: TextStyle(
+                  fontSize: 26,
+                  color: Color(0xff181C1F),
+                  fontFamily: 'Tajawal',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            content: Form(
+              key: majorFormKey,
+              child: TextFormField(
+                controller: majorController,
+                cursorColor: const Color(0xff2A9D8F),
+                validator: (value) {
+                  if (value == null ||
+                      value.trim().isEmpty) {
+                    return 'الاختصاص مطلوب';
+                  }
+
+                  return null;
+                },
+                decoration: _inputDecoration(
+                  hintText: 'الاختصاص',
+                ),
+              ),
+            ),
+            actionsAlignment: MainAxisAlignment.center,
+            actions: [
+              SizedBox(
+                width: double.infinity,
+                child: Consumer<EditProfileProvider>(
+                  builder: (
+                      context,
+                      editProvider,
+                      child,
+                      ) {
+                    if (editProvider.isLoading) {
+                      return const Center(
+                        child: SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: Color(0xff2A9D8F),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return ButtonTemplate(
+                      text: 'تعديل',
+                      onPressed: () async {
+                        if (!(majorFormKey.currentState
+                            ?.validate() ??
+                            false)) {
+                          return;
+                        }
+
+                        await editProvider.editProfile(
+                          major: majorController.text.trim(),
+                        );
+
+                        if (!mounted) return;
+
+                        if (editProvider.isSuccess) {
+                          await _refreshProfile();
+
+                          if (!mounted) return;
+
+                          Navigator.of(dialogContext).pop();
+                        } else if (editProvider.errorMessage !=
+                            null) {
+                          MySnackBar.show(
+                            context,
+                            message:
+                            editProvider.errorMessage!,
+                          );
+                        }
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  InputDecoration _inputDecoration({
+    required String hintText,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: const TextStyle(
+        fontFamily: 'Tajawal',
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Colors.grey,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color(0xff2A9D8F),
+          width: 2,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color(0xffE76F51),
+        ),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color(0xffE76F51),
+          width: 2,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<ProfileProvider>();
-    final firstNameController = TextEditingController();
-    final secondNamecontroller = TextEditingController();
-    final majorController = TextEditingController();
-    final profile = provider.profile;
-    final _formKey = GlobalKey<FormState>();
-    final logoutProvider = context.watch<LogoutProvider>();
-    if (provider.isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
+    final profileProvider =
+    context.watch<ProfileProvider>();
+
+    final logoutProvider =
+    context.watch<LogoutProvider>();
+
+    final profile = profileProvider.profile;
+
+    if (profileProvider.isLoading && profile == null) {
+      return const Directionality(
+        textDirection: TextDirection.rtl,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: CircularProgressIndicator(
+              color: Color(0xff2A9D8F),
+            ),
+          ),
         ),
       );
     }
 
     if (profile == null) {
-      return Scaffold(
-        body: Stack(
-          children: [
-            Positioned(
-              top: 0,
-              left: 0,
-              child: Image.asset(
-                'assets/Images/Ellipse 4.png',
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: Stack(
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                child: Image.asset(
+                  'assets/Images/Ellipse 4.png',
+                ),
               ),
-            ),
-
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: Image.asset(
-                'assets/Images/Ellipse 7.png',
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Image.asset(
+                  'assets/Images/Ellipse 7.png',
+                ),
               ),
-            ),
-
-            SafeArea(
-              child: Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    color: Color(0xff2A9D8F),
-                    size: 30,
+              SafeArea(
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    onPressed: _goBack,
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: Color(0xff2A9D8F),
+                      size: 30,
+                    ),
                   ),
                 ),
               ),
-            ),
-            Center(
-              child: Text("لا توجد بيانات"),
-            ),
-          ],
-        )
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.person_off_outlined,
+                        color: Color(0xffE76F51),
+                        size: 55,
+                      ),
+                      const SizedBox(height: 15),
+                      Text(
+                        profileProvider.errorMessage ??
+                            'تعذر تحميل بيانات الحساب',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontFamily: 'Tajawal',
+                          fontSize: 17,
+                          color: Color(0xff264653),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton.icon(
+                        onPressed: profileProvider.isLoading
+                            ? null
+                            : _refreshProfile,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                          const Color(0xff2A9D8F),
+                          foregroundColor: Colors.white,
+                          padding:
+                          const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                            BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: profileProvider.isLoading
+                            ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child:
+                          CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                            : const Icon(
+                          Icons.refresh_rounded,
+                        ),
+                        label: const Text(
+                          'إعادة المحاولة',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
@@ -74,218 +498,138 @@ class ProfilePage extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: Stack(
-          children: [
-            Positioned(
-              top: 0,
-              left: 0,
-              child: Image.asset(
-                'assets/Images/Ellipse 4.png',
+        body: RefreshIndicator(
+          color: const Color(0xff2A9D8F),
+          onRefresh: _refreshProfile,
+          child: Stack(
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                child: Image.asset(
+                  'assets/Images/Ellipse 4.png',
+                ),
               ),
-            ),
-
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: Image.asset(
-                'assets/Images/Ellipse 7.png',
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Image.asset(
+                  'assets/Images/Ellipse 7.png',
+                ),
               ),
-            ),
-
-            SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 70, 20, 20),
-                child: Column(
-                  children: [
-                    Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        CircleAvatar(
-                          radius: 60,
-                          backgroundColor: const Color(0xff2A9D8F),
-                          child: const Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 60,
-                          )
-                        ),
-
-                        InkWell(
-                          onTap: () {},
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xff2A9D8F),
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
-                            ),
-                            child: const Icon(
-                              Icons.edit,
+              SafeArea(
+                child: SingleChildScrollView(
+                  physics:
+                  const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(
+                    20,
+                    70,
+                    20,
+                    30,
+                  ),
+                  child: Column(
+                    children: [
+                      Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          const CircleAvatar(
+                            radius: 60,
+                            backgroundColor:
+                            Color(0xff2A9D8F),
+                            child: Icon(
+                              Icons.person,
                               color: Colors.white,
-                              size: 18,
+                              size: 60,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "${profile.firstName} ${profile.lastName}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontFamily: "Tajawal",
-                            fontSize:30,
-                            color: Color(0xff264653),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        IconButton(
-                          onPressed: (){
-                            showDialog(
-                              context: context,
-                              builder: (_) => AlertDialog(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                title: Center(child: Text("تعديل الاسم",style: TextStyle(fontSize:26,color:Color(0xff181C1F),fontFamily: "Tajawal",),)),
-                                content: Form(
-                                  key: _formKey,
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: TextField(
-                                          controller: firstNameController,
-                                          cursorColor: const Color(0xff2A9D8F),
-                                          decoration: InputDecoration(
-                                            hintText: "الاسم",
-                                            enabledBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(12),
-                                              borderSide: const BorderSide(
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(12),
-                                              borderSide: const BorderSide(
-                                                color: Color(0xff2A9D8F),
-                                                width: 2,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: TextField(
-                                          controller: secondNamecontroller,
-                                          cursorColor: const Color(0xff2A9D8F),
-                                          decoration:  InputDecoration(
-                                            hintText: "الكنية",
-                                            enabledBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(12),
-                                              borderSide: const BorderSide(
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(12),
-                                              borderSide: const BorderSide(
-                                                color: Color(0xff2A9D8F),
-                                                width: 2,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                actionsAlignment: MainAxisAlignment.center,
-                                actions: [
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: Consumer<EditProfileProvider>(
-                              builder: (context, editProvider, child) {
-                                return editProvider.isLoading
-                                    ? const Center(
-                                  child: SizedBox(
-                                    width: 28,
-                                    height: 28,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 3,
-                                      color: Color(0xff2A9D8F),
-                                    ),
-                                  ),
-                                )
-                                : ButtonTemplate(
-                            text: "تعديل",
-                            onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                            await editProvider.editProfile(
-                            firstName: firstNameController.text,
-                            secondName :secondNamecontroller.text,
-                            );
-                            if (editProvider.isSuccess) {
-                              await context.read<ProfileProvider>().getProfile();
-
-                                Navigator.pop(context);
-                            }
-                             else if (editProvider.errorMessage != null) {
-                            MySnackBar.show(
-                            context,
-                            message: editProvider.errorMessage!,
-                            );
-                            }
-                            }
+                          InkWell(
+                            onTap: () {
+                              // أضف اختيار الصورة لاحقاً.
                             },
-                            );
-                            },
+                            borderRadius:
+                            BorderRadius.circular(30),
+                            child: Container(
+                              padding:
+                              const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                  0xff2A9D8F,
+                                ),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.edit,
+                                color: Colors.white,
+                                size: 18,
+                              ),
                             ),
-                                  ),
-                                ],
-                              )
-                            );
-                          },
-                          icon: Icon(Icons.edit,
-                            color: Color(0xff2A9D8F),
-                            size:20),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    Text(
-                      profile.major,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        color: Color(0xff264653),
-                        fontFamily: "Tajawal",
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.12),
-                            offset: const Offset(0, 6),
-                            blurRadius: 12,
                           ),
                         ],
                       ),
-                      child: Padding(
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment:
+                        MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              '${profile.firstName} '
+                                  '${profile.lastName}',
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Tajawal',
+                                fontSize: 30,
+                                color: Color(0xff264653),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          IconButton(
+                            onPressed: _showEditNameDialog,
+                            icon: const Icon(
+                              Icons.edit,
+                              color: Color(0xff2A9D8F),
+                              size: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        profile.major,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Color(0xff264653),
+                          fontFamily: 'Tajawal',
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      Container(
+                        width: double.infinity,
+                        margin:
+                        const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius:
+                          BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(
+                                alpha: 0.12,
+                              ),
+                              offset: const Offset(0, 6),
+                              blurRadius: 12,
+                            ),
+                          ],
+                        ),
                         child: Column(
                           children: [
                             Row(
@@ -295,19 +639,20 @@ class ProfilePage extends StatelessWidget {
                                   color: Color(0xff2A9D8F),
                                 ),
                                 const SizedBox(width: 12),
-
-                                Text(
-                                  profile.email,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontFamily: "Tajawal",
+                                Expanded(
+                                  child: Text(
+                                    profile.email,
+                                    overflow:
+                                    TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontFamily: 'Tajawal',
+                                    ),
                                   ),
                                 ),
-
                               ],
                             ),
                             const Divider(height: 30),
-
                             Row(
                               children: [
                                 const Icon(
@@ -315,189 +660,152 @@ class ProfilePage extends StatelessWidget {
                                   color: Color(0xff2A9D8F),
                                 ),
                                 const SizedBox(width: 12),
-
-                                Text(
-                                  "${profile.role} / ${profile.major}",
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontFamily: "Tajawal",
+                                Expanded(
+                                  child: Text(
+                                    '${profile.role} / '
+                                        '${profile.major}',
+                                    overflow:
+                                    TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontFamily: 'Tajawal',
+                                    ),
                                   ),
                                 ),
-
-                                const Spacer(),
-
                                 IconButton(
-                                  onPressed: (){
-                                    showDialog(
-                                        context: context,
-                                        builder: (_) => AlertDialog(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(20),
-                                          ),
-                                          title: Center(child: Text("تعديل الاختصاص",style: TextStyle(fontSize:26,color:Color(0xff181C1F),fontFamily: "Tajawal",),)),
-                                          content: Form(
-                                            key: _formKey,
-                                            child: TextField(
-                                              controller: majorController,
-                                              cursorColor: const Color(0xff2A9D8F),
-                                              decoration: InputDecoration(
-                                                hintText: "الاختصاص",
-                                                enabledBorder: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(12),
-                                                  borderSide: const BorderSide(
-                                                    color: Colors.grey,
-                                                  ),
-                                                ),
-                                                focusedBorder: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(12),
-                                                  borderSide: const BorderSide(
-                                                    color: Color(0xff2A9D8F),
-                                                    width: 2,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          actionsAlignment: MainAxisAlignment.center,
-                                          actions: [
-                                            SizedBox(
-                                              width: double.infinity,
-                                              child: Consumer<EditProfileProvider>(
-                                                builder: (context, editProvider, child) {
-                                                  return editProvider.isLoading
-                                                      ? const Center(
-                                                    child: SizedBox(
-                                                      width: 28,
-                                                      height: 28,
-                                                      child: CircularProgressIndicator(
-                                                        strokeWidth: 3,
-                                                        color: Color(0xff2A9D8F),
-                                                      ),
-                                                    ),
-                                                  )
-                                                      : ButtonTemplate(
-                                                    text: "تعديل",
-                                                    onPressed: () async {
-                                                      if (_formKey.currentState!.validate()) {
-                                                        await editProvider.editProfile(
-                                                            major : majorController.text
-                                                        );
-                                                        if (editProvider.isSuccess) {
-                                                          await context.read<ProfileProvider>().getProfile();
-
-                                                          Navigator.pop(context);
-                                                        } else if (editProvider.errorMessage != null) {
-                                                          MySnackBar.show(
-                                                            context,
-                                                            message: editProvider.errorMessage!,
-                                                          );
-                                                        }
-                                                      }
-                                                    },
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                    );
-                                  },
+                                  onPressed:
+                                  _showEditMajorDialog,
                                   icon: const Icon(
                                     Icons.edit,
-                                    color: Color(0xff2A9D8F),
+                                    color:
+                                    Color(0xff2A9D8F),
                                   ),
                                 ),
                               ],
-                            ),                          ],
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    profileItem(
-                      Icons.school_outlined,
-                      "الدورات المسجلة",
-                      onTap: (){}
-                    ),
-
-                    const SizedBox(height: 5),
-
-                    profileItem(
-                      Icons.favorite_border,
-                      "المفضلة",
-                      onTap: (){Navigator.push(context, MaterialPageRoute(builder: (context){return FavouritePage();}));}
-                    ),
-
-                    const SizedBox(height: 25),
-
-                SizedBox(
-                  width: 240,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: logoutProvider.isLoading
-                        ? null
-                        : () async {
-                      await logoutProvider.logout();
-
-                      if (logoutProvider.isSuccess) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const SignInPage(),
-                          ),
-                              (route) => false,
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff2A9D8F),
-                      foregroundColor: Colors.white,
-                    ),
-                    child: logoutProvider.isLoading
-                        ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
+                      const SizedBox(height: 30),
+                      profileItem(
+                        Icons.school_outlined,
+                        'الدورات المسجلة',
+                        onTap: () {
+                          widget.onCoursesPressed?.call();
+                        },
                       ),
-                    )
-                        : const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.logout),
-                        SizedBox(width: 8),
-                        Text(
-                          "تسجيل الخروج",
-                          style: TextStyle(
-                            fontFamily: "Tajawal",
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                      const SizedBox(height: 5),
+                      profileItem(
+                        Icons.favorite_border,
+                        'المفضلة',
+                        onTap: () {
+                          if (widget.onFavouritePressed !=
+                              null) {
+                            widget.onFavouritePressed!.call();
+                            return;
+                          }
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                              const FavouritePage(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 25),
+                      SizedBox(
+                        width: 240,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: logoutProvider.isLoading
+                              ? null
+                              : () async {
+                            await logoutProvider
+                                .logout();
+
+                            if (!mounted) return;
+
+                            if (logoutProvider
+                                .isSuccess) {
+                              Navigator
+                                  .pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                  const SignInPage(),
+                                ),
+                                    (route) => false,
+                              );
+                            } else if (logoutProvider
+                                .errorMessage !=
+                                null) {
+                              MySnackBar.show(
+                                context,
+                                message: logoutProvider
+                                    .errorMessage!,
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                            const Color(0xff2A9D8F),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                              BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: logoutProvider.isLoading
+                              ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child:
+                            CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                              : const Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.logout),
+                              SizedBox(width: 8),
+                              Text(
+                                'تسجيل الخروج',
+                                style: TextStyle(
+                                  fontFamily:
+                                  'Tajawal',
+                                  fontWeight:
+                                  FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  )
-                )],
-                ),
-              ),
-            ),
-
-            SafeArea(
-              child: Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    color: Color(0xff2A9D8F),
-                    size: 30,
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          ],
+              SafeArea(
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    onPressed: _goBack,
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: Color(0xff2A9D8F),
+                      size: 30,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

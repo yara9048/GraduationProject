@@ -106,7 +106,7 @@ class _McqScreenState extends State<McqScreen> {
                         top: 20,
                         right: 70,
                         child: Text(
-                          "مسار",
+                          "لمّاح ",
                           style: TextStyle(
                             fontSize: 43,
                             fontWeight: FontWeight.bold,

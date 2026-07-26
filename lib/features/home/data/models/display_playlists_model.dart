@@ -17,7 +17,7 @@ class DisplayPlaylistsModel {
   int totalVideoCount;
   double? totalDuration;
   int studentsCount;
-  int completionRate;
+  double completionRate;
   String rating;
   DateTime createdAt;
   DateTime updatedAt;
@@ -37,20 +37,32 @@ class DisplayPlaylistsModel {
     required this.updatedAt,
   });
 
-  factory DisplayPlaylistsModel.fromJson(Map<String, dynamic> json) => DisplayPlaylistsModel(
-    id: json["id"],
-    name: json["name"],
-    description: json["description"],
-    category: json["category"],
-    thumbnail: json["thumbnail"],
-    totalVideoCount: json["total_video_count"],
-    totalDuration: json["total_duration"]?.toDouble(),
-    studentsCount: json["students_count"],
-    completionRate: json["completion_rate"],
-    rating: json["rating"],
-    createdAt: DateTime.parse(json["created_at"]),
-    updatedAt: DateTime.parse(json["updated_at"]),
-  );
+  factory DisplayPlaylistsModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
+    return DisplayPlaylistsModel(
+      id: (json["id"] as num).toInt(),
+      name: json["name"]?.toString() ?? "",
+      description: json["description"]?.toString() ?? "",
+      category: json["category"]?.toString() ?? "",
+      thumbnail: json["thumbnail"],
+      totalVideoCount:
+      (json["total_video_count"] as num?)?.toInt() ?? 0,
+      totalDuration:
+      (json["total_duration"] as num?)?.toDouble(),
+      studentsCount:
+      (json["students_count"] as num?)?.toInt() ?? 0,
+      completionRate:
+      (json["completion_rate"] as num?)?.toDouble() ?? 0.0,
+      rating: json["rating"]?.toString() ?? "",
+      createdAt: DateTime.parse(
+        json["created_at"].toString(),
+      ),
+      updatedAt: DateTime.parse(
+        json["updated_at"].toString(),
+      ),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     "id": id,

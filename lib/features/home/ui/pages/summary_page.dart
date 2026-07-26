@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:graduationprojct/features/home/data/models/ai_features_model.dart';
 import 'package:graduationprojct/features/home/providers/ai_features_provider.dart';
+import 'package:graduationprojct/features/home/ui/widgets/mind_map_card_template.dart';
 import 'package:graduationprojct/features/home/ui/widgets/summary_card_template.dart';
 import 'package:provider/provider.dart';
 
@@ -48,14 +48,34 @@ class _SummaryPageState extends State<SummaryPage> {
     if (provider.errorMessage != null) {
       return Scaffold(
         body: Center(
-          child: Text(provider.errorMessage!),
+          child: Text(
+            provider.errorMessage!,
+            textAlign: TextAlign.center,
+          ),
         ),
       );
     }
 
-    final academic = provider.getSummaryByType("academic");
-    final simple = provider.getSummaryByType("simple");
-    final mindMap = provider.getSummaryByType("mind_map");
+    final academic =
+    provider.getSummaryByType("academic");
+
+    final simple =
+    provider.getSummaryByType("simple");
+
+    final mindMap =
+    provider.getSummaryByType("mind_map");
+
+    final String academicText = academic != null
+        ? provider.getSummaryText(academic)
+        : "";
+
+    final String simpleText = simple != null
+        ? provider.getSummaryText(simple)
+        : "";
+
+    final String mindMapUrl = mindMap != null
+        ? provider.getMindMapUrl(mindMap)
+        : "";
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -92,8 +112,10 @@ class _SummaryPageState extends State<SummaryPage> {
                               Navigator.pop(context);
                             },
                             icon: const Icon(
-                              Icons.arrow_back_ios_new_rounded,
-                              textDirection: TextDirection.rtl,
+                              Icons
+                                  .arrow_back_ios_new_rounded,
+                              textDirection:
+                              TextDirection.rtl,
                               color: Color(0xff2A9D8F),
                               size: 30,
                             ),
@@ -103,17 +125,21 @@ class _SummaryPageState extends State<SummaryPage> {
                           top: 20,
                           right: 70,
                           child: Text(
-                            "مسار",
+                            "لمّاح ",
                             style: TextStyle(
                               fontSize: 43,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xff2A9D8F),
+                              fontWeight:
+                              FontWeight.bold,
+                              color:
+                              Color(0xff2A9D8F),
                               fontFamily: "Tajawal",
                               shadows: [
                                 Shadow(
-                                  offset: Offset(-1, 4),
+                                  offset:
+                                  Offset(-1, 4),
                                   blurRadius: 16,
-                                  color: Colors.black26,
+                                  color:
+                                  Colors.black26,
                                 ),
                               ],
                             ),
@@ -122,9 +148,11 @@ class _SummaryPageState extends State<SummaryPage> {
                       ],
                     ),
                   ),
-
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding:
+                    const EdgeInsets.symmetric(
+                      horizontal: 20,
+                    ),
                     child: Column(
                       children: [
                         Text(
@@ -132,8 +160,10 @@ class _SummaryPageState extends State<SummaryPage> {
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xff181C1F),
+                            fontWeight:
+                            FontWeight.bold,
+                            color:
+                            Color(0xff181C1F),
                             fontFamily: "Tajawal",
                           ),
                         ),
@@ -143,82 +173,121 @@ class _SummaryPageState extends State<SummaryPage> {
                           style: TextStyle(
                             fontSize: 15,
                             fontFamily: "Tajawal",
-                            color: Color(0xff1A2429),
+                            color:
+                            Color(0xff1A2429),
                           ),
                         ),
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
                   Expanded(
                     child: DefaultTabController(
                       length: 3,
                       child: Column(
                         children: [
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            padding:
+                            const EdgeInsets
+                                .symmetric(
+                              horizontal: 20,
+                            ),
                             child: Container(
                               height: 40,
-                              decoration: BoxDecoration(
+                              decoration:
+                              BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(30),
+                                borderRadius:
+                                BorderRadius
+                                    .circular(30),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(.08),
+                                    color: Colors.black
+                                        .withOpacity(.08),
                                     blurRadius: 10,
-                                    offset: const Offset(0, 4),
+                                    offset:
+                                    const Offset(
+                                      0,
+                                      4,
+                                    ),
                                   ),
                                 ],
                               ),
                               child: const TabBar(
-                                indicator: BoxDecoration(
-                                  color: Color(0xff2A9D8F),
-                                  borderRadius: BorderRadius.all(
+                                indicator:
+                                BoxDecoration(
+                                  color:
+                                  Color(0xff2A9D8F),
+                                  borderRadius:
+                                  BorderRadius.all(
                                     Radius.circular(25),
                                   ),
                                 ),
-                                indicatorSize: TabBarIndicatorSize.tab,
-                                dividerColor: Colors.transparent,
-                                labelColor: Colors.white,
-                                unselectedLabelColor: Colors.grey,
-                                labelStyle: TextStyle(
-                                  fontWeight: FontWeight.bold,
+                                indicatorSize:
+                                TabBarIndicatorSize
+                                    .tab,
+                                dividerColor:
+                                Colors.transparent,
+                                labelColor:
+                                Colors.white,
+                                unselectedLabelColor:
+                                Colors.grey,
+                                labelStyle:
+                                TextStyle(
+                                  fontWeight:
+                                  FontWeight.bold,
                                   fontSize: 15,
                                 ),
                                 tabs: [
-                                  Tab(text: "ملخص أكاديمي"),
-                                  Tab(text: "ملخص مبسط"),
-                                  Tab(text: "خريطة ذهنية"),
+                                  Tab(
+                                    text:
+                                    "ملخص أكاديمي",
+                                  ),
+                                  Tab(
+                                    text:
+                                    "ملخص مبسط",
+                                  ),
+                                  Tab(
+                                    text:
+                                    "خريطة ذهنية",
+                                  ),
                                 ],
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 20),
-
                           Expanded(
                             child: TabBarView(
                               children: [
-                                academic != null
+                                academicText.isNotEmpty
                                     ? SingleChildScrollView(
-                                  padding: const EdgeInsets.all(16),
-                                  child: SummaryCard(
-                                    data: provider.getSummaryText(academic),
-                                  )
+                                  padding:
+                                  const EdgeInsets
+                                      .only(
+                                    bottom: 20,
+                                  ),
+                                  child:
+                                  SummaryCard(
+                                    data:
+                                    academicText,
+                                  ),
                                 )
                                     : const Center(
                                   child: Text(
                                     "لا يوجد ملخص أكاديمي",
                                   ),
                                 ),
-
-                                simple != null
+                                simpleText.isNotEmpty
                                     ? SingleChildScrollView(
-                                  padding: const EdgeInsets.all(16),
-                                  child: SummaryCard(
-                                    data: provider.getSummaryText(simple),
+                                  padding:
+                                  const EdgeInsets
+                                      .only(
+                                    bottom: 20,
+                                  ),
+                                  child:
+                                  SummaryCard(
+                                    data:
+                                    simpleText,
                                   ),
                                 )
                                     : const Center(
@@ -226,12 +295,17 @@ class _SummaryPageState extends State<SummaryPage> {
                                     "لا يوجد ملخص مبسط",
                                   ),
                                 ),
-
-                                mindMap != null
+                                mindMapUrl.isNotEmpty
                                     ? SingleChildScrollView(
-                                  padding: const EdgeInsets.all(16),
-                                  child: SummaryCard(
-                                    data: provider.getSummaryText(mindMap),
+                                  padding:
+                                  const EdgeInsets
+                                      .only(
+                                    bottom: 20,
+                                  ),
+                                  child:
+                                  MindMapCard(
+                                    svgUrl:
+                                    mindMapUrl,
                                   ),
                                 )
                                     : const Center(

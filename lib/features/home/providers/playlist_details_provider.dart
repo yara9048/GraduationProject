@@ -23,25 +23,41 @@ class PlaylistDetailsProvider with ChangeNotifier {
 
   PlayListDetailsModel? get playListDetails => _playListDetails;
 
-  Future<void> getDetails({required int id}) async {
+  Future<void> getDetails({
+    required int id,
+  }) async {
     _isLoading = true;
     _errorMessage = null;
     _isSuccess = false;
     notifyListeners();
 
     try {
+      debugPrint('Getting playlist details for ID: $id');
 
-      _playListDetails = await _service.getDetails(id: id);
+      _playListDetails = await _service.getDetails(
+        id: id,
+      );
+
+      debugPrint(
+        'Playlist loaded: ${_playListDetails?.name}',
+      );
 
       _isSuccess = true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _errorMessage = e.toString();
+
+      debugPrint(
+        'Playlist details error: $e',
+      );
+
+      debugPrintStack(
+        stackTrace: stackTrace,
+      );
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
-
 
   void reset() {
     _isLoading = false;

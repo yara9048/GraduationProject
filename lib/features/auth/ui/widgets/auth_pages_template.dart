@@ -32,7 +32,7 @@ class AuthPagesTemplate extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                "مسار",
+                "لمّاح ",
                 style: TextStyle(
                   fontSize: 43,
                   fontWeight: FontWeight.bold,

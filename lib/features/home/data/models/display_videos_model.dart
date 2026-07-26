@@ -1,77 +1,116 @@
-// To parse this JSON data, do
-//
-//     final displayVideosModel = displayVideosModelFromJson(jsonString);
-
 import 'dart:convert';
 
-List<DisplayVideosModel> displayVideosModelFromJson(String str) => List<DisplayVideosModel>.from(json.decode(str).map((x) => DisplayVideosModel.fromJson(x)));
+List<DisplayVideosModel> displayVideosModelFromJson(String str) {
+final decodedData = json.decode(str) as List<dynamic>;
 
-String displayVideosModelToJson(List<DisplayVideosModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+return decodedData
+    .map(
+(item) => DisplayVideosModel.fromJson(
+item as Map<String, dynamic>,
+),
+)
+    .toList();
+}
+
+String displayVideosModelToJson(
+List<DisplayVideosModel> data,
+) {
+return json.encode(
+data.map((item) => item.toJson()).toList(),
+);
+}
 
 class DisplayVideosModel {
-  int id;
-  String title;
-  String description;
-  int playlist;
-  int owner;
-  dynamic videoFile;
-  dynamic thumbnail;
-  double duration;
-  int views;
-  String status;
-  String transcript;
-  int mcqCount;
-  DateTime createdAt;
-  DateTime updatedAt;
+final int id;
+final String title;
+final String description;
+final int playlist;
+final int owner;
+final String? videoFile;
+final String? thumbnail;
+final double duration;
+final int views;
+final String status;
+final String approvalStatus;
+final String rejectionReason;
+final String transcript;
+final int mcqCount;
+final DateTime createdAt;
+final DateTime updatedAt;
 
-  DisplayVideosModel({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.playlist,
-    required this.owner,
-    required this.videoFile,
-    required this.thumbnail,
-    required this.duration,
-    required this.views,
-    required this.status,
-    required this.transcript,
-    required this.mcqCount,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+const DisplayVideosModel({
+required this.id,
+required this.title,
+required this.description,
+required this.playlist,
+required this.owner,
+required this.videoFile,
+required this.thumbnail,
+required this.duration,
+required this.views,
+required this.status,
+required this.approvalStatus,
+required this.rejectionReason,
+required this.transcript,
+required this.mcqCount,
+required this.createdAt,
+required this.updatedAt,
+});
 
-  factory DisplayVideosModel.fromJson(Map<String, dynamic> json) => DisplayVideosModel(
-    id: json["id"],
-    title: json["title"],
-    description: json["description"],
-    playlist: json["playlist"],
-    owner: json["owner"],
-    videoFile: json["video_file"],
-    thumbnail: json["thumbnail"],
-    duration: json["duration"]?.toDouble(),
-    views: json["views"],
-    status: json["status"],
-    transcript: json["transcript"],
-    mcqCount: json["mcqCount"],
-    createdAt: DateTime.parse(json["created_at"]),
-    updatedAt: DateTime.parse(json["updated_at"]),
-  );
+factory DisplayVideosModel.fromJson(
+Map<String, dynamic> json,
+) {
+return DisplayVideosModel(
+id: (json["id"] as num?)?.toInt() ?? 0,
+title: json["title"]?.toString() ?? "",
+description:
+json["description"]?.toString() ?? "",
+playlist:
+(json["playlist"] as num?)?.toInt() ?? 0,
+owner: (json["owner"] as num?)?.toInt() ?? 0,
+videoFile: json["video_file"]?.toString(),
+thumbnail: json["thumbnail"]?.toString(),
+duration:
+(json["duration"] as num?)?.toDouble() ?? 0.0,
+views: (json["views"] as num?)?.toInt() ?? 0,
+status: json["status"]?.toString() ?? "",
+approvalStatus:
+json["approval_status"]?.toString() ?? "",
+rejectionReason:
+json["rejection_reason"]?.toString() ?? "",
+transcript:
+json["transcript"]?.toString() ?? "",
+mcqCount:
+(json["mcqCount"] as num?)?.toInt() ?? 0,
+createdAt: DateTime.tryParse(
+json["created_at"]?.toString() ?? "",
+) ??
+DateTime.fromMillisecondsSinceEpoch(0),
+updatedAt: DateTime.tryParse(
+json["updated_at"]?.toString() ?? "",
+) ??
+DateTime.fromMillisecondsSinceEpoch(0),
+);
+}
 
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "title": title,
-    "description": description,
-    "playlist": playlist,
-    "owner": owner,
-    "video_file": videoFile,
-    "thumbnail": thumbnail,
-    "duration": duration,
-    "views": views,
-    "status": status,
-    "transcript": transcript,
-    "mcqCount": mcqCount,
-    "created_at": createdAt.toIso8601String(),
-    "updated_at": updatedAt.toIso8601String(),
-  };
+Map<String, dynamic> toJson() {
+return {
+"id": id,
+"title": title,
+"description": description,
+"playlist": playlist,
+"owner": owner,
+"video_file": videoFile,
+"thumbnail": thumbnail,
+"duration": duration,
+"views": views,
+"status": status,
+"approval_status": approvalStatus,
+"rejection_reason": rejectionReason,
+"transcript": transcript,
+"mcqCount": mcqCount,
+"created_at": createdAt.toIso8601String(),
+"updated_at": updatedAt.toIso8601String(),
+};
+}
 }

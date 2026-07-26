@@ -30,6 +30,8 @@ class SignInProvider with ChangeNotifier {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       print(user.access);
       await prefs.setString('auth_token', user.access);
+      await prefs.setInt('user_pk', user.user.pk);
+
 
       _isSuccess = true;
     } catch (e) {

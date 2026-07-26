@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/display_playlists_provider.dart';
+import 'package:graduationprojct/features/home/ui/pages/search_page.dart';
 import 'package:provider/provider.dart';
 
 import '../widgets/course_card_template.dart';
@@ -62,18 +63,19 @@ class _DisplayPlaylistsPageState extends State<DisplayPlaylistsPage> {
                 onPressed: () => Navigator.pop(context),
                 icon: const Row(
                   children: [
+
+
+                    Text("قائمة التشفيل",style: TextStyle(fontWeight: FontWeight.bold,
+                        color: Color(0xff2A9D8F),
+                        fontFamily: "Tajawal",fontSize: 22),),
+                    SizedBox(width: 20,),
+
                     Icon(
                       Icons.arrow_back_ios_new_rounded,
                       textDirection: TextDirection.rtl,
                       color: Color(0xff2A9D8F),
                       size: 30,
                     ),
-                    SizedBox(width: 20,),
-
-                    Text("قائمة التشفيل",style: TextStyle(fontWeight: FontWeight.bold,
-                        color: Color(0xff2A9D8F),
-                        fontFamily: "Tajawal",fontSize: 22),),
-
                   ],
                 ),
               ),),
@@ -123,6 +125,19 @@ class _DisplayPlaylistsPageState extends State<DisplayPlaylistsPage> {
 
 
                   ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 50,
+              left: 8,
+              child: IconButton(
+                onPressed: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context){return SearchPage();}));},
+                icon: Icon(
+                  Icons.search,
+                  color: const Color(0xff2A9D8F),
+                  size: 40,
                 ),
               ),
             ),
