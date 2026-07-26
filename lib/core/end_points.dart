@@ -6,6 +6,10 @@ class ApiEndpoints {
   static const passwordResetRequest = '/reset-password/request/';
   static const passwordResetOtp = '/reset-password/verify/';
   static const newPassword = '/reset-password/confirm/';
+  static const filteredPaylists = 'playlists/for_you/';
+  static const playlists = 'playlists/';
+  static const favourite = 'favorites/';
+
 
 
 }
