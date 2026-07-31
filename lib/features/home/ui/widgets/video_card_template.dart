@@ -15,7 +15,6 @@ class VideoCardTemplate extends StatefulWidget {
   final String status;
   final VoidCallback? onTap;
 
-  /// يتم استدعاؤها عندما يُحذف الفيديو من المفضلة.
   final VoidCallback? onRemovedFromFavourite;
 
   const VideoCardTemplate({
@@ -86,7 +85,6 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
 
     final bool previousStatus = isFavorite;
 
-    // Optimistic update
     setState(() {
       isFavorite = !isFavorite;
       isFavoriteLoading = true;
@@ -114,11 +112,6 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
       if (userPk != null) {
         final String key =
             'fav_video_${userPk}_${widget.videoId}';
-
-        /*
-         * إذا كان الـProvider يحفظ الحالة داخل
-         * SharedPreferences، نقرأها منه.
-         */
         savedStatus =
             prefs.getBool(key) ?? isFavorite;
       }
@@ -160,32 +153,32 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(
-        bottom: 10,
+        bottom: 6,
       ),
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.4),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                color: Colors.black.withOpacity(0.25),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
-            crossAxisAlignment:
-            CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Stack(
                 alignment: Alignment.center,
                 children: [
                   SizedBox(
-                    height: 130,
+                    height: 100,
                     width: double.infinity,
                     child: Image.asset(
                       widget.imagePath,
@@ -193,42 +186,37 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
                     ),
                   ),
 
-                  // زر تشغيل الفيديو
                   Container(
-                    width: 42,
-                    height: 42,
+                    width: 26,
+                    height: 26,
                     decoration: BoxDecoration(
-                      color:
-                      Colors.white.withOpacity(0.9),
+                      color: Colors.white.withOpacity(0.9),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.play_arrow_rounded,
                       color: Color(0xff264653),
-                      size: 28,
+                      size: 24,
                     ),
                   ),
 
-                  // حالة الفيديو
                   Positioned(
-                    top: 8,
-                    right: 8,
+                    top: 6,
+                    right: 6,
                     child: Container(
-                      padding:
-                      const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 2,
                       ),
                       decoration: BoxDecoration(
                         color: const Color(0xff2A9D8F),
-                        borderRadius:
-                        BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         widget.status,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 15,
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Tajawal',
                         ),
@@ -236,24 +224,15 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
                     ),
                   ),
 
-                  // زر المفضلة
                   Positioned(
-                    top: 8,
-                    left: 8,
+                    top: 6,
+                    left: 6,
                     child: Container(
-                      width: 43,
-                      height: 43,
+                      width: 26,
+                      height: 26,
                       decoration: BoxDecoration(
-                        color:
-                        Colors.white.withOpacity(0.9),
+                        color: Colors.white.withOpacity(0.9),
                         shape: BoxShape.circle,
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
                       ),
                       child: IconButton(
                         padding: EdgeInsets.zero,
@@ -262,10 +241,9 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
                             : _toggleFavorite,
                         icon: isFavoriteLoading
                             ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child:
-                          CircularProgressIndicator(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
                             strokeWidth: 2,
                             color: Colors.red,
                           ),
@@ -273,10 +251,9 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
                             : Icon(
                           isFavorite
                               ? Icons.favorite
-                              : Icons
-                              .favorite_border,
+                              : Icons.favorite_border,
                           color: Colors.red,
-                          size: 25,
+                          size: 18,
                         ),
                       ),
                     ),
@@ -285,79 +262,82 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
               ),
 
               Padding(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 6,
+                ),
                 child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       widget.title,
                       textAlign: TextAlign.right,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 22,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Tajawal',
                         color: Color(0xff264653),
                       ),
                     ),
 
-                    const SizedBox(height: 4),
-
-                    if (widget.description.isNotEmpty)
+                    if (widget.description.isNotEmpty) ...[
+                      const SizedBox(height: 2),
                       Text(
                         widget.description,
                         textAlign: TextAlign.right,
                         maxLines: 1,
-                        overflow:
-                        TextOverflow.ellipsis,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 18,
+                          fontSize: 12,
                           color: Colors.black,
                           fontFamily: 'Tajawal',
                         ),
                       ),
+                    ],
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 4),
 
                     Row(
                       children: [
                         const Icon(
                           Icons.visibility_rounded,
-                          size: 20,
+                          size: 16,
                           color: Color(0xffA67500),
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 3),
                         Text(
                           '${widget.views}',
                           style: const TextStyle(
                             color: Color(0xffA67500),
-                            fontWeight:
-                            FontWeight.w600,
+                            fontWeight: FontWeight.w600,
                             fontFamily: 'Tajawal',
-                            fontSize: 16,
+                            fontSize: 12,
                           ),
                         ),
+
                         const Spacer(),
+
                         const Icon(
                           Icons.access_time_rounded,
-                          size: 20,
+                          size: 16,
                           color: Color(0xff92A1A1),
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 3),
                         Text(
                           widget.duration,
                           style: const TextStyle(
                             color: Color(0xff92A1A1),
-                            fontWeight:
-                            FontWeight.w600,
+                            fontWeight: FontWeight.w600,
                             fontFamily: 'Tajawal',
-                            fontSize: 16,
+                            fontSize: 12,
                           ),
                         ),
                       ],
                     ),
+                    const SizedBox(height: 4),
                   ],
                 ),
               ),

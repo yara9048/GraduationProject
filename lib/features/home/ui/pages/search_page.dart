@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../auth/ui/widgets/text_field_template.dart';
+import 'main_navigation_page.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -30,7 +31,8 @@ class _SearchPageState extends State<SearchPage> {
             top: 55,
             right: 16,
             child: IconButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context){return MainNavigationPage();})),
+
               icon: Row(
                 children: [
 

@@ -1,8 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:graduationprojct/features/home/ui/pages/main_navigation_page.dart';
 import 'package:provider/provider.dart';
-import '../../../../home/ui/pages/home_page.dart';
+
+import '../../../../home/ui/pages/main_navigation_page.dart';
 import '../../../providers/sign_in_provider.dart';
 import '../../widgets/auth_pages_template.dart';
 import '../../widgets/button_template.dart';
@@ -19,180 +19,282 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final GlobalKey<FormState> _formKey =
+  GlobalKey<FormState>();
+
+  final TextEditingController emailController =
+  TextEditingController();
+
+  final TextEditingController passwordController =
+  TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+
+      // يسمح للصفحة أن تصغر عند فتح الكيبورد
+      resizeToAvoidBottomInset: true,
+
       body: AuthPagesTemplate(
-        text1: "مرحبا بعودتك",
-        text2: "يرجى ادخال بياناتك لتسجيل الدخول",
+        text1: 'مرحبا بعودتك',
+        text2: 'يرجى ادخال بياناتك لتسجيل الدخول',
         size1: 17,
         size2: 17,
-        child: Center(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-
-                const SizedBox(height: 230),
-
-                Padding(
-                  padding: const EdgeInsets.only(left: 200),
-                  child: Text(
-                    "البريد الالكتروني",
-                    style: TextStyle(
-                      color: Color(0xff1A2429),
-                      fontSize: 17,
-                      fontFamily: "Tajawal",
-                      fontWeight: FontWeight.w600,
-                    ),
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                keyboardDismissBehavior:
+                ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: EdgeInsets.only(
+                  bottom:
+                  MediaQuery.of(context).viewInsets.bottom +
+                      20,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
                   ),
-                ),
+                  child: IntrinsicHeight(
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 230),
 
-                const SizedBox(height: 12),
+                          const Padding(
+                            padding:
+                            EdgeInsets.only(right: 20),
+                            child: Align(
+                              alignment:
+                              Alignment.centerRight,
+                              child: Text(
+                                'البريد الالكتروني',
+                                style: TextStyle(
+                                  color: Color(0xff1A2429),
+                                  fontSize: 17,
+                                  fontFamily: 'Tajawal',
+                                  fontWeight:
+                                  FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
 
-                TextFieldTemplate(
-                  controller: emailController,
-                  size2: 17,
-                  size: 16,
-                  hint: " بريدك الالكتروني",
-                  icon: Icons.email_outlined,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "الحقل فارغ";
-                    } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                      return "ادخل بريد الكتروني صالح";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
+                          const SizedBox(height: 12),
 
-                Padding(
-                  padding: const EdgeInsets.only(left: 220),
-                  child: Text(
-                    "كلمة المرور",
-                    style: TextStyle(
-                      color: Color(0xff1A2429),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: "Tajawal",
-                    ),
-                  ),
-                ),
+                          TextFieldTemplate(
+                            controller: emailController,
+                            size2: 17,
+                            size: 16,
+                            hint: 'بريدك الالكتروني',
+                            icon: Icons.email_outlined,
+                            validator: (value) {
+                              if (value == null ||
+                                  value.trim().isEmpty) {
+                                return 'الحقل فارغ';
+                              }
 
-                const SizedBox(height: 12),
+                              if (!RegExp(
+                                r'^[^@]+@[^@]+\.[^@]+',
+                              ).hasMatch(value.trim())) {
+                                return 'ادخل بريد الكتروني صالح';
+                              }
 
-                TextFieldTemplate(
-                  controller: passwordController,
-                  size: 16,
-                  size2: 17,
-                  hint: " كلمة المرور",
-                  icon: Icons.remove_red_eye,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "الحقل فارغ";
-                    } else if (value.length < 6) {
-                      return "كلمة المرور يجب أن تكون 6 أحرف على الأقل";
-                    }
-                    return null;
-                  },
-                ),
+                              return null;
+                            },
+                          ),
 
-                Padding(
-                  padding: const EdgeInsets.only(right: 200, top: 10),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                            return ForgetPasswordPage();
-                          }));
-                    },
-                    child: Text(
-                      "هل نسيت كلمة المرور؟",
-                      style: TextStyle(
-                        color: Color(0xff2A9D8F),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: "Tajawal",
+                          const SizedBox(height: 20),
+
+                          const Padding(
+                            padding:
+                            EdgeInsets.only(right: 20),
+                            child: Align(
+                              alignment:
+                              Alignment.centerRight,
+                              child: Text(
+                                'كلمة المرور',
+                                style: TextStyle(
+                                  color: Color(0xff1A2429),
+                                  fontSize: 17,
+                                  fontWeight:
+                                  FontWeight.w600,
+                                  fontFamily: 'Tajawal',
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          TextFieldTemplate(
+                            controller: passwordController,
+                            size: 16,
+                            size2: 17,
+                            hint: 'كلمة المرور',
+                            icon: Icons.remove_red_eye,
+                            validator: (value) {
+                              if (value == null ||
+                                  value.isEmpty) {
+                                return 'الحقل فارغ';
+                              }
+
+                              if (value.length < 6) {
+                                return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+                              }
+
+                              return null;
+                            },
+                          ),
+
+                          Padding(
+                            padding:
+                            const EdgeInsets.only(
+                              right: 20,
+                              top: 10,
+                            ),
+                            child: Align(
+                              alignment:
+                              Alignment.centerRight,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                      const ForgetPasswordPage(),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  'هل نسيت كلمة المرور؟',
+                                  style: TextStyle(
+                                    color:
+                                    Color(0xff2A9D8F),
+                                    fontSize: 13,
+                                    fontWeight:
+                                    FontWeight.w600,
+                                    fontFamily: 'Tajawal',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 60),
+
+                          Consumer<SignInProvider>(
+                            builder: (
+                                context,
+                                authProvider,
+                                child,
+                                ) {
+                              if (authProvider.isLoading) {
+                                return const CircularProgressIndicator(
+                                  color:
+                                  Color(0xff2A9D8F),
+                                );
+                              }
+
+                              return ButtonTemplate(
+                                text: 'تسجيل الدخول',
+                                onPressed: () async {
+                                  FocusScope.of(context).unfocus();
+
+                                  if (!_formKey.currentState!.validate()) {
+                                    return;
+                                  }
+
+                                  final bool success = await authProvider.login(
+                                    emailController.text.trim(),
+                                    passwordController.text,
+                                  );
+
+                                  if (!context.mounted) {
+                                    return;
+                                  }
+
+                                  if (success) {
+                                    Navigator.of(context).pushAndRemoveUntil(
+                                      MaterialPageRoute(
+                                        builder: (_) => const MainNavigationPage(),
+                                      ),
+                                          (route) => false,
+                                    );
+                                  } else if (authProvider.errorMessage != null) {
+                                    MySnackBar.show(
+                                      context,
+                                      message: authProvider.errorMessage!,
+                                    );
+                                  }
+                                },
+                              );
+                            },
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontFamily: 'Tajawal',
+                              ),
+                              children: [
+                                const TextSpan(
+                                  text:
+                                  'ليس لديك حساب؟ ',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: 'Tajawal',
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text:
+                                  'انشاء حساب جديد',
+                                  style: const TextStyle(
+                                    color:
+                                    Color(0xffE9C46A),
+                                    fontFamily: 'Tajawal',
+                                    fontSize: 13,
+                                    fontWeight:
+                                    FontWeight.bold,
+                                  ),
+                                  recognizer:
+                                  TapGestureRecognizer()
+                                    ..onTap = () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                          const SignUpPage(),
+                                        ),
+                                      );
+                                    },
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 30),
+                        ],
                       ),
                     ),
                   ),
                 ),
-
-                const SizedBox(height: 60),
-                Consumer<SignInProvider>(
-                  builder: (context, authProvider, child) {
-                    return authProvider.isLoading
-                        ? const CircularProgressIndicator(
-                      color: Color(0xff2A9D8F),
-                    )
-                        : ButtonTemplate(
-                      text: "تسجيل الدخول",
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          await authProvider.login(
-                            emailController.text,
-                            passwordController.text,
-                          );
-
-                          if (authProvider.isSuccess) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (_) => MainNavigationPage()),
-                            );
-                          } else if (authProvider.errorMessage != null) {
-                            MySnackBar.show(
-                              context,
-                              message: authProvider.errorMessage!,
-                            );
-                          }
-                        }
-                      },
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 10),
-
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    style: const TextStyle(fontSize: 17, fontFamily: "Tajawal"),
-                    children: [
-                      const TextSpan(
-                        text: "ليس لديك حساب؟ ",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: "Tajawal",
-                          fontSize: 13,
-                        ),
-                      ),
-                      TextSpan(
-                        text: "انشاء حساب جديد",
-                        style: const TextStyle(
-                          color: Color(0xffE9C46A),
-                          fontFamily: "Tajawal",
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold
-                        ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => MainNavigationPage()),
-                            );
-                          },
-                      ),
-                    ],
-                  ),
-                ),
-
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),

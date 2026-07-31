@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/home/ui/pages/main_navigation_page.dart';
 import 'package:graduationprojct/features/home/ui/widgets/subjects_card_template.dart';
 import 'package:provider/provider.dart';
 
@@ -24,6 +25,10 @@ class _AllSubjectsPageState extends State<AllSubjectsPage> {
   Widget build(BuildContext context) {
     final subjectsProvider = context.watch<DisplaySubjectsProvider>();
     final subjects = subjectsProvider.subjects;
+    final List<String> subjectImages = [
+      'assets/Images/Group 51.png',
+      'assets/Images/Group 52.png',
+    ];
     return Scaffold(
       backgroundColor: Colors.white,
       body: SizedBox(
@@ -43,7 +48,7 @@ class _AllSubjectsPageState extends State<AllSubjectsPage> {
                     top: 55,
                     right: 16,
                     child: IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context){return MainNavigationPage();})),
                       icon: const Icon(
                         Icons.arrow_back_ios_new_rounded,
                         textDirection: TextDirection.rtl,
@@ -93,7 +98,8 @@ class _AllSubjectsPageState extends State<AllSubjectsPage> {
                                   padding: const EdgeInsets.only(bottom: 10.0),
                                   child: SubjectsCard(
                                     title: sub.name,
-                                    imagePath: 'assets/Images/Group 51.png',
+                                    imagePath: subjectImages[
+                                    index % subjectImages.length],
                                     textColor: Color(0xffA67500),
                                     width: 300,
                                     top: 10,

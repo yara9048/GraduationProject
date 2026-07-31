@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/ui/pages/chat_page.dart';
+import 'package:graduationprojct/features/home/ui/pages/display_videos_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/summary_page.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
@@ -14,11 +15,13 @@ import '../widgets/video_info_dialog_template.dart';
 import 'mcq_page.dart';
 
 class VideoDetailsPage extends StatefulWidget {
+  final int playlistId;
   final int videoId;
   final String videoName;
   const VideoDetailsPage({
     super.key,
     required this.videoId,
+    required this.playlistId,
     required this.videoName,
   });
 
@@ -209,6 +212,8 @@ class _VideoDetailsPageState extends State<VideoDetailsPage> {
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Color(0xffE9C46A),
+                              fontSize: 13,
+
                             ),
                           ),
                           Text(
@@ -216,7 +221,7 @@ class _VideoDetailsPageState extends State<VideoDetailsPage> {
                                 ? "تمت مشاهدة: كامل الفيديو"
                                 : "تمت مشاهدة : %${(provider.watchProgress * 100).toInt()}",
                             style: const TextStyle(
-                              fontSize: 15,
+                              fontSize: 13,
                               fontFamily: "Tajawal",
                               fontWeight: FontWeight.bold,
                               color: Color(0xff1A2429),
@@ -256,6 +261,7 @@ class _VideoDetailsPageState extends State<VideoDetailsPage> {
                         builder: (context) {
                           print(widget.videoId);
                           return SummaryPage(
+                            playlistId: widget.playlistId,
                             id: widget.videoId,
                             name: widget.videoName,
                           );
@@ -281,6 +287,7 @@ class _VideoDetailsPageState extends State<VideoDetailsPage> {
                       context,
                       MaterialPageRoute(
                         builder: (_) => McqScreen(
+                          playlistId: widget.playlistId,
                           videoId: widget.videoId,
                           videoName: widget.videoName,
                         ),
@@ -303,7 +310,7 @@ class _VideoDetailsPageState extends State<VideoDetailsPage> {
 
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => ChatPage()),
+                      MaterialPageRoute(builder: (_) => ChatPage(id:widget.videoId, name: widget.videoName,playlistId: widget.playlistId,)),
                     );
                   },
                 ),
@@ -319,11 +326,11 @@ class _VideoDetailsPageState extends State<VideoDetailsPage> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 10, right: 12),
                 child: IconButton(
-                  onPressed: () => Navigator.pop(context),
+    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context){return DisplayVideosPage(id: widget.playlistId,);})),
                   icon: const Icon(
                     Icons.chevron_right,
                     color: Color(0xffE9C46A),
-                    size: 40,
+                    size: 30,
                   ),
                 ),
               ),
@@ -345,7 +352,7 @@ class _VideoDetailsPageState extends State<VideoDetailsPage> {
                   icon: const Icon(
                     Icons.info_outline,
                     color: Color(0xffE9C46A),
-                    size: 30,
+                    size: 20,
                   ),
                 ),
               ),

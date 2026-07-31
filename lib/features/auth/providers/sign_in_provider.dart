@@ -36,27 +36,31 @@ class SignInProvider with ChangeNotifier {
         password: password,
       );
 
-      final prefs = await SharedPreferences.getInstance();
-
-      final token = user.access.trim();
+      final String token = user.access.trim();
 
       if (token.isEmpty) {
         throw Exception('لم يتم إرجاع التوكن من السيرفر');
       }
 
-      await prefs.setString(
+      final prefs = await SharedPreferences.getInstance();
+
+      final bool tokenSaved = await prefs.setString(
         'auth_token',
         token,
       );
 
-      await prefs.setInt(
+      final bool userIdSaved = await prefs.setInt(
         'user_pk',
         user.user.pk,
       );
 
+      if (!tokenSaved || !userIdSaved) {
+        throw Exception('فشل حفظ بيانات تسجيل الدخول');
+      }
+
       final savedToken = prefs.getString('auth_token');
 
-      if (savedToken == null || savedToken.isEmpty) {
+      if (savedToken == null || savedToken.trim().isEmpty) {
         throw Exception('فشل حفظ التوكن');
       }
 
@@ -64,13 +68,20 @@ class SignInProvider with ChangeNotifier {
 
       _isSuccess = true;
 
-      // يغير AppRoot مباشرة إلى MainNavigationPage
-      _authProvider.setLoggedIn();
+      await _authProvider.setLoggedIn();
+
+      print(
+        'AuthProvider isLoggedIn: ${_authProvider.isLoggedIn}',
+      );
 
       return true;
     } catch (e) {
-      _errorMessage = e.toString();
       _isSuccess = false;
+      _errorMessage = e
+          .toString()
+          .replaceFirst('Exception: ', '');
+
+      print('Login error: $_errorMessage');
 
       return false;
     } finally {
@@ -83,6 +94,7 @@ class SignInProvider with ChangeNotifier {
     _isLoading = false;
     _errorMessage = null;
     _isSuccess = false;
+
     notifyListeners();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/watching_history_provider.dart';
+import 'package:graduationprojct/features/home/ui/pages/main_navigation_page.dart';
 import 'package:provider/provider.dart';
 
 import '../widgets/watching_history_card.dart';
@@ -68,8 +69,8 @@ class _WatchingHistoryPageState extends State<WatchingHistoryPage> {
               top: 55,
               right: 16,
               child: IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Row(
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context){return MainNavigationPage(initialIndex: 4,);})),
+                  icon: const Row(
                   children: [
                     Icon(
                       Icons.arrow_back_ios_new_rounded,

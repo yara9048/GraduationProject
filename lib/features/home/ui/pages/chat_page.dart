@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/home/ui/pages/video_details_page.dart';
 
 import '../widgets/bot_message_template.dart';
 import '../widgets/user_mesaage_template.dart';
 
 class ChatPage extends StatelessWidget {
-  const ChatPage({super.key});
+  final int id;
+  final String name;
+  final int playlistId;
+  const ChatPage({super.key, required this.id, required this.name, required this.playlistId});
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +49,7 @@ class ChatPage extends StatelessWidget {
 
           actions: [
             IconButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context){return VideoDetailsPage(videoId: id, videoName: name, playlistId: playlistId,);})),
               icon: const Icon(
                 Icons.arrow_forward_ios_rounded,
                 color: Color(0xffD9A63A),

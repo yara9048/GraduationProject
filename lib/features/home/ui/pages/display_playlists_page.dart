@@ -59,26 +59,10 @@ class _DisplayPlaylistsPageState extends State<DisplayPlaylistsPage> {
             Positioned(
               top: 55,
               right: 16,
-              child: IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Row(
-                  children: [
-                    Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      textDirection: TextDirection.rtl,
-                      color: Color(0xff2A9D8F),
-                      size: 20,
-                    ),
-                    SizedBox(width: 20,),
-
-                    Text("قائمة التشغيل",style: TextStyle(fontWeight: FontWeight.bold,
+              child: Text("قائمة التشغيل",style: TextStyle(fontWeight: FontWeight.bold,
                         color: Color(0xff2A9D8F),
                         fontFamily: "Tajawal",fontSize: 20),),
-
-
-                  ],
-                ),
-              ),),
+            ),
             const Center(
               child: Text("لا توجد بيانات"),
             ),
@@ -107,24 +91,10 @@ class _DisplayPlaylistsPageState extends State<DisplayPlaylistsPage> {
             Positioned(
               top: 55,
               right: 16,
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      textDirection: TextDirection.rtl,
-                      color: Color(0xff2A9D8F),
-                      size: 20,
-                    ),
-                  ),
-                  Text("قوائم التشغيل",style: TextStyle(fontWeight: FontWeight.bold,
+              child: Text("قوائم التشغيل",style: TextStyle(fontWeight: FontWeight.bold,
                       color: Color(0xff2A9D8F),
                       fontFamily: "Tajawal",fontSize:20),),
 
-
-                ],
-              ),
             ),
             Positioned(
               top: 50,

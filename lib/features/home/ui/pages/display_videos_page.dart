@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/display_videos_provider.dart';
 import 'package:graduationprojct/features/home/providers/playlist_details_provider.dart';
+import 'package:graduationprojct/features/home/ui/pages/display_playlists_page.dart';
+import 'package:graduationprojct/features/home/ui/pages/main_navigation_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/playlist_details_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/video_details_page.dart';
 import 'package:provider/provider.dart';
@@ -177,11 +179,8 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
       top: 55,
       right: 16,
       child: InkWell(
-        /*
-         * رجوع للصفحة السابقة بدل إنشاء صفحة جديدة.
-         */
         onTap: () {
-          Navigator.pop(context);
+          Navigator.push(context, MaterialPageRoute(builder: (context){return MainNavigationPage(initialIndex: 1,);}));
         },
         borderRadius: BorderRadius.circular(12),
         child: const Padding(
@@ -330,6 +329,7 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                     builder: (_) =>
                         VideoDetailsPage(
                           videoId: video.id,
+                          playlistId: video.playlist,
                           videoName: video.title,
                         ),
                   ),

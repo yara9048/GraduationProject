@@ -58,25 +58,7 @@ class _PaymentPageState extends State<PaymentPage> {
             Positioned(
               top: 55,
               right: 16,
-              child: InkWell(
-                onTap: () => Navigator.pop(context),
-                borderRadius: BorderRadius.circular(12),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        textDirection: TextDirection.rtl,
-                        color: Color(0xff2A9D8F),
-                        size: 20,
-                      ),
-                      SizedBox(width: 12),
-                      Text(
+              child: Text(
                         'سجل الدفع',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -84,10 +66,7 @@ class _PaymentPageState extends State<PaymentPage> {
                           fontFamily: 'Tajawal',
                           fontSize: 20,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
+
               ),
             ),
 

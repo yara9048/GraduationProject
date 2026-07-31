@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../widgets/notification_card_template.dart';
+import 'main_navigation_page.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -33,7 +34,7 @@ class _NotificationPageState extends State<NotificationPage> {
           ),
 
           Positioned(
-            top: 35,
+            top: 10,
             right: 16,
             child: SafeArea(
               bottom: false,
@@ -45,20 +46,18 @@ class _NotificationPageState extends State<NotificationPage> {
                       fontWeight: FontWeight.bold,
                       color: Color(0xff2A9D8F),
                       fontFamily: "Tajawal",
-                      fontSize: 28,
+                      fontSize: 20,
                     ),
                   ),
                   const SizedBox(width: 8),
 
                   IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context){return MainNavigationPage();})),
                     icon: const Icon(
                       Icons.arrow_back_ios_new_rounded,
                       textDirection: TextDirection.rtl,
                       color: Color(0xff2A9D8F),
-                      size: 28,
+                      size: 20,
                     ),
                   ),
 

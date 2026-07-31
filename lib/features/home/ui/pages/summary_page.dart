@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/ai_features_provider.dart';
+import 'package:graduationprojct/features/home/ui/pages/video_details_page.dart';
 import 'package:graduationprojct/features/home/ui/widgets/mind_map_card_template.dart';
 import 'package:graduationprojct/features/home/ui/widgets/summary_card_template.dart';
 import 'package:provider/provider.dart';
@@ -7,11 +8,12 @@ import 'package:provider/provider.dart';
 class SummaryPage extends StatefulWidget {
   final int id;
   final String name;
-
+  final int playlistId;
   const SummaryPage({
     super.key,
     required this.id,
     required this.name,
+    required this.playlistId
   });
 
   @override
@@ -108,9 +110,7 @@ class _SummaryPageState extends State<SummaryPage> {
                           top: 20,
                           right: 16,
                           child: IconButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
+                           onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context){return VideoDetailsPage(videoId: widget.id, videoName: widget.name, playlistId: widget.playlistId,);})),
                             icon: const Icon(
                               Icons
                                   .arrow_back_ios_new_rounded,
@@ -236,7 +236,7 @@ class _SummaryPageState extends State<SummaryPage> {
                                 TextStyle(
                                   fontWeight:
                                   FontWeight.bold,
-                                  fontSize: 15,
+                                  fontSize: 12,
                                 ),
                                 tabs: [
                                   Tab(

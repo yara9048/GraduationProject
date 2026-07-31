@@ -2,21 +2,23 @@ import 'package:custom_navigation_bar/custom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:graduationprojct/features/home/ui/pages/display_playlists_page.dart';
-import 'package:graduationprojct/features/home/ui/pages/payment_page.dart';
-
 import '../../../auth/providers/profile_provider.dart';
 import '../../../auth/ui/pages/profile/profile_page.dart';
 import '../../providers/display_facourite_provider.dart';
 import '../../providers/display_playlists_provider.dart';
 import '../../providers/filtered_playlist_provider.dart';
 import '../../providers/main_navigation_provider.dart';
+import 'display_playlists_page.dart';
 import 'favourite_page.dart';
 import 'home_page.dart';
+import 'payment_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
+  final int initialIndex;
+
   const MainNavigationPage({
     super.key,
+    this.initialIndex = 0,
   });
 
   @override
@@ -24,7 +26,8 @@ class MainNavigationPage extends StatefulWidget {
       _MainNavigationPageState();
 }
 
-class _MainNavigationPageState extends State<MainNavigationPage> {
+class _MainNavigationPageState
+    extends State<MainNavigationPage> {
   late final List<Widget> _pages;
 
   @override
@@ -38,9 +41,25 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       PaymentPage(),
       ProfilePage(),
     ];
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      final safeInitialIndex =
+      widget.initialIndex >= 0 &&
+          widget.initialIndex < _pages.length
+          ? widget.initialIndex
+          : 0;
+
+      _changeTab(safeInitialIndex);
+    });
   }
 
-  Future<void> _onTabPressed(int index) async {
+  Future<void> _changeTab(int index) async {
+    if (index < 0 || index >= _pages.length) {
+      return;
+    }
+
     final navigationProvider =
     context.read<MainNavigationProvider>();
 
@@ -57,6 +76,10 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     );
   }
 
+  Future<void> _onTabPressed(int index) async {
+    await _changeTab(index);
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentIndex = context.select<
@@ -65,13 +88,19 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           (provider) => provider.currentIndex,
     );
 
+    final safeCurrentIndex =
+    currentIndex >= 0 &&
+        currentIndex < _pages.length
+        ? currentIndex
+        : 0;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Colors.white,
         extendBody: false,
         body: IndexedStack(
-          index: currentIndex,
+          index: safeCurrentIndex,
           children: _pages,
         ),
         bottomNavigationBar: Container(
@@ -96,15 +125,18 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           child: SafeArea(
             top: false,
             child: CustomNavigationBar(
-              currentIndex: currentIndex,
+              currentIndex: safeCurrentIndex,
               onTap: _onTabPressed,
               iconSize: 28,
               isFloating: false,
               elevation: 0,
               backgroundColor: Colors.white,
-              selectedColor: const Color(0xff2A9D8F),
-              unSelectedColor: const Color(0xff9AB5B1),
-              strokeColor: const Color(0xffE9C46A),
+              selectedColor:
+              const Color(0xff2A9D8F),
+              unSelectedColor:
+              const Color(0xff9AB5B1),
+              strokeColor:
+              const Color(0xffE9C46A),
               scaleFactor: 0.15,
               items: [
                 CustomNavigationBarItem(

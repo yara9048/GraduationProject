@@ -15,8 +15,8 @@ class LockedDialog {
             alignment: Alignment.topCenter,
             children: [
               Container(
-                width: 350,
-                height: 200,
+                width: 320,
+                height: 180,
                 margin: const EdgeInsets.only(top: 60),
                 padding: const EdgeInsets.fromLTRB(24, 80, 24, 28),
                 decoration: BoxDecoration(
@@ -29,7 +29,7 @@ class LockedDialog {
                   style: TextStyle(
                     fontFamily: "Tajawal",
                     decoration: TextDecoration.none,
-                    fontSize: 18,
+                    fontSize: 16,
                     height: 1.5,
                     color: Color(0xffA7A7A7),
                     fontWeight: FontWeight.bold,
@@ -39,8 +39,8 @@ class LockedDialog {
               Positioned(
                 top: 0,
                 child: Container(
-                  width: 120,
-                  height: 120,
+                  width: 100,
+                  height: 100,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,

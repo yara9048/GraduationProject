@@ -42,7 +42,11 @@ class _HomePageState extends State<HomePage> {
     final nowShowingPlaylists = nowShowingProvider.playlists;
     final subjectsProvider = context.watch<DisplaySubjectsProvider>();
     final subjects = subjectsProvider.subjects;
-
+    final List<String> subjectImages = [
+      'assets/Images/Group 47.png',
+      'assets/Images/Group 48.png',
+      'assets/Images/Group 49.png',
+    ];
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -256,16 +260,20 @@ class _HomePageState extends State<HomePage> {
                             padding: const EdgeInsets.only(right: 10.0),
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
-                              itemCount:subjects.length<3? subjects.length : 3,
+                              itemCount: subjects.length,
                               itemBuilder: (context, index) {
                                 final sub = subjects[index];
                                 return Padding(
-                                  padding: const EdgeInsets.only(right: 8.0,bottom: 10),
+                                  padding: const EdgeInsets.only(
+                                    right: 8,
+                                    bottom: 10,
+                                  ),
                                   child: SubjectsCard(
                                     id: sub.id,
                                     title: sub.name,
-                                    imagePath: 'assets/Images/Group 47.png',
-                                    textColor: Color(0xffA67500),
+                                    imagePath: subjectImages[
+                                    index % subjectImages.length],
+                                    textColor: const Color(0xffA67500),
                                     width: 150,
                                   ),
                                 );

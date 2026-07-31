@@ -35,10 +35,6 @@ class _PlaylistDetailsPageState
       widget.course;
 
   void _goBack() {
-    /*
-     * نعيد true فقط إذا تم الاشتراك داخل الصفحة.
-     * DisplayVideosPage ستعيد تحميل الفيديوهات بعدها.
-     */
     Navigator.pop(
       context,
       subscriptionChanged,

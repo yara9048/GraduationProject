@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/display_playlist_by_subject_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_playlists_provider.dart';
+import 'package:graduationprojct/features/home/ui/pages/main_navigation_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/search_page.dart';
 import 'package:provider/provider.dart';
 
@@ -62,7 +63,7 @@ class _DisplayPlaylistBySubjectPageState extends State<DisplayPlaylistBySubjectP
               top: 55,
               right: 16,
               child: IconButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context){return MainNavigationPage();})),
                 icon: const Row(
                   children: [
                     Text("قوائم التشغيل",style: TextStyle(fontWeight: FontWeight.bold,
@@ -114,7 +115,7 @@ class _DisplayPlaylistBySubjectPageState extends State<DisplayPlaylistBySubjectP
                 child: Row(
                   children: [
                     IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context){return MainNavigationPage();})),
                       icon: Icon(
                         Icons.arrow_back_ios_new_rounded,
                         textDirection: TextDirection.rtl,

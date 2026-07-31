@@ -42,6 +42,9 @@ dependencies:
   flutter_svg: ^2.0.10+1
   flutter_markdown: ^0.7.7+1
   custom_navigation_bar:
+  file_picker: ^10.3.3
+  firebase_core: ^4.1.1
+  firebase_messaging: ^16.0.1
 
 dev_dependencies:
   flutter_test:

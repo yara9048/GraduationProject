@@ -46,7 +46,7 @@ class NotificationCard extends StatelessWidget {
               child: const Icon(
                 Icons.notifications_active_rounded,
                 color: Color(0xff2A9D8F),
-                size: 28,
+                size: 20,
               ),
             ),
 
@@ -62,7 +62,7 @@ class NotificationCard extends StatelessWidget {
                     style: const TextStyle(
                       fontFamily: "Tajawal",
                       fontWeight: FontWeight.bold,
-                      fontSize: 19,
+                      fontSize: 16,
                       color: Color(0xff264653),
                     ),
                   ),
@@ -74,7 +74,7 @@ class NotificationCard extends StatelessWidget {
                     textAlign: TextAlign.right,
                     style: const TextStyle(
                       fontFamily: "Tajawal",
-                      fontSize: 16,
+                      fontSize: 15,
                       color: Color(0xff264653),
                     ),
                   ),
@@ -87,7 +87,7 @@ class NotificationCard extends StatelessWidget {
                         children: [
                           const Icon(
                             Icons.access_time_rounded,
-                            size: 17,
+                            size: 15,
                             color: Color(0xff264653),
                           ),
                           const SizedBox(width: 4),
@@ -95,7 +95,7 @@ class NotificationCard extends StatelessWidget {
                             time,
                             style: const TextStyle(
                               fontFamily: "Tajawal",
-                              fontSize: 14,
+                              fontSize: 13,
                               color: Color(0xff264653),
                             ),
                           ),

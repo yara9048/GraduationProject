@@ -44,10 +44,11 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                SizedBox(height:200),
                 OtpInputTemplate(
                   numberOfFields: 4,
-                  fieldWidth: 75,
-                  fieldHeight: 80,
+                  fieldWidth: 60,
+                  fieldHeight: 60,
                   borderRadius: BorderRadius.circular(15),
                   fillColor: const Color(0xffD1D9D9).withOpacity(0.2),
                   borderColor: Colors.black38,

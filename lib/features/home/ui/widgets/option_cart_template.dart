@@ -46,7 +46,7 @@ class OptionCart extends StatelessWidget {
                 child: Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 26,
+                    fontSize: 20,
                     fontFamily: "Tajawal",
                     fontWeight: FontWeight.bold,
                   ),
@@ -54,8 +54,8 @@ class OptionCart extends StatelessWidget {
               ),
               Image.asset(
                 image,
-                width: 32,
-                height: 32,
+                width: 20,
+                height: 20,
               ),
             ],
           ),
@@ -64,7 +64,7 @@ class OptionCart extends StatelessWidget {
             subtitle,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontFamily: "Tajawal",
               color: Color(0xff181C1F),
             ),
@@ -72,7 +72,7 @@ class OptionCart extends StatelessWidget {
           const SizedBox(height: 18),
           SizedBox(
             width: double.infinity,
-            height: 50,
+            height: 38,
             child: ElevatedButton(
               onPressed: onPressed,
               style: ElevatedButton.styleFrom(
@@ -90,7 +90,7 @@ class OptionCart extends StatelessWidget {
               child: Text(
                 buttonText,
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 14,
                   fontFamily: "Tajawal",
                   fontWeight: FontWeight.bold,
                 ),
