@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../data/services/log_out_services.dart';
+import 'auth_provider.dart';
 
 class LogoutProvider extends ChangeNotifier {
   final LogoutService _service = LogoutService();
+  final AuthProvider _authProvider;
+
+  LogoutProvider({
+    required AuthProvider authProvider,
+  }) : _authProvider = authProvider;
 
   bool _isLoading = false;
   bool _isSuccess = false;
@@ -13,7 +20,7 @@ class LogoutProvider extends ChangeNotifier {
   bool get isSuccess => _isSuccess;
   String? get errorMessage => _errorMessage;
 
-  Future<void> logout() async {
+  Future<bool> logout() async {
     _isLoading = true;
     _isSuccess = false;
     _errorMessage = null;
@@ -21,24 +28,38 @@ class LogoutProvider extends ChangeNotifier {
 
     try {
       final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
 
-      final token = prefs.getString("auth_token");
-
-      if (token != null && token.isNotEmpty) {
+      /*
+       * نحاول إرسال طلب Logout للسيرفر.
+       * حتى لو فشل السيرفر، نحذف التوكن محلياً.
+       */
+      if (token != null && token.trim().isNotEmpty) {
         try {
           await _service.logout(token);
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('Server logout error: $e');
+        }
       }
 
-      await prefs.remove("auth_token");
+      await prefs.remove('auth_token');
+      await prefs.remove('user_pk');
 
       _isSuccess = true;
+
+      // يغير AppRoot مباشرة إلى SignInPage
+      _authProvider.setLoggedOut();
+
+      return true;
     } catch (e) {
       _errorMessage = e.toString();
-    }
+      _isSuccess = false;
 
-    _isLoading = false;
-    notifyListeners();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   void reset() {

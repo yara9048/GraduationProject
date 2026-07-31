@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/home/providers/display_subjects_provider.dart';
 import 'package:graduationprojct/features/home/providers/filtered_playlist_provider.dart';
 import 'package:graduationprojct/features/auth/ui/pages/profile/profile_page.dart';
+import 'package:graduationprojct/features/home/ui/pages/all_subjects_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/notification_page.dart';
 import 'package:graduationprojct/features/home/ui/widgets/new_added_course_template.dart';
 import 'package:graduationprojct/features/home/ui/widgets/subjects_card_template.dart';
@@ -8,10 +10,10 @@ import 'package:provider/provider.dart';
 
 import '../../../auth/providers/profile_provider.dart';
 import '../../providers/display_playlists_provider.dart';
+import '../../providers/now_showing_playlist_provider.dart';
 import '../widgets/course_card_template.dart';
 import '../../../auth/ui/widgets/text_field_template.dart';
 import '../widgets/section_title_template.dart';
-import 'course_view.dart';
 import 'display_playlists_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -27,16 +29,19 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DisplayPlaylistsProvider>().getPlayLists();
+      context.read<NowShowingPlaylistProvider>().getPlaylists();
       context.read<FilteredPlaylistProvider>().getFilteredPlaylists();
+      context.read<DisplaySubjectsProvider>().getSubjects();
 
     });
   }
   Widget build(BuildContext context) {
-    final provider = context.watch<DisplayPlaylistsProvider>();
-    final playlists = provider.playlists;
     final filterProvider = context.watch<FilteredPlaylistProvider>();
     final filteredPlaylists = filterProvider.filtered_playlists;
+    final nowShowingProvider = context.watch<NowShowingPlaylistProvider>();
+    final nowShowingPlaylists = nowShowingProvider.playlists;
+    final subjectsProvider = context.watch<DisplaySubjectsProvider>();
+    final subjects = subjectsProvider.subjects;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -50,7 +55,7 @@ class _HomePageState extends State<HomePage> {
               child: Image.asset('assets/Images/Ellipse 4.png'),
             ),
             Positioned(
-              top: 45,
+              top: 47.5,
               left: 8,
               child: IconButton(
                 onPressed: (){
@@ -59,7 +64,7 @@ class _HomePageState extends State<HomePage> {
                 icon: Icon(
                   Icons.notifications_none_outlined,
                   color: const Color(0xff2A9D8F),
-                  size: 46,
+                  size: 40,
                 ),
               ),
             ),
@@ -72,14 +77,14 @@ class _HomePageState extends State<HomePage> {
                       alignment: Alignment.centerRight,
                       child: Padding(
                         padding: const EdgeInsets.only(
-                          top: 50,
+                          top: 60,
                           right: 30,
                           bottom: 30,
                         ),
                         child: Text(
                           "لمّاح ",
                           style: TextStyle(
-                            fontSize: 43,
+                            fontSize: 38,
                             fontWeight: FontWeight.bold,
                             color: Color(0xff2A9D8F),
                             fontFamily: "Tajawal",
@@ -128,7 +133,7 @@ class _HomePageState extends State<HomePage> {
                                         color: Color(0xffE9C46A),
                                         fontWeight: FontWeight.bold,
                                         fontFamily: "Tajawal",
-                                        fontSize: 18,
+                                        fontSize: 15,
                                       ),
                                     ),
                                   ),
@@ -136,15 +141,15 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
 
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 5),
 
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          padding: const EdgeInsets.symmetric(horizontal:15),
                           child: SizedBox(
-                            height: 320,
+                            height: 245,
                             child: Builder(
                               builder: (context) {
-                                if (provider.isLoading) {
+                                if (nowShowingProvider.isLoading) {
                                   return const Center(
                                     child: SizedBox(
                                       width: 28,
@@ -157,10 +162,10 @@ class _HomePageState extends State<HomePage> {
                                   );
                                 }
 
-                                if (provider.errorMessage != null) {
+                                if (nowShowingProvider.errorMessage != null) {
                                   return Center(
                                     child: Text(
-                                      provider.errorMessage!,
+                                      nowShowingProvider.errorMessage ?? "حدث خطأ غير معروف",
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         fontFamily: "Tajawal",
@@ -170,7 +175,7 @@ class _HomePageState extends State<HomePage> {
                                   );
                                 }
 
-                                if (playlists.isEmpty) {
+                                if (nowShowingPlaylists.isEmpty) {
                                   return const Center(
                                     child: Text(
                                       "لا توجد بيانات",
@@ -185,12 +190,9 @@ class _HomePageState extends State<HomePage> {
 
                                 return ListView.builder(
                                   scrollDirection: Axis.horizontal,
-                                  padding: const EdgeInsets.only(bottom: 20),
-                                  itemCount: playlists.length > 2
-                                      ? 2
-                                      : playlists.length,
+                                  itemCount: nowShowingPlaylists.length,
                                   itemBuilder: (context, index) {
-                                    final playlist = playlists[index];
+                                    final playlist = nowShowingPlaylists[index];
 
                                     return Padding(
                                       padding: const EdgeInsets.only(left: 16),
@@ -198,11 +200,10 @@ class _HomePageState extends State<HomePage> {
                                         playlistId: playlist.id,
                                         imagePath:
                                         'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
-                                        title: playlist.name,
+                                        title: playlist.title,
                                         durationText:
-                                        "${playlist.totalDuration ?? 0} دقيقة",
-                                        progress:
-                                        playlist.completionRate / 100,
+                                        "${playlist.duration ?? 0} دقيقة",
+                                        progress: 0.5,
                                         description: playlist.description,
                                       ),
                                     );
@@ -212,12 +213,11 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         ),
-
+                        SizedBox(height: 30,),
                         Padding(
                           padding: const EdgeInsets.only(
                             right: 30,
                             left: 30,
-                            top: 10,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -230,7 +230,7 @@ class _HomePageState extends State<HomePage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => CourseView(),
+                                      builder: (_) => AllSubjectsPage(),
                                     ),
                                   );
                                 },
@@ -240,7 +240,7 @@ class _HomePageState extends State<HomePage> {
                                     color: Color(0xffE9C46A),
                                     fontWeight: FontWeight.bold,
                                     fontFamily: "Tajawal",
-                                    fontSize: 18,
+                                    fontSize: 15,
                                   ),
                                 ),
                               ),
@@ -251,63 +251,93 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(height: 10),
 
                         SizedBox(
-                          height: 110,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: [
-                              SubjectsCard(
-                                title: "القانون المدني",
-                                imagePath: 'assets/Images/Group 47.png',
-                                textColor: Color(0xffA67500),
-                                width: 220,
-                              ),
-                              SubjectsCard(
-                                title: "قانون أصول المحاكمات الجزئية",
-                                imagePath: 'assets/Images/Group 43.png',
-                                textColor: Color(0xff009A87),
-                                width: 220,
-                                width2: 160,
-                                top: 5,
-                                size: 24,
-                              ),
-                              SubjectsCard(
-                                title: "قانون العقوبات العام 3",
-                                imagePath: 'assets/Images/Group 42.png',
-                                textColor: Color(0xffE76F51),
-                                width: 220,
-                                width2: 150,
-                              ),
-                            ],
-                          ),
-                        ),
-
+                          height: 90,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 10.0),
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount:subjects.length<3? subjects.length : 3,
+                              itemBuilder: (context, index) {
+                                final sub = subjects[index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 8.0,bottom: 10),
+                                  child: SubjectsCard(
+                                    id: sub.id,
+                                    title: sub.name,
+                                    imagePath: 'assets/Images/Group 47.png',
+                                    textColor: Color(0xffA67500),
+                                    width: 150,
+                                  ),
+                                );
+                              },
+                            ),
+                          )),
                         Padding(
-                          padding: const EdgeInsets.only(right: 30, top: 35),
+                          padding: const EdgeInsets.only(right: 30, top: 20),
                           child: const SectionTitle(title: "خصيصا لك :"),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(right: 20.0),
+                          padding: const EdgeInsets.only(right: 20),
                           child: SizedBox(
-                            height: filteredPlaylists.isEmpty ? 60 : 330,
-                            child: filteredPlaylists.isEmpty
-                                ? const Center(
-                              child: Text("لا توجد بيانات"),
-                            )
-                                : ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: filteredPlaylists.length,
-                              itemBuilder: (context, index) {
-                                final playlist = filteredPlaylists[index];
-                                return Padding(
-                                  padding: const EdgeInsets.only(left: 16),
-                                  child: NewAddedCourseTemplate(
-                                    id: playlist.id,
-                                    imagePath: 'assets/Images/700ccaab9d6c5bae720cc6ee03954b805e4c490e.jpg',
-                                    title: playlist.name,
-                                    duration: playlist.totalDuration.toString(),
-                                    color: const Color(0xffE76F51),
-                                  ),
-                                );
+                            height: 330,
+                            child: Builder(
+                              builder: (context) {
+                                if (filterProvider.isLoading) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(
+                                      color: Color(0xff2A9D8F),
+                                    ),
+                                  );
+                                }
+
+                                if (filterProvider.errorMessage != null) {
+                                  return Center(
+                                    child: Text(
+                                      filterProvider.errorMessage!,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Colors.red,
+                                        fontFamily: "Tajawal",
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                if (filteredPlaylists.isEmpty) {
+                                  return const Center(
+                                    child: Text(
+                                      "لا توجد بيانات",
+                                      style: TextStyle(
+                                        fontFamily: "Tajawal",
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                return ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: filteredPlaylists.length,
+                                    itemBuilder: (context, index) {
+                                      final playlist = filteredPlaylists[index];
+
+                                      return Padding(
+                                        padding: const EdgeInsets.only(left: 16),
+                                        child: Align(
+                                          alignment: Alignment.topRight,
+                                          child: NewAddedCourseTemplate(
+                                            id: playlist.id,
+                                            imagePath:
+                                            'assets/Images/700ccaab9d6c5bae720cc6ee03954b805e4c490e.jpg',
+                                            title: playlist.name,
+                                            duration: playlist.totalDuration == null
+                                                ? "0"
+                                                : playlist.totalDuration!.toStringAsFixed(0),
+                                            color: const Color(0xffE76F51),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
                               },
                             ),
                           ),

@@ -34,8 +34,9 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
             child: Form(
               key:_formKey,
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: 240),
+                  SizedBox(height: 100,),
                   TextFieldTemplate(
                     controller: emailController,
                     size: 40,
@@ -51,7 +52,7 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 40),
+                  SizedBox(height: 20),
                   Consumer<ResetPasswordRequestProvider>(
                     builder: (context, authProvider, child) {
                       return authProvider.isLoading

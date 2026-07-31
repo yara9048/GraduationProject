@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/home/ui/pages/main_navigation_page.dart';
 import 'package:provider/provider.dart';
 import '../../../../home/ui/pages/home_page.dart';
 import '../../../providers/sign_in_provider.dart';
@@ -39,7 +40,7 @@ class _SignInPageState extends State<SignInPage> {
                 const SizedBox(height: 230),
 
                 Padding(
-                  padding: const EdgeInsets.only(left: 250),
+                  padding: const EdgeInsets.only(left: 200),
                   child: Text(
                     "البريد الالكتروني",
                     style: TextStyle(
@@ -68,10 +69,10 @@ class _SignInPageState extends State<SignInPage> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
 
                 Padding(
-                  padding: const EdgeInsets.only(left: 280),
+                  padding: const EdgeInsets.only(left: 220),
                   child: Text(
                     "كلمة المرور",
                     style: TextStyle(
@@ -141,7 +142,7 @@ class _SignInPageState extends State<SignInPage> {
                           if (authProvider.isSuccess) {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (_) => HomePage()),
+                              MaterialPageRoute(builder: (_) => MainNavigationPage()),
                             );
                           } else if (authProvider.errorMessage != null) {
                             MySnackBar.show(
@@ -155,7 +156,7 @@ class _SignInPageState extends State<SignInPage> {
                   },
                 ),
 
-                const SizedBox(height: 50),
+                const SizedBox(height: 10),
 
                 RichText(
                   textAlign: TextAlign.center,
@@ -167,7 +168,7 @@ class _SignInPageState extends State<SignInPage> {
                         style: TextStyle(
                           color: Colors.black,
                           fontFamily: "Tajawal",
-                          fontSize: 19,
+                          fontSize: 13,
                         ),
                       ),
                       TextSpan(
@@ -175,14 +176,14 @@ class _SignInPageState extends State<SignInPage> {
                         style: const TextStyle(
                           color: Color(0xffE9C46A),
                           fontFamily: "Tajawal",
-                          fontSize: 19,
+                          fontSize: 13,
                           fontWeight: FontWeight.bold
                         ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => SignUpPage()),
+                              MaterialPageRoute(builder: (_) => MainNavigationPage()),
                             );
                           },
                       ),

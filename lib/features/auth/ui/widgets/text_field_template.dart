@@ -71,7 +71,7 @@ class _TextFieldTemplateState extends State<TextFieldTemplate> {
             suffixIcon: Icon(
               widget.icon,
               color: isFocused ? const Color(0xff2A9D8F) : Colors.black26,
-              size: 27,
+              size: 16,
             ),
 
             hintText: widget.hint,
@@ -79,7 +79,7 @@ class _TextFieldTemplateState extends State<TextFieldTemplate> {
             hintStyle: const TextStyle(
               color: Color(0xffD1D9D9),
               fontWeight: FontWeight.bold,
-              fontSize: 15,
+              fontSize: 13,
               fontFamily: "Tajawal",
             ),
 

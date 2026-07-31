@@ -6,113 +6,197 @@ import 'package:graduationprojct/features/auth/providers/profile_provider.dart';
 import 'package:graduationprojct/features/auth/providers/resend_otp_provider.dart';
 import 'package:graduationprojct/features/auth/providers/reset_password_request_provider.dart';
 import 'package:graduationprojct/features/auth/providers/sign_up_provider.dart';
-import 'package:graduationprojct/features/auth/ui/pages/sign_up/splash_page.dart';
 import 'package:graduationprojct/features/home/providers/add_playlist_to_fav_provider.dart';
 import 'package:graduationprojct/features/home/providers/add_video_to_fav_provider.dart';
+import 'package:graduationprojct/features/home/providers/ai_features_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_facourite_provider.dart';
+import 'package:graduationprojct/features/home/providers/display_playlist_by_subject_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_playlists_provider.dart';
+import 'package:graduationprojct/features/home/providers/display_subjects_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_videos_provider.dart';
 import 'package:graduationprojct/features/home/providers/filtered_playlist_provider.dart';
-import 'package:graduationprojct/features/home/providers/ai_features_provider.dart';
+import 'package:graduationprojct/features/home/providers/funding_request_provider.dart';
+import 'package:graduationprojct/features/home/providers/main_navigation_provider.dart';
+import 'package:graduationprojct/features/home/providers/now_showing_playlist_provider.dart';
 import 'package:graduationprojct/features/home/providers/playlist_details_provider.dart';
-import 'package:graduationprojct/features/home/ui/pages/home_page.dart';
+import 'package:graduationprojct/features/home/providers/rating_playlist_provider.dart';
+import 'package:graduationprojct/features/home/providers/subscribe_provider.dart';
+import 'package:graduationprojct/features/home/providers/video_details_function_provider.dart';
+import 'package:graduationprojct/features/home/providers/video_details_provider.dart';
+import 'package:graduationprojct/features/home/providers/wallet_provider.dart';
+import 'package:graduationprojct/features/home/providers/watching_history_provider.dart';
 import 'package:provider/provider.dart';
 
+import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/providers/log_out_provider.dart';
 import 'features/auth/providers/send_otp_provider.dart';
 import 'features/auth/providers/sign_in_provider.dart';
 import 'features/auth/ui/pages/sign_in/sign_in_page.dart';
-import 'features/home/providers/main_navigation_provider.dart';
-import 'features/home/providers/video_details_function_provider.dart';
-import 'features/home/providers/video_details_provider.dart';
-import 'features/home/ui/pages/chat_page.dart';
 import 'features/home/ui/pages/main_navigation_page.dart';
-import 'features/home/ui/pages/mcq_page.dart';
-import 'features/auth/ui/pages/profile/profile_page.dart';
-import 'features/home/ui/pages/summary_page.dart';
-import 'features/home/ui/pages/video_details_page.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final authProvider = AuthProvider();
+
+  await authProvider.checkLogin();
+
+  runApp(
+    MyApp(
+      authProvider: authProvider,
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AuthProvider authProvider;
+
+  const MyApp({
+    super.key,
+    required this.authProvider,
+  });
+
   @override
   Widget build(BuildContext context) {
-    return  MultiProvider(
+    return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => SignInProvider(),
+        ChangeNotifierProvider<AuthProvider>.value(
+          value: authProvider,
         ),
+
+        ChangeNotifierProvider(
+          create: (_) => SignInProvider(authProvider: authProvider,),
+        ),
+
         ChangeNotifierProvider(
           create: (_) => SignUpProvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => ResendOtpProvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => SendOtpProvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => ResetPasswordRequestProvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => PasswordSendOtpPrvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => NewPasswordProvider(),
         ),
-        ChangeNotifierProvider(
-          create: (_) => PasswordSendOtpPrvider(),
-        ),
+
         ChangeNotifierProvider(
           create: (_) => VideoDetailsFunctionProvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => VideoDetailsProvider(),
-        ), ChangeNotifierProvider(
+        ),
+
+        ChangeNotifierProvider(
           create: (_) => AiFeaturesProvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(),
         ),
+
         ChangeNotifierProvider(
-          create: (_) => LogoutProvider(),
+          create: (_) => LogoutProvider(authProvider: authProvider,),
         ),
+
         ChangeNotifierProvider(
           create: (_) => EditProfileProvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => DisplayPlaylistsProvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => AddPlaylistToFavProvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => DisplayVideosProvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => FilteredPlaylistProvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => AddVideoToFavProvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => DisplayFavouriteProvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => PlaylistDetailsProvider(),
         ),
+
         ChangeNotifierProvider(
           create: (_) => MainNavigationProvider(),
         ),
-      ],
 
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: const MainNavigationPage(),
-      ),
+        ChangeNotifierProvider(
+          create: (_) => NowShowingPlaylistProvider(),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => DisplaySubjectsProvider(),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => SubscribeProvider(),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => RatingPlaylistProvider(),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => WalletProvider(),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => WatchingHistoryProvider(),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => FundingRequestProvider(),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => DisplayPlaylistBySubjectProvider(),
+        ),
+      ],
+      child: const AppRoot(),
+    );
+  }
+}
+
+class AppRoot extends StatelessWidget {
+  const AppRoot({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: authProvider.isLoggedIn
+          ? const MainNavigationPage()
+          : const SignInPage(),
     );
   }
 }

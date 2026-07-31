@@ -16,7 +16,7 @@ class AddVideoToFavService {
   }) async {
     try {
       final response = await _dio.post(
-        "videos/$id/toggle_favorite/",
+        ApiEndpoints.toggleVideoFavorite(id),
         data: {
           'id': id,
         },

@@ -9,8 +9,8 @@ class FilteredPlayListsModel {
   final int studentsCount;
   final double completionRate;
   final String rating;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   FilteredPlayListsModel({
     required this.id,
@@ -27,37 +27,77 @@ class FilteredPlayListsModel {
     required this.updatedAt,
   });
 
-  factory FilteredPlayListsModel.fromJson(Map<String, dynamic> json) {
+  factory FilteredPlayListsModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
     return FilteredPlayListsModel(
-      id: json["id"],
-      name: json["name"] ?? "",
-      description: json["description"] ?? "",
-      category: json["category"] ?? "",
-      thumbnail: json["thumbnail"],
-      totalVideoCount: json["total_video_count"] ?? 0,
-      totalDuration: json["total_duration"] == null
-          ? null
-          : (json["total_duration"] as num).toDouble(),
-      studentsCount: json["students_count"] ?? 0,
-      completionRate: (json["completion_rate"] as num).toDouble(),
-      rating: json["rating"] ?? "",
-      createdAt: DateTime.parse(json["created_at"]),
-      updatedAt: DateTime.parse(json["updated_at"]),
+      id: _toInt(json["id"]),
+      name: json["name"]?.toString() ?? "",
+      description: json["description"]?.toString() ?? "",
+      category: json["category"]?.toString() ?? "",
+      thumbnail: json["thumbnail"]?.toString(),
+      totalVideoCount: _toInt(json["total_video_count"]),
+      totalDuration: _toNullableDouble(json["total_duration"]),
+      studentsCount: _toInt(json["students_count"]),
+      completionRate: _toDouble(json["completion_rate"]),
+      rating: json["rating"]?.toString() ?? "",
+      createdAt: _toDateTime(json["created_at"]),
+      updatedAt: _toDateTime(json["updated_at"]),
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "name": name,
-    "description": description,
-    "category": category,
-    "thumbnail": thumbnail,
-    "total_video_count": totalVideoCount,
-    "total_duration": totalDuration,
-    "students_count": studentsCount,
-    "completion_rate": completionRate,
-    "rating": rating,
-    "created_at": createdAt.toIso8601String(),
-    "updated_at": updatedAt.toIso8601String(),
-  };
+  static int _toInt(dynamic value) {
+    if (value == null) return 0;
+
+    if (value is num) {
+      return value.toInt();
+    }
+
+    return int.tryParse(value.toString()) ??
+        double.tryParse(value.toString())?.toInt() ??
+        0;
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value == null) return 0.0;
+
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(value.toString()) ?? 0.0;
+  }
+
+  static double? _toNullableDouble(dynamic value) {
+    if (value == null) return null;
+
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(value.toString());
+  }
+
+  static DateTime? _toDateTime(dynamic value) {
+    if (value == null) return null;
+
+    return DateTime.tryParse(value.toString());
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "id": id,
+      "name": name,
+      "description": description,
+      "category": category,
+      "thumbnail": thumbnail,
+      "total_video_count": totalVideoCount,
+      "total_duration": totalDuration,
+      "students_count": studentsCount,
+      "completion_rate": completionRate,
+      "rating": rating,
+      "created_at": createdAt?.toIso8601String(),
+      "updated_at": updatedAt?.toIso8601String(),
+    };
+  }
 }

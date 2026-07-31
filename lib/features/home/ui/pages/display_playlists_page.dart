@@ -63,19 +63,19 @@ class _DisplayPlaylistsPageState extends State<DisplayPlaylistsPage> {
                 onPressed: () => Navigator.pop(context),
                 icon: const Row(
                   children: [
-
-
-                    Text("قائمة التشفيل",style: TextStyle(fontWeight: FontWeight.bold,
-                        color: Color(0xff2A9D8F),
-                        fontFamily: "Tajawal",fontSize: 22),),
-                    SizedBox(width: 20,),
-
                     Icon(
                       Icons.arrow_back_ios_new_rounded,
                       textDirection: TextDirection.rtl,
                       color: Color(0xff2A9D8F),
-                      size: 30,
+                      size: 20,
                     ),
+                    SizedBox(width: 20,),
+
+                    Text("قائمة التشغيل",style: TextStyle(fontWeight: FontWeight.bold,
+                        color: Color(0xff2A9D8F),
+                        fontFamily: "Tajawal",fontSize: 20),),
+
+
                   ],
                 ),
               ),),
@@ -107,25 +107,23 @@ class _DisplayPlaylistsPageState extends State<DisplayPlaylistsPage> {
             Positioned(
               top: 55,
               right: 16,
-              child: IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: Row(
-                  children: [
-                    Icon(
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(
                       Icons.arrow_back_ios_new_rounded,
                       textDirection: TextDirection.rtl,
                       color: Color(0xff2A9D8F),
-                      size: 30,
+                      size: 20,
                     ),
-                    SizedBox(width: 20,),
+                  ),
+                  Text("قوائم التشغيل",style: TextStyle(fontWeight: FontWeight.bold,
+                      color: Color(0xff2A9D8F),
+                      fontFamily: "Tajawal",fontSize:20),),
 
-                    Text("قوائم التشغيل",style: TextStyle(fontWeight: FontWeight.bold,
-                        color: Color(0xff2A9D8F),
-                        fontFamily: "Tajawal",fontSize: 28),),
 
-
-                  ],
-                ),
+                ],
               ),
             ),
             Positioned(
@@ -137,12 +135,12 @@ class _DisplayPlaylistsPageState extends State<DisplayPlaylistsPage> {
                 icon: Icon(
                   Icons.search,
                   color: const Color(0xff2A9D8F),
-                  size: 40,
+                  size: 30,
                 ),
               ),
             ),
             Positioned.fill(
-              top: 150,
+              top: 130,
               left: 16,
               right: 16,
               child: ListView.builder(

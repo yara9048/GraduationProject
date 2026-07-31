@@ -16,7 +16,7 @@ class SectionTitle extends StatelessWidget {
         color: Color(0xff1A2429),
         fontWeight: FontWeight.bold,
         fontFamily: "Tajawal",
-        fontSize: 18,
+        fontSize: 15,
       ),
     );
   }

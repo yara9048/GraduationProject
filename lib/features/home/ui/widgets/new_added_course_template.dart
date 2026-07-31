@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/ui/pages/display_videos_page.dart';
 
 import '../pages/video_details_page.dart';
-import '../pages/videos_page.dart';
 
 class NewAddedCourseTemplate extends StatelessWidget {
   final int id;
@@ -23,10 +22,10 @@ class NewAddedCourseTemplate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 20,top: 20,bottom: 20),
+      padding: const EdgeInsets.only(top: 20,bottom: 20),
       child: Container(
-        width: 380,
-        height: 300,
+        width: 270,
+        height: 200,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(22),
@@ -50,7 +49,7 @@ class NewAddedCourseTemplate extends StatelessWidget {
                   ),
                   child: Image.asset(
                     imagePath,
-                    height: 150,
+                    height: 100,
                     width: double.infinity,
                     fit: BoxFit.cover,
                     alignment: const Alignment(0,0.3),
@@ -61,8 +60,8 @@ class NewAddedCourseTemplate extends StatelessWidget {
                   bottom: -18,
                   right: 18,
                   child: Container(
-                    width: 55,
-                    height: 55,
+                    width: 45,
+                    height: 45,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
@@ -78,7 +77,7 @@ class NewAddedCourseTemplate extends StatelessWidget {
                       child: Icon(
                         Icons.play_arrow_outlined,
                         color: color,
-                        size: 45,
+                        size: 30,
                       ),
                     ),
                   ),
@@ -86,7 +85,7 @@ class NewAddedCourseTemplate extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 35),
+            const SizedBox(height: 25),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -97,15 +96,13 @@ class NewAddedCourseTemplate extends StatelessWidget {
                   textAlign: TextAlign.right,
                   style: const TextStyle(
                     fontFamily: "Tajawal",
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Color(0xff264653),
                   ),
                 ),
               ),
             ),
-
-            const SizedBox(height:2),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -122,7 +119,7 @@ class NewAddedCourseTemplate extends StatelessWidget {
                     Text(
                       duration,
                       style: const TextStyle(
-                        fontSize: 15,
+                        fontSize: 13,
                         fontFamily: "Tajawal",
                         color: Color(0xff92A1A1),
                         fontWeight: FontWeight.bold,
@@ -133,7 +130,7 @@ class NewAddedCourseTemplate extends StatelessWidget {
 
                     ElevatedButton(
                       onPressed :(){
-                       Navigator.push(context, MaterialPageRoute(builder: (context){return DisplayVideosPage(id: id);}));
+                        Navigator.push(context, MaterialPageRoute(builder: (context){return DisplayVideosPage(id: id);}));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: color,
@@ -149,6 +146,7 @@ class NewAddedCourseTemplate extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: "Tajawal",
                           fontWeight: FontWeight.bold,
+                          fontSize: 13
                         ),
                       ),
                     ),
@@ -157,7 +155,6 @@ class NewAddedCourseTemplate extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 18),
           ],
         ),
       ),

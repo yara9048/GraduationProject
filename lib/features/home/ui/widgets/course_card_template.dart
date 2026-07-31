@@ -15,7 +15,6 @@ class CourseCardTemplate extends StatefulWidget {
   final String durationText;
   final double progress;
   final double width;
-  final double height;
 
   /// يتم استدعاؤها عندما تُحذف القائمة من المفضلة.
   final VoidCallback? onRemovedFromFavourite;
@@ -29,8 +28,7 @@ class CourseCardTemplate extends StatefulWidget {
     required this.durationText,
     required this.progress,
     this.onRemovedFromFavourite,
-    this.width = 375,
-    this.height = 280,
+    this.width = 300,
   });
 
   @override
@@ -149,130 +147,123 @@ class _CourseCardTemplateState extends State<CourseCardTemplate> {
           ),
         );
       },
-      child: Container(
-        width: widget.width,
-        height: widget.height,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 20,
-              offset: Offset(-3, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                  child: SizedBox(
-                    height: 160,
-                    width: double.infinity,
-                    child: Image.asset(widget.imagePath, fit: BoxFit.cover),
-                  ),
-                ),
-                Positioned(
-                  top: 12,
-                  left: 10,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      shape: BoxShape.circle,
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+          width: widget.width,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 20,
+                offset: Offset(-3, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
                     ),
-                    child: IconButton(
-                      onPressed: isFavoriteLoading ? null : _toggleFavorite,
-                      icon: isFavoriteLoading
-                          ? const SizedBox(
-                              width: 21,
-                              height: 21,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.red,
-                              ),
-                            )
-                          : Icon(
-                              isFavorite
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: Colors.red,
-                            ),
+                    child: SizedBox(
+                      height: 130,
+                      width: double.infinity,
+                      child: Image.asset(widget.imagePath, fit: BoxFit.cover),
                     ),
                   ),
+                  Positioned(
+                    top: 12,
+                    left: 10,
+                    child: GestureDetector(
+                      onTap: isFavoriteLoading ? null : _toggleFavorite,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: Colors.red,
+                          size: 22,
+                        ),
+                      ),
+                    )
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 12, right: 12, top: 12),
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: Text(
+                    widget.title,
+                    textAlign: TextAlign.right,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Color(0xff264653),
+                      fontFamily: "Tajawal",
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 12, right: 12, top: 12),
-              child: Align(
-                alignment: Alignment.topRight,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 10,left: 10),
                 child: Text(
-                  widget.title,
+                  widget.description,
                   textAlign: TextAlign.right,
                   style: const TextStyle(
-                    fontSize: 19,
-                    color: Color(0xff264653),
+                    fontSize: 13,
                     fontFamily: "Tajawal",
+                    color: Color(0xff92A1A1),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Text(
-                widget.description,
-                textAlign: TextAlign.right,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontFamily: "Tajawal",
-                  color: Color(0xff92A1A1),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.access_time,
-                      color: Color(0xff92A1A1),
-                      size: 17,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      widget.durationText,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontFamily: "Tajawal",
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.access_time,
                         color: Color(0xff92A1A1),
-                        fontWeight: FontWeight.bold,
+                        size: 15,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 5),
+                      Text(
+                        widget.durationText,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontFamily: "Tajawal",
+                          color: Color(0xff92A1A1),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 10,
-                right: 10,
-                bottom: 20,
-                top: 7,
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: 15,
+                  right: 15,
+                  top: 5,
+                  bottom: 10
+                ),
+                child: CustomProgressLine(progress: widget.progress),
               ),
-              child: CustomProgressLine(progress: widget.progress),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

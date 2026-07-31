@@ -1,17 +1,17 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 
 import '../../../../core/dio.dart';
+import '../../../../core/end_points.dart';
 import '../models/filtered_playlist_model.dart';
 
 class FilteredPlaylistService {
-  Future<List<FilteredPlayListsModel>> getFilteredPlayLists(String token) async {
+  Future<List<FilteredPlayListsModel>> getFilteredPlayLists(
+      String token,
+      ) async {
     try {
-      print("========== SERVICE START ==========");
-      print("Request => playlists/for_you/");
-      print("Token => $token");
-
       final response = await DioHelper().get(
-        "playlists/for_you/",
+        ApiEndpoints.filteredPlaylists,
         options: Options(
           headers: {
             "Authorization": "Bearer $token",
@@ -19,23 +19,36 @@ class FilteredPlaylistService {
         ),
       );
 
-      print("Status Code => ${response.statusCode}");
-      print("Response Type => ${response.data.runtimeType}");
-      print("Response Data => ${response.data}");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Type: ${response.data.runtimeType}");
+      debugPrint("Response Data: ${response.data}");
 
-      final data = List<FilteredPlayListsModel>.from(
-        response.data.map(
-              (x) => FilteredPlayListsModel.fromJson(x),
-        ),
-      );
+      final responseData = response.data;
 
-      print("Parsed Length => ${data.length}");
-      print("========== SERVICE END ==========");
+      if (responseData is! List) {
+        throw FormatException(
+          "Expected List but received ${responseData.runtimeType}",
+        );
+      }
 
-      return data;
-    } catch (e, s) {
-      print("SERVICE ERROR => $e");
-      print(s);
+      final playlists = responseData.map((item) {
+        if (item is! Map) {
+          throw FormatException(
+            "Expected playlist object but received ${item.runtimeType}",
+          );
+        }
+
+        return FilteredPlayListsModel.fromJson(
+          Map<String, dynamic>.from(item),
+        );
+      }).toList();
+
+      debugPrint("Parsed playlists: ${playlists.length}");
+
+      return playlists;
+    } catch (e, stackTrace) {
+      debugPrint("FilteredPlaylistService error: $e");
+      debugPrintStack(stackTrace: stackTrace);
       rethrow;
     }
   }

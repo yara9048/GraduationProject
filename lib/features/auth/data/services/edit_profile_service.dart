@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:graduationprojct/features/auth/data/models/edit_profile_model.dart';
 import '../../../../../core/dio.dart';
+import '../../../../core/end_points.dart';
 
 class EditProfileService {
   final DioHelper _dio = DioHelper();
@@ -27,7 +28,7 @@ class EditProfileService {
       }
 
       final response = await _dio.put(
-        "profile/",
+        ApiEndpoints.profile,
         data: data,
         options: Options(
           headers: {

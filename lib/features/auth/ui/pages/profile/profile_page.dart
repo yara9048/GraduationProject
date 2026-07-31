@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/auth/providers/edit_profile_provider.dart';
 import 'package:graduationprojct/features/auth/ui/pages/sign_in/sign_in_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/favourite_page.dart';
+import 'package:graduationprojct/features/home/ui/pages/watching_history_page.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/log_out_provider.dart';
@@ -63,17 +64,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _refreshProfile() async {
     await context.read<ProfileProvider>().getProfile();
-  }
-
-  void _goBack() {
-    if (widget.onBack != null) {
-      widget.onBack!.call();
-      return;
-    }
-
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-    }
   }
 
   Future<void> _showEditNameDialog() async {
@@ -407,19 +397,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   'assets/Images/Ellipse 7.png',
                 ),
               ),
-              SafeArea(
-                child: Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    onPressed: _goBack,
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: Color(0xff2A9D8F),
-                      size: 30,
-                    ),
-                  ),
-                ),
-              ),
               Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -533,18 +510,17 @@ class _ProfilePageState extends State<ProfilePage> {
                         alignment: Alignment.bottomRight,
                         children: [
                           const CircleAvatar(
-                            radius: 60,
+                            radius: 50,
                             backgroundColor:
                             Color(0xff2A9D8F),
                             child: Icon(
                               Icons.person,
                               color: Colors.white,
-                              size: 60,
+                              size: 50,
                             ),
                           ),
                           InkWell(
                             onTap: () {
-                              // أضف اختيار الصورة لاحقاً.
                             },
                             borderRadius:
                             BorderRadius.circular(30),
@@ -564,7 +540,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: const Icon(
                                 Icons.edit,
                                 color: Colors.white,
-                                size: 18,
+                                size: 15,
                               ),
                             ),
                           ),
@@ -576,16 +552,19 @@ class _ProfilePageState extends State<ProfilePage> {
                         MainAxisAlignment.center,
                         children: [
                           Flexible(
-                            child: Text(
-                              '${profile.firstName} '
-                                  '${profile.lastName}',
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Tajawal',
-                                fontSize: 30,
-                                color: Color(0xff264653),
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 50.0),
+                              child: Text(
+                                '${profile.firstName} '
+                                    '${profile.lastName}',
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Tajawal',
+                                  fontSize: 25,
+                                  color: Color(0xff264653),
+                                ),
                               ),
                             ),
                           ),
@@ -600,7 +579,6 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
                       Text(
                         profile.major,
                         textAlign: TextAlign.center,
@@ -610,7 +588,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           fontFamily: 'Tajawal',
                         ),
                       ),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 10),
                       Container(
                         width: double.infinity,
                         margin:
@@ -637,6 +615,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 const Icon(
                                   Icons.email_outlined,
                                   color: Color(0xff2A9D8F),
+                                  size: 20,
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -645,7 +624,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     overflow:
                                     TextOverflow.ellipsis,
                                     style: const TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 16,
                                       fontFamily: 'Tajawal',
                                     ),
                                   ),
@@ -658,6 +637,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 const Icon(
                                   Icons.badge_outlined,
                                   color: Color(0xff2A9D8F),
+                                  size: 20,
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -667,7 +647,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     overflow:
                                     TextOverflow.ellipsis,
                                     style: const TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 16,
                                       fontFamily: 'Tajawal',
                                     ),
                                   ),
@@ -679,6 +659,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Icons.edit,
                                     color:
                                     Color(0xff2A9D8F),
+                                    size: 20,
+
                                   ),
                                 ),
                               ],
@@ -686,12 +668,18 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 30),
                       profileItem(
                         Icons.school_outlined,
                         'الدورات المسجلة',
                         onTap: () {
                           widget.onCoursesPressed?.call();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                              const WatchingHistoryPage(),
+                            ),
+                          );
                         },
                       ),
                       const SizedBox(height: 5),
@@ -714,7 +702,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           );
                         },
                       ),
-                      const SizedBox(height: 25),
+                      const SizedBox(height: 60),
                       SizedBox(
                         width: 240,
                         height: 52,
@@ -780,7 +768,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   'Tajawal',
                                   fontWeight:
                                   FontWeight.bold,
-                                  fontSize: 18,
+                                  fontSize: 16,
                                 ),
                               ),
                             ],
@@ -788,19 +776,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                     ],
-                  ),
-                ),
-              ),
-              SafeArea(
-                child: Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    onPressed: _goBack,
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: Color(0xff2A9D8F),
-                      size: 30,
-                    ),
                   ),
                 ),
               ),

@@ -1,69 +1,173 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:graduationprojct/features/home/data/models/playlist_details_model.dart';
-import 'package:graduationprojct/features/home/data/models/video_details_model.dart';
-import 'package:graduationprojct/features/home/data/services/play_list_details_service.dart';
-import 'package:graduationprojct/features/home/data/services/video_details_service.dart';
+import 'package:graduationprojct/features/home/data/services/playlist_details_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class PlaylistDetailsProvider with ChangeNotifier {
-  final PlayListDetailsService _service = PlayListDetailsService();
+final PlayListDetailsService _service =
+PlayListDetailsService();
 
-  bool _isLoading = false;
-  String? _errorMessage;
-  bool _isSuccess = false;
+bool _isLoading = false;
+String? _errorMessage;
+bool _isSuccess = false;
 
-  PlayListDetailsModel? _playListDetails;
+PlayListDetailsModel? _playListDetails;
 
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
-  bool get isSuccess => _isSuccess;
+int? _loadedPlaylistId;
 
-  PlayListDetailsModel? get playListDetails => _playListDetails;
+bool get isLoading => _isLoading;
 
-  Future<void> getDetails({
-    required int id,
-  }) async {
-    _isLoading = true;
-    _errorMessage = null;
-    _isSuccess = false;
-    notifyListeners();
+String? get errorMessage => _errorMessage;
 
-    try {
-      debugPrint('Getting playlist details for ID: $id');
+bool get isSuccess => _isSuccess;
 
-      _playListDetails = await _service.getDetails(
-        id: id,
-      );
+PlayListDetailsModel? get playListDetails =>
+_playListDetails;
 
-      debugPrint(
-        'Playlist loaded: ${_playListDetails?.name}',
-      );
+int? get loadedPlaylistId => _loadedPlaylistId;
 
-      _isSuccess = true;
-    } catch (e, stackTrace) {
-      _errorMessage = e.toString();
+Future<void> getDetails({
+required int id,
+bool forceRefresh = false,
+}) async {
+/*
+     * إذا كانت نفس Playlist محملة مسبقاً،
+     * لا نعيد الطلب إلا عند استخدام forceRefresh.
+     */
+if (!forceRefresh &&
+_loadedPlaylistId == id &&
+_playListDetails != null) {
+debugPrint(
+'Playlist details already loaded for ID: $id',
+);
 
-      debugPrint(
-        'Playlist details error: $e',
-      );
+return;
+}
 
-      debugPrintStack(
-        stackTrace: stackTrace,
-      );
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
+_isLoading = true;
+_errorMessage = null;
+_isSuccess = false;
 
-  void reset() {
-    _isLoading = false;
-    _errorMessage = null;
-    _isSuccess = false;
-    _playListDetails = null;
-    notifyListeners();
-  }
+/*
+     * مهم جداً:
+     * نحذف بيانات Playlist السابقة قبل تحميل الجديدة،
+     * حتى لا تظهر نفس التفاصيل القديمة.
+     */
+_playListDetails = null;
+_loadedPlaylistId = null;
+
+notifyListeners();
+
+try {
+debugPrint(
+'Getting playlist details for ID: $id',
+);
+
+final prefs =
+await SharedPreferences.getInstance();
+
+final token =
+prefs.getString('auth_token');
+
+if (token == null || token.isEmpty) {
+throw Exception(
+'Authentication token not found',
+);
+}
+
+final response =
+await _service.getDetails(
+token: token,
+id: id,
+);
+
+/*
+       * نتأكد أن النتيجة المحفوظة تخص الـ id
+       * الذي طلبناه حالياً.
+       */
+_playListDetails = response;
+_loadedPlaylistId = id;
+_isSuccess = true;
+_errorMessage = null;
+
+debugPrint(
+'Playlist loaded successfully:',
+);
+
+debugPrint(
+'Requested ID: $id',
+);
+
+debugPrint(
+'Response ID: ${_playListDetails?.id}',
+);
+
+debugPrint(
+'Playlist name: ${_playListDetails?.name}',
+);
+} catch (e, stackTrace) {
+_errorMessage =
+_cleanErrorMessage(e.toString());
+
+_isSuccess = false;
+
+/*
+       * لا نترك بيانات Playlist قديمة
+       * عند فشل الطلب.
+       */
+_playListDetails = null;
+_loadedPlaylistId = null;
+
+debugPrint(
+'Playlist details error for ID $id: $e',
+);
+
+debugPrintStack(
+stackTrace: stackTrace,
+);
+} finally {
+_isLoading = false;
+notifyListeners();
+}
+}
+
+/*
+   * تستخدم عند الحاجة لإعادة تحميل
+   * تفاصيل الـ Playlist الحالية من السيرفر.
+   */
+Future<void> refreshDetails({
+required int id,
+}) async {
+await getDetails(
+id: id,
+forceRefresh: true,
+);
+}
+
+/*
+   * التحقق أن البيانات الموجودة تخص
+   * Playlist معينة.
+   */
+bool hasDetailsFor(int id) {
+return _loadedPlaylistId == id &&
+_playListDetails != null;
+}
+
+void reset() {
+_isLoading = false;
+_errorMessage = null;
+_isSuccess = false;
+_playListDetails = null;
+_loadedPlaylistId = null;
+
+notifyListeners();
+}
+
+String _cleanErrorMessage(String error) {
+return error
+    .replaceFirst('Exception:', '')
+    .replaceFirst('DioException:', '')
+    .replaceAll(RegExp(r'\s+'), ' ')
+    .trim();
+}
 }

@@ -31,7 +31,14 @@ class DisplayPlaylistsProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      _playlists = await _service.getPlayLists();
+      final prefs = await SharedPreferences.getInstance();
+
+      final token = prefs.getString("auth_token");
+
+      if (token == null || token.isEmpty) {
+        throw Exception("Authentication token not found");
+      }
+      _playlists = await _service.getPlayLists(token: token);
 
       _isSuccess = true;
     } catch (e) {

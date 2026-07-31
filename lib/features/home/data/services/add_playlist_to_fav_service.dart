@@ -15,7 +15,7 @@ class AddPlaylistToFavService {
   }) async {
     try {
       final response = await _dio.post(
-        "playlists/$id/toggle_favorite/",
+        ApiEndpoints.togglePlaylistFavorite(id),
         data: {
           'id': id,
         },

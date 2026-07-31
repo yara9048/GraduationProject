@@ -11,8 +11,8 @@ class CustomProgressLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 340,
-      height: 10,
+      width: 320,
+      height: 7,
       decoration: BoxDecoration(
         color: Colors.grey.shade300,
         borderRadius: BorderRadius.circular(10),

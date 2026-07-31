@@ -98,7 +98,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             child: CustomNavigationBar(
               currentIndex: currentIndex,
               onTap: _onTabPressed,
-              iconSize: 35,
+              iconSize: 28,
               isFloating: false,
               elevation: 0,
               backgroundColor: Colors.white,

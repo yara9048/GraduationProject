@@ -56,9 +56,7 @@ class _FavouritePageState extends State<FavouritePage> {
       );
     }
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: Colors.white,
         body: Stack(
           children: [
@@ -90,7 +88,7 @@ class _FavouritePageState extends State<FavouritePage> {
                       Icons.arrow_back_ios_new_rounded,
                       textDirection: TextDirection.rtl,
                       color: Color(0xff2A9D8F),
-                      size: 30,
+                      size: 20,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -100,7 +98,7 @@ class _FavouritePageState extends State<FavouritePage> {
                       fontWeight: FontWeight.bold,
                       color: Color(0xff2A9D8F),
                       fontFamily: "Tajawal",
-                      fontSize: 28,
+                      fontSize: 20,
                     ),
                   ),
                 ],
@@ -116,7 +114,7 @@ class _FavouritePageState extends State<FavouritePage> {
                 icon: Icon(
                   Icons.search,
                   color: const Color(0xff2A9D8F),
-                  size: 40,
+                  size: 30,
                 ),
               ),
             ),
@@ -131,7 +129,7 @@ class _FavouritePageState extends State<FavouritePage> {
                     child: Text(
                       "الفيديوهات المفضلة",
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         fontFamily: "Tajawal",
                         color: Color(0xff264653),
@@ -142,7 +140,6 @@ class _FavouritePageState extends State<FavouritePage> {
                   const SizedBox(height: 14),
 
                   SizedBox(
-                    height: 280,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: favouriteVideos.length,
@@ -150,9 +147,7 @@ class _FavouritePageState extends State<FavouritePage> {
                       const SizedBox(width: 16),
                       itemBuilder: (context, index) {
                         final video = favouriteVideos[index];
-
                         return SizedBox(
-                          width: 300,
                           child: VideoCardTemplate(
                             key: ValueKey(
                               video.videoDetail!.id,
@@ -207,7 +202,7 @@ class _FavouritePageState extends State<FavouritePage> {
                     child: Text(
                       "قوائم التشغيل المفضلة",
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         fontFamily: "Tajawal",
                         color: Color(0xff264653),
@@ -218,7 +213,6 @@ class _FavouritePageState extends State<FavouritePage> {
                   const SizedBox(height: 14),
 
                   SizedBox(
-                    height: 280,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: favouritePlaylists.length,
@@ -228,7 +222,6 @@ class _FavouritePageState extends State<FavouritePage> {
                         final playlist = favouritePlaylists[index];
 
                         return SizedBox(
-                          width: 400,
                           child: CourseCardTemplate(
                             key: ValueKey(
                               playlist.playlistDetail!.id,
@@ -261,7 +254,7 @@ class _FavouritePageState extends State<FavouritePage> {
             ),
           ],
         ),
-      )
+
     );
   }
 }

@@ -5,12 +5,18 @@ import 'package:graduationprojct/features/home/data/models/playlist_details_mode
 import 'package:graduationprojct/features/home/data/models/video_details_model.dart';
 
 import '../../../../core/dio.dart';
+import '../../../../core/end_points.dart';
 
 class PlayListDetailsService {
 
-  Future<PlayListDetailsModel> getDetails({required int id}) async {
+  Future<PlayListDetailsModel> getDetails({required int id, required String token}) async {
     final response = await DioHelper().get(
-      "/playlists/$id/",
+      ApiEndpoints.courseDetails(id),
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      ),
     );
 
     return PlayListDetailsModel.fromJson(response.data);

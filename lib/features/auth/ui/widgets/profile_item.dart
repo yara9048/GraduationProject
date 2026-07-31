@@ -7,7 +7,6 @@ Widget profileItem(
     }) {
   return Container(
     height: 60,
-    margin: const EdgeInsets.only(bottom: 12),
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
@@ -23,17 +22,19 @@ Widget profileItem(
       leading: Icon(
         icon,
         color: const Color(0xff2A9D8F),
+        size: 20,
       ),
       title: Text(
         title,
         style: const TextStyle(
           fontFamily: "Tajawal",
           fontWeight: FontWeight.w600,
+          fontSize: 14
         ),
       ),
       trailing: const Icon(
         Icons.arrow_forward_ios,
-        size: 18,
+        size: 15,
       ),
       onTap: onTap,
     ),

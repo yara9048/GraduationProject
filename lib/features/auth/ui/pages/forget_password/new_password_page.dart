@@ -40,12 +40,12 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                 children: [
                   SizedBox(height: 230),
                   Padding(
-                    padding: const EdgeInsets.only(left: 290),
+                    padding: const EdgeInsets.only(left: 228),
                     child: Text(
                       "كلمة المرور",
                       style: TextStyle(
                         color: Color(0xff1A2429),
-                        fontSize: 17,
+                        fontSize: 13,
                         fontFamily: "Tajawal",
                         fontWeight: FontWeight.w600,
 
@@ -70,12 +70,12 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                   ),
                   SizedBox(height: 18),
                   Padding(
-                    padding: const EdgeInsets.only(left: 250),
+                    padding: const EdgeInsets.only(left: 190),
                     child: Text(
                       "تأكيد كلمة المرور",
                       style: TextStyle(
                         color: Color(0xff1A2429),
-                        fontSize: 17,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         fontFamily: "Tajawal",
                       ),
@@ -97,7 +97,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 35),
+                  SizedBox(height: 40),
                   Consumer<NewPasswordProvider>(
                     builder: (context, authProvider, child) {
                       return authProvider.isLoading

@@ -38,12 +38,13 @@ class _VerifyForgetPasswordPageState extends State<VerifyForgetPasswordPage> {
           child: Form(
             key: _formKey,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                SizedBox(height: 200,),
                 OtpInputTemplate(
                   numberOfFields: 4,
-                  fieldWidth: 75,
-                  fieldHeight: 80,
+                  fieldWidth: 60,
+                  fieldHeight: 65,
                   borderRadius: BorderRadius.circular(15),
                   fillColor: const Color(0xffD1D9D9).withOpacity(0.2),
                   borderColor: Colors.black38,
@@ -58,7 +59,7 @@ class _VerifyForgetPasswordPageState extends State<VerifyForgetPasswordPage> {
                   },
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 10),
 
                 RichText(
                   textAlign: TextAlign.center,
@@ -92,7 +93,7 @@ class _VerifyForgetPasswordPageState extends State<VerifyForgetPasswordPage> {
                   ),
                 ),
 
-                const SizedBox(height: 90),
+                const SizedBox(height: 40),
 
                 Consumer<PasswordSendOtpPrvider>(
                   builder: (context, authProvider, child) {

@@ -1,19 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:graduationprojct/features/home/ui/pages/video_details_page.dart';
 import 'package:graduationprojct/features/home/ui/widgets/subjects_card_template.dart';
+import 'package:provider/provider.dart';
 
-import '../widgets/new_added_course_template.dart';
+import '../../providers/display_subjects_provider.dart';
 
-class VideoPage extends StatefulWidget {
-  const VideoPage({super.key});
+class AllSubjectsPage extends StatefulWidget {
+  const AllSubjectsPage({super.key});
 
   @override
-  State<VideoPage> createState() => _VideoPageState();
+  State<AllSubjectsPage> createState() => _AllSubjectsPageState();
 }
 
-class _VideoPageState extends State<VideoPage> {
+class _AllSubjectsPageState extends State<AllSubjectsPage> {
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<DisplaySubjectsProvider>().getSubjects();
+
+    });
+  }
   Widget build(BuildContext context) {
+    final subjectsProvider = context.watch<DisplaySubjectsProvider>();
+    final subjects = subjectsProvider.subjects;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SizedBox(
@@ -66,47 +76,38 @@ class _VideoPageState extends State<VideoPage> {
                 ],
               ),
             ),
-            Directionality(
-              textDirection: TextDirection.rtl,
-              child:  Padding(
-                padding: const EdgeInsets.only(right: 30,left: 30),
-                child: Text(
-                  "فيديوهات قانون أصول المحاكمات الجزائية :",
-                  style: const TextStyle(
-                    color: Color(0xff1A2429),
-                    fontWeight: FontWeight.bold,
-                    fontFamily: "Tajawal",
-                    fontSize: 22,
-                  ),
-                ),
-              ),
-            ),
+
             Expanded(
               child: MediaQuery.removePadding(
                 removeTop: true,
                 context: context,
-                child: ListView(
-                children: [
-                  NewAddedCourseTemplate(
-                    id: 1,
-                    imagePath: 'assets/Images/700ccaab9d6c5bae720cc6ee03954b805e4c490e.jpg',
-                    title: 'مقدمة في قانون أصول المحاكمات الجزائية',
-                    duration: '2 ساعة',
-                    color: Color(0xffE76F51),
-                  ),
-                  NewAddedCourseTemplate(
-                    id: 1,
-                    imagePath: 'assets/Images/download (2) 1.png',
-                    title: 'مقدمة في قانون أصول المحاكمات الجزائية',
-                    duration: '2 ساعة',
-                    color: Color(0xffE2A9D8F),
-                  ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ListView.builder(
+                            itemCount:subjects.length<3? subjects.length : 3,
+                            itemBuilder: (context, index) {
+                              final sub = subjects[index];
+                              return SizedBox(
+                                height: 90,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 10.0),
+                                  child: SubjectsCard(
+                                    title: sub.name,
+                                    imagePath: 'assets/Images/Group 51.png',
+                                    textColor: Color(0xffA67500),
+                                    width: 300,
+                                    top: 10,
+                                    width2: 250,
+                                    fit: BoxFit.fitWidth, id: sub.id,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        )),
+                  )
 
-                ],
-              ),
-                            )
-
-            )],
+          ],
         ),
       ),
     );

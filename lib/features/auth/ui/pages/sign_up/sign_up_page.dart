@@ -32,12 +32,12 @@ class _SignUpPageState extends State<SignUpPage> {
       backgroundColor: Colors.white,
       body: AuthPagesTemplate(
         text1: "!أهلاً بك ",
-        size1: 18,
-        size2: 18,
+        size1: 13,
+        size2: 13,
         text2: ".قم بإنشاء حسابك الآن لتبدأ رحلتك التعليمية معنا",
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.only(right: 20, left: 20,top: 185),            child: Form(
+            padding: const EdgeInsets.only(right: 20, left: 0,top: 175),            child: Form(
               key: _formKey,
               child: Column(
                 children: [
@@ -52,7 +52,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               "الكنية",
                               style: TextStyle(
                                 color: Color(0xff1A2429),
-                                fontSize: 17,
+                                fontSize: 13,
                                 fontFamily: "Tajawal",
                                 fontWeight: FontWeight.w600,
                               ),
@@ -60,8 +60,8 @@ class _SignUpPageState extends State<SignUpPage> {
                             SizedBox(height: isValidationActive? 0:5,),
                             TextFieldTemplate(
                               controller: secondNameController,
-                              size2: 17,
-                              size: 16,
+                              size2: 13,
+                              size: 13,
                               hint: "كنيتك",
                               icon: Icons.person_outline,
                               validator: (value) {
@@ -73,7 +73,6 @@ class _SignUpPageState extends State<SignUpPage> {
                           ],
                         ),
                       ),
-                      SizedBox(width: 20),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -82,7 +81,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               "الاسم",
                               style: TextStyle(
                                 color: Color(0xff1A2429),
-                                fontSize: 17,
+                                fontSize: 13,
                                 fontFamily: "Tajawal",
                                 fontWeight: FontWeight.w600,
                               ),
@@ -90,8 +89,8 @@ class _SignUpPageState extends State<SignUpPage> {
                             SizedBox(height: isValidationActive? 0:5,),
                             TextFieldTemplate(
                               controller: firstNameController,
-                              size2: 17,
-                              size: 16,
+                              size2: 13,
+                              size: 13,
                               hint: "اسمك",
                               icon: Icons.person,
                               validator: (value) {
@@ -105,14 +104,14 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: isValidationActive? 15: 20),
+                  SizedBox(height: isValidationActive? 10: 15),
                   Align(
                     alignment: Alignment.centerRight,
                     child: Text(
                       "البريد الالكتروني",
                       style: TextStyle(
                         color: Color(0xff1A2429),
-                        fontSize: 17,
+                        fontSize: 13,
                         fontFamily: "Tajawal",
                         fontWeight: FontWeight.w600,
                       ),
@@ -132,14 +131,14 @@ class _SignUpPageState extends State<SignUpPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: isValidationActive? 10: 15),
                   Align(
                     alignment: Alignment.centerRight,
                     child: Text(
                       "الاختصاص",
                       style: TextStyle(
                         color: Color(0xff1A2429),
-                        fontSize: 17,
+                        fontSize: 13,
                         fontFamily: "Tajawal",
                         fontWeight: FontWeight.w600,
                       ),
@@ -158,14 +157,14 @@ class _SignUpPageState extends State<SignUpPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: isValidationActive? 10: 20),
+                  SizedBox(height: isValidationActive? 10: 15),
                   Align(
                     alignment: Alignment.centerRight,
                     child: Text(
                       "كلمة المرور",
                       style: TextStyle(
                         color: Color(0xff1A2429),
-                        fontSize: 17,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         fontFamily: "Tajawal",
                       ),
@@ -185,14 +184,14 @@ class _SignUpPageState extends State<SignUpPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: isValidationActive? 10: 20),
+                  SizedBox(height: isValidationActive? 10: 15),
                   Align(
                     alignment: Alignment.centerRight,
                     child: Text(
                       "تأكيد كلمة المرور",
                       style: TextStyle(
                         color: Color(0xff1A2429),
-                        fontSize: 17,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         fontFamily: "Tajawal",
                       ),
@@ -212,7 +211,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: isValidationActive?10: 30),
+                  SizedBox(height: isValidationActive?10: 20),
                   Consumer<SignUpProvider>(
                     builder: (context, authProvider, child) {
                       return authProvider.isLoading
@@ -245,19 +244,19 @@ class _SignUpPageState extends State<SignUpPage> {
                       );
                     },
                   ),
-                  SizedBox(height: 20,),
+                  SizedBox(height: 10,),
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
-                      style: TextStyle(fontSize: 17, fontFamily: "Tajawal"),
+                      style: TextStyle(fontSize: 13, fontFamily: "Tajawal"),
                       children: [
                         TextSpan(
                           text: "لديك حساب مسبقاً؟ ",
-                          style: TextStyle(color: Colors.black, fontFamily: "Tajawal", fontSize: 19),
+                          style: TextStyle(color: Colors.black, fontFamily: "Tajawal", fontSize: 13),
                         ),
                         TextSpan(
                           text: "تسجيل الدخول",
-                          style: TextStyle(color: Color(0xffE9C46A), fontFamily: "Tajawal", fontSize: 19,fontWeight: FontWeight.bold),
+                          style: TextStyle(color: Color(0xffE9C46A), fontFamily: "Tajawal", fontSize: 13,fontWeight: FontWeight.bold),
                           recognizer: TapGestureRecognizer()..onTap = () {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => SignInPage()));
                           },
