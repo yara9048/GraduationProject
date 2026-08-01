@@ -142,8 +142,11 @@ class _EditNameDialogState
   @override
   Widget build(BuildContext context) {
     return Directionality(
+
       textDirection: TextDirection.rtl,
       child: AlertDialog(
+        backgroundColor: Colors.white,
+
         shape: RoundedRectangleBorder(
           borderRadius:
           BorderRadius.circular(20),
@@ -152,7 +155,7 @@ class _EditNameDialogState
           child: Text(
             'تعديل الاسم',
             style: TextStyle(
-              fontSize: 26,
+              fontSize: 20,
               color: Color(0xff181C1F),
               fontFamily: 'Tajawal',
               fontWeight: FontWeight.bold,

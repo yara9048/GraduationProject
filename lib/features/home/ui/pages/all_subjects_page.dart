@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/ui/pages/main_navigation_page.dart';
+import 'package:graduationprojct/features/home/ui/pages/subject_search_page.dart';
 import 'package:graduationprojct/features/home/ui/widgets/subjects_card_template.dart';
 import 'package:provider/provider.dart';
 
@@ -43,7 +44,19 @@ class _AllSubjectsPageState extends State<AllSubjectsPage> {
                     left: 0,
                     child: Image.asset('assets/Images/Ellipse 4.png'),
                   ),
-
+                  Positioned(
+                    top: 50,
+                    left: 8,
+                    child: IconButton(
+                      onPressed: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context){return SubjectSearchPage();}));},
+                      icon: Icon(
+                        Icons.search,
+                        color: const Color(0xff2A9D8F),
+                        size: 30,
+                      ),
+                    ),
+                  ),
                   Positioned(
                     top: 55,
                     right: 16,

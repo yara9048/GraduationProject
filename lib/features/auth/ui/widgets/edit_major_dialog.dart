@@ -150,7 +150,7 @@ class _EditMajorDialogState
           child: Text(
             'تعديل الاختصاص',
             style: TextStyle(
-              fontSize: 26,
+              fontSize: 20,
               color: Color(0xff181C1F),
               fontFamily: 'Tajawal',
               fontWeight: FontWeight.bold,

@@ -28,6 +28,7 @@ class DioHelper {
         Map<String, dynamic>? query,
         Options? options,
       }) async {
+
     return _dio.get(
       endpoint,
       queryParameters: query,

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/display_playlist_by_subject_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_playlists_provider.dart';
 import 'package:graduationprojct/features/home/ui/pages/main_navigation_page.dart';
-import 'package:graduationprojct/features/home/ui/pages/search_page.dart';
+import 'package:graduationprojct/features/home/ui/pages/subject_search_page.dart';
 import 'package:provider/provider.dart';
 
 import '../widgets/course_card_template.dart';
@@ -129,19 +129,6 @@ class _DisplayPlaylistBySubjectPageState extends State<DisplayPlaylistBySubjectP
 
 
                   ],
-                ),
-              ),
-              Positioned(
-                top: 50,
-                left: 8,
-                child: IconButton(
-                  onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context){return SearchPage();}));},
-                  icon: Icon(
-                    Icons.search,
-                    color: const Color(0xff2A9D8F),
-                    size: 30,
-                  ),
                 ),
               ),
               Positioned.fill(

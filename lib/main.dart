@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/auth/providers/edit_profile_provider.dart';
 import 'package:graduationprojct/features/auth/providers/new_password_provider.dart';
@@ -19,26 +21,53 @@ import 'package:graduationprojct/features/home/providers/funding_request_provide
 import 'package:graduationprojct/features/home/providers/main_navigation_provider.dart';
 import 'package:graduationprojct/features/home/providers/now_showing_playlist_provider.dart';
 import 'package:graduationprojct/features/home/providers/playlist_details_provider.dart';
+import 'package:graduationprojct/features/home/providers/playlist_search_provider.dart';
 import 'package:graduationprojct/features/home/providers/rating_playlist_provider.dart';
+import 'package:graduationprojct/features/home/providers/subject_search_provider.dart';
 import 'package:graduationprojct/features/home/providers/subscribe_provider.dart';
 import 'package:graduationprojct/features/home/providers/video_details_function_provider.dart';
 import 'package:graduationprojct/features/home/providers/video_details_provider.dart';
 import 'package:graduationprojct/features/home/providers/wallet_provider.dart';
 import 'package:graduationprojct/features/home/providers/watching_history_provider.dart';
+import 'package:graduationprojct/features/home/ui/pages/playlist_search_page.dart';
 import 'package:provider/provider.dart';
 
+import 'features/auth/data/services/firebase_messaging_service.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/providers/log_out_provider.dart';
 import 'features/auth/providers/send_otp_provider.dart';
 import 'features/auth/providers/sign_in_provider.dart';
 import 'features/auth/ui/pages/sign_in/sign_in_page.dart';
 import 'features/home/ui/pages/main_navigation_page.dart';
+import 'firebase_options.dart';
+
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(
+    RemoteMessage message,
+    ) async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  debugPrint(
+    'Background message: ${message.messageId}',
+  );
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final authProvider = AuthProvider();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
+  FirebaseMessaging.onBackgroundMessage(
+    firebaseMessagingBackgroundHandler,
+  );
+
+  await FirebaseMessagingService.instance.initialize();
+
+  final authProvider = AuthProvider();
   await authProvider.checkLogin();
 
   runApp(
@@ -178,6 +207,11 @@ class MyApp extends StatelessWidget {
 
         ChangeNotifierProvider(
           create: (_) => DisplayPlaylistBySubjectProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => PlaylistSearchProvider(),
+        ),ChangeNotifierProvider(
+          create: (_) => SubjectSearchProvider(),
         ),
       ],
       child: const AppRoot(),

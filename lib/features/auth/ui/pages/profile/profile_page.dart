@@ -393,7 +393,6 @@ class _ProfilePageState extends State<ProfilePage> {
                           );
                         },
                       ),
-                      const SizedBox(height: 5),
                       profileItem(
                         Icons.favorite_border,
                         'المفضلة',
@@ -413,7 +412,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           );
                         },
                       ),
-                      const SizedBox(height: 60),
+                      const SizedBox(height: 20),
                       SizedBox(
                         width: 240,
                         height: 52,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:graduationprojct/features/home/ui/pages/search_page.dart';
+import 'package:graduationprojct/features/home/ui/pages/subject_search_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/video_details_page.dart';
 import 'package:provider/provider.dart';
 
@@ -122,27 +122,6 @@ class _FavouritePageState
                   color: Color(0xff2A9D8F),
                   fontFamily: 'Tajawal',
                   fontSize: 20,
-                ),
-              ),
-            ),
-
-            Positioned(
-              top: 45,
-              left: 8,
-              child: IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                      const SearchPage(),
-                    ),
-                  );
-                },
-                icon: const Icon(
-                  Icons.search,
-                  color: Color(0xff2A9D8F),
-                  size: 30,
                 ),
               ),
             ),
