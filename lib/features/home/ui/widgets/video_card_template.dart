@@ -4,17 +4,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../auth/ui/widgets/snack_bar.dart';
 import '../../providers/add_video_to_fav_provider.dart';
+import 'safe_network_image.dart';
 
 class VideoCardTemplate extends StatefulWidget {
   final int videoId;
-  final String imagePath;
+  final String? imagePath;
   final String description;
   final String title;
   final String duration;
   final int views;
   final String status;
   final VoidCallback? onTap;
-
   final VoidCallback? onRemovedFromFavourite;
 
   const VideoCardTemplate({
@@ -35,7 +35,8 @@ class VideoCardTemplate extends StatefulWidget {
       _VideoCardTemplateState();
 }
 
-class _VideoCardTemplateState extends State<VideoCardTemplate> {
+class _VideoCardTemplateState
+    extends State<VideoCardTemplate> {
   bool isFavorite = false;
   bool isFavoriteLoading = false;
 
@@ -55,9 +56,11 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
   }
 
   Future<void> _loadFavoriteStatus() async {
-    final prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs =
+    await SharedPreferences.getInstance();
 
-    final int? userPk = await _getUserPk(prefs);
+    final int? userPk =
+    await _getUserPk(prefs);
 
     if (userPk == null) {
       return;
@@ -90,7 +93,7 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
       isFavoriteLoading = true;
     });
 
-    final favProvider =
+    final AddVideoToFavProvider favProvider =
     context.read<AddVideoToFavProvider>();
 
     await favProvider.addVidToFav(
@@ -102,16 +105,18 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
     }
 
     if (favProvider.isSuccess) {
-      final prefs =
+      final SharedPreferences prefs =
       await SharedPreferences.getInstance();
 
-      final int? userPk = await _getUserPk(prefs);
+      final int? userPk =
+      await _getUserPk(prefs);
 
       bool savedStatus = isFavorite;
 
       if (userPk != null) {
         final String key =
             'fav_video_${userPk}_${widget.videoId}';
+
         savedStatus =
             prefs.getBool(key) ?? isFavorite;
       }
@@ -143,7 +148,8 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
 
       MySnackBar.show(
         context,
-        message: favProvider.errorMessage ??
+        message:
+        favProvider.errorMessage ??
             'حدث خطأ أثناء تحديث المفضلة',
       );
     }
@@ -172,7 +178,8 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
           clipBehavior: Clip.antiAlias,
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+            CrossAxisAlignment.start,
             children: [
               Stack(
                 alignment: Alignment.center,
@@ -180,12 +187,15 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
                   SizedBox(
                     height: 100,
                     width: double.infinity,
-                    child: Image.asset(
-                      widget.imagePath,
+                    child: SafeNetworkImage(
+                      imageUrl: widget.imagePath,
+                      placeholderPath:
+                      'assets/Images/photo_2026-07-23_00-20-19.jpg',
+                      width: double.infinity,
+                      height: 100,
                       fit: BoxFit.cover,
                     ),
                   ),
-
                   Container(
                     width: 26,
                     height: 26,
@@ -199,18 +209,20 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
                       size: 24,
                     ),
                   ),
-
                   Positioned(
                     top: 6,
                     right: 6,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding:
+                      const EdgeInsets.symmetric(
                         horizontal: 7,
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xff2A9D8F),
-                        borderRadius: BorderRadius.circular(8),
+                        color:
+                        const Color(0xff2A9D8F),
+                        borderRadius:
+                        BorderRadius.circular(8),
                       ),
                       child: Text(
                         widget.status,
@@ -223,7 +235,6 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
                       ),
                     ),
                   ),
-
                   Positioned(
                     top: 6,
                     left: 6,
@@ -231,7 +242,8 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
                       width: 26,
                       height: 26,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
+                        color:
+                        Colors.white.withOpacity(0.9),
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
@@ -243,7 +255,8 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
                             ? const SizedBox(
                           width: 16,
                           height: 16,
-                          child: CircularProgressIndicator(
+                          child:
+                          CircularProgressIndicator(
                             strokeWidth: 2,
                             color: Colors.red,
                           ),
@@ -251,7 +264,8 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
                             : Icon(
                           isFavorite
                               ? Icons.favorite
-                              : Icons.favorite_border,
+                              : Icons
+                              .favorite_border,
                           color: Colors.red,
                           size: 18,
                         ),
@@ -260,21 +274,23 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
                   ),
                 ],
               ),
-
               Padding(
-                padding: const EdgeInsets.symmetric(
+                padding:
+                const EdgeInsets.symmetric(
                   horizontal: 8,
                   vertical: 6,
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment:
+                  CrossAxisAlignment.end,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       widget.title,
                       textAlign: TextAlign.right,
                       maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      overflow:
+                      TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -282,14 +298,15 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
                         color: Color(0xff264653),
                       ),
                     ),
-
-                    if (widget.description.isNotEmpty) ...[
+                    if (widget
+                        .description.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
                         widget.description,
                         textAlign: TextAlign.right,
                         maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        overflow:
+                        TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.black,
@@ -297,9 +314,7 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
                         ),
                       ),
                     ],
-
                     const SizedBox(height: 4),
-
                     Row(
                       children: [
                         const Icon(
@@ -311,26 +326,29 @@ class _VideoCardTemplateState extends State<VideoCardTemplate> {
                         Text(
                           '${widget.views}',
                           style: const TextStyle(
-                            color: Color(0xffA67500),
-                            fontWeight: FontWeight.w600,
+                            color:
+                            Color(0xffA67500),
+                            fontWeight:
+                            FontWeight.w600,
                             fontFamily: 'Tajawal',
                             fontSize: 12,
                           ),
                         ),
-
                         const Spacer(),
-
                         const Icon(
                           Icons.access_time_rounded,
                           size: 16,
-                          color: Color(0xff92A1A1),
+                          color:
+                          Color(0xff92A1A1),
                         ),
                         const SizedBox(width: 3),
                         Text(
                           widget.duration,
                           style: const TextStyle(
-                            color: Color(0xff92A1A1),
-                            fontWeight: FontWeight.w600,
+                            color:
+                            Color(0xff92A1A1),
+                            fontWeight:
+                            FontWeight.w600,
                             fontFamily: 'Tajawal',
                             fontSize: 12,
                           ),

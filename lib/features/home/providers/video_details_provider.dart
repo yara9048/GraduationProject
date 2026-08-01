@@ -28,8 +28,14 @@ class VideoDetailsProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      final prefs = await SharedPreferences.getInstance();
 
-      _videoDetails = await _service.getDetails(id: id);
+      final token = prefs.getString("auth_token");
+
+      if (token == null || token.isEmpty) {
+        throw Exception("Authentication token not found");
+      }
+      _videoDetails = await _service.getDetails(id: id, token: token);
 
       _isSuccess = true;
     } catch (e) {

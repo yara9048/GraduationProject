@@ -30,11 +30,7 @@ Future<void> getDetails({
 required int id,
 bool forceRefresh = false,
 }) async {
-/*
-     * إذا كانت نفس Playlist محملة مسبقاً،
-     * لا نعيد الطلب إلا عند استخدام forceRefresh.
-     */
-if (!forceRefresh &&
+  if (!forceRefresh &&
 _loadedPlaylistId == id &&
 _playListDetails != null) {
 debugPrint(
@@ -48,11 +44,7 @@ _isLoading = true;
 _errorMessage = null;
 _isSuccess = false;
 
-/*
-     * مهم جداً:
-     * نحذف بيانات Playlist السابقة قبل تحميل الجديدة،
-     * حتى لا تظهر نفس التفاصيل القديمة.
-     */
+
 _playListDetails = null;
 _loadedPlaylistId = null;
 

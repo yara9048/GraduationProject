@@ -38,6 +38,7 @@ class _SummaryPageState extends State<SummaryPage> {
 
     if (provider.isLoading) {
       return const Scaffold(
+        backgroundColor: Colors.white,
         body: Center(
           child: CircularProgressIndicator(
             strokeWidth: 3,

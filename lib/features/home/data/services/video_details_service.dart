@@ -8,10 +8,20 @@ import '../../../../core/end_points.dart';
 
 class VideoDetailsService {
 
-  Future<VideoDetailsModel> getDetails({required int id}) async {
+  Future<VideoDetailsModel> getDetails({required int id, required String token}) async {
     final response = await DioHelper().get(
       ApiEndpoints.videoDetails(id),
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      ),
+
     );
+    print("=======================");
+    print(response.data);
+    print("=======================");
 
     return VideoDetailsModel.fromJson(response.data);
   }

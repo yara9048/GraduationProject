@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/home/ui/widgets/safe_network_image.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,9 +17,7 @@ class CourseCardTemplate extends StatefulWidget {
   final double progress;
   final double width;
 
-  /// يتم استدعاؤها عندما تُحذف القائمة من المفضلة.
   final VoidCallback? onRemovedFromFavourite;
-
   const CourseCardTemplate({
     super.key,
     required this.playlistId,
@@ -113,10 +112,6 @@ class _CourseCardTemplateState extends State<CourseCardTemplate> {
         message: favProvider.response?.status.toString() ?? "تم تحديث المفضلة",
       );
 
-      /*
-       * إذا أصبحت القيمة false فهذا يعني أن القائمة
-       * أُزيلت من المفضلة، فنخبر الصفحة الأب.
-       */
       if (!savedStatus) {
         widget.onRemovedFromFavourite?.call();
       }
@@ -175,8 +170,10 @@ class _CourseCardTemplateState extends State<CourseCardTemplate> {
                     child: SizedBox(
                       height: 130,
                       width: double.infinity,
-                      child: Image.asset(widget.imagePath, fit: BoxFit.cover),
-                    ),
+                      child: SafeNetworkImage(
+                        imageUrl: widget.imagePath,
+                        fit: BoxFit.cover,
+                      ),)
                   ),
                   Positioned(
                     top: 12,

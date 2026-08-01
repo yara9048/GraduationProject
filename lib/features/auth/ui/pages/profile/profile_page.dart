@@ -8,6 +8,9 @@ import 'package:provider/provider.dart';
 import '../../../providers/log_out_provider.dart';
 import '../../../providers/profile_provider.dart';
 import '../../widgets/button_template.dart';
+import '../../widgets/edit_major_dialog.dart';
+import '../../widgets/edit_name_dialog.dart';
+import '../../widgets/profile_image_picker.dart';
 import '../../widgets/profile_item.dart';
 import '../../widgets/snack_bar.dart';
 
@@ -28,6 +31,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  String? selectedMajor;
   final TextEditingController firstNameController =
   TextEditingController();
 
@@ -66,288 +70,32 @@ class _ProfilePageState extends State<ProfilePage> {
     await context.read<ProfileProvider>().getProfile();
   }
 
-  Future<void> _showEditNameDialog() async {
-    final profile =
-        context.read<ProfileProvider>().profile;
-
-    if (profile == null) return;
-
-    firstNameController.text = profile.firstName;
-    secondNameController.text = profile.lastName;
-
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            title: const Center(
-              child: Text(
-                'تعديل الاسم',
-                style: TextStyle(
-                  fontSize: 26,
-                  color: Color(0xff181C1F),
-                  fontFamily: 'Tajawal',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            content: Form(
-              key: nameFormKey,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: firstNameController,
-                      cursorColor: const Color(0xff2A9D8F),
-                      textInputAction: TextInputAction.next,
-                      validator: (value) {
-                        if (value == null ||
-                            value.trim().isEmpty) {
-                          return 'الاسم مطلوب';
-                        }
-
-                        return null;
-                      },
-                      decoration: _inputDecoration(
-                        hintText: 'الاسم',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
-                      controller: secondNameController,
-                      cursorColor: const Color(0xff2A9D8F),
-                      validator: (value) {
-                        if (value == null ||
-                            value.trim().isEmpty) {
-                          return 'الكنية مطلوبة';
-                        }
-
-                        return null;
-                      },
-                      decoration: _inputDecoration(
-                        hintText: 'الكنية',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actionsAlignment: MainAxisAlignment.center,
-            actions: [
-              SizedBox(
-                width: double.infinity,
-                child: Consumer<EditProfileProvider>(
-                  builder: (
-                      context,
-                      editProvider,
-                      child,
-                      ) {
-                    if (editProvider.isLoading) {
-                      return const Center(
-                        child: SizedBox(
-                          width: 28,
-                          height: 28,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 3,
-                            color: Color(0xff2A9D8F),
-                          ),
-                        ),
-                      );
-                    }
-
-                    return ButtonTemplate(
-                      text: 'تعديل',
-                      onPressed: () async {
-                        if (!(nameFormKey.currentState
-                            ?.validate() ??
-                            false)) {
-                          return;
-                        }
-
-                        await editProvider.editProfile(
-                          firstName:
-                          firstNameController.text.trim(),
-                          secondName:
-                          secondNameController.text.trim(),
-                        );
-
-                        if (!mounted) return;
-
-                        if (editProvider.isSuccess) {
-                          await _refreshProfile();
-
-                          if (!mounted) return;
-
-                          Navigator.of(dialogContext).pop();
-                        } else if (editProvider.errorMessage !=
-                            null) {
-                          MySnackBar.show(
-                            context,
-                            message:
-                            editProvider.errorMessage!,
-                          );
-                        }
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> _showEditMajorDialog() async {
     final profile =
         context.read<ProfileProvider>().profile;
 
     if (profile == null) return;
 
-    majorController.text = profile.major;
+    await showDialog<void>(
+      context: context,
+      builder: (_) => EditMajorDialog(
+        currentMajor: profile.major,
+        onUpdated: _refreshProfile,
+      ),
+    );
+  }
+  Future<void> _showEditNameDialog() async {
+    final profile =
+        context.read<ProfileProvider>().profile;
+
+    if (profile == null) return;
 
     await showDialog<void>(
       context: context,
-      builder: (dialogContext) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            title: const Center(
-              child: Text(
-                'تعديل الاختصاص',
-                style: TextStyle(
-                  fontSize: 26,
-                  color: Color(0xff181C1F),
-                  fontFamily: 'Tajawal',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            content: Form(
-              key: majorFormKey,
-              child: TextFormField(
-                controller: majorController,
-                cursorColor: const Color(0xff2A9D8F),
-                validator: (value) {
-                  if (value == null ||
-                      value.trim().isEmpty) {
-                    return 'الاختصاص مطلوب';
-                  }
-
-                  return null;
-                },
-                decoration: _inputDecoration(
-                  hintText: 'الاختصاص',
-                ),
-              ),
-            ),
-            actionsAlignment: MainAxisAlignment.center,
-            actions: [
-              SizedBox(
-                width: double.infinity,
-                child: Consumer<EditProfileProvider>(
-                  builder: (
-                      context,
-                      editProvider,
-                      child,
-                      ) {
-                    if (editProvider.isLoading) {
-                      return const Center(
-                        child: SizedBox(
-                          width: 28,
-                          height: 28,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 3,
-                            color: Color(0xff2A9D8F),
-                          ),
-                        ),
-                      );
-                    }
-
-                    return ButtonTemplate(
-                      text: 'تعديل',
-                      onPressed: () async {
-                        if (!(majorFormKey.currentState
-                            ?.validate() ??
-                            false)) {
-                          return;
-                        }
-
-                        await editProvider.editProfile(
-                          major: majorController.text.trim(),
-                        );
-
-                        if (!mounted) return;
-
-                        if (editProvider.isSuccess) {
-                          await _refreshProfile();
-
-                          if (!mounted) return;
-
-                          Navigator.of(dialogContext).pop();
-                        } else if (editProvider.errorMessage !=
-                            null) {
-                          MySnackBar.show(
-                            context,
-                            message:
-                            editProvider.errorMessage!,
-                          );
-                        }
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  InputDecoration _inputDecoration({
-    required String hintText,
-  }) {
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: const TextStyle(
-        fontFamily: 'Tajawal',
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: Colors.grey,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: Color(0xff2A9D8F),
-          width: 2,
-        ),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: Color(0xffE76F51),
-        ),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: Color(0xffE76F51),
-          width: 2,
-        ),
+      builder: (_) => EditNameDialog(
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        onUpdated: _refreshProfile,
       ),
     );
   }
@@ -506,45 +254,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   child: Column(
                     children: [
-                      Stack(
-                        alignment: Alignment.bottomRight,
-                        children: [
-                          const CircleAvatar(
-                            radius: 50,
-                            backgroundColor:
-                            Color(0xff2A9D8F),
-                            child: Icon(
-                              Icons.person,
-                              color: Colors.white,
-                              size: 50,
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                            },
-                            borderRadius:
-                            BorderRadius.circular(30),
-                            child: Container(
-                              padding:
-                              const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: const Color(
-                                  0xff2A9D8F,
-                                ),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 2,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.edit,
-                                color: Colors.white,
-                                size: 15,
-                              ),
-                            ),
-                          ),
-                        ],
+                      ProfileImagePicker(
+                        serverImageUrl: profile.image,
                       ),
                       const SizedBox(height: 20),
                       Row(

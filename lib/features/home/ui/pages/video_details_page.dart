@@ -3,21 +3,21 @@ import 'package:graduationprojct/features/home/ui/pages/chat_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/display_videos_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/summary_page.dart';
 import 'package:provider/provider.dart';
-import 'package:video_player/video_player.dart';
-import 'package:chewie/chewie.dart';
-import 'dart:async';
+
 import '../../providers/add_video_to_fav_provider.dart';
 import '../../providers/video_details_function_provider.dart';
 import '../../providers/video_details_provider.dart';
 import '../widgets/lock_dialog_template.dart';
 import '../widgets/option_cart_template.dart';
 import '../widgets/video_info_dialog_template.dart';
+import '../widgets/video_player_section.dart' hide VideoDetailsFunctionProvider;
 import 'mcq_page.dart';
 
 class VideoDetailsPage extends StatefulWidget {
   final int playlistId;
   final int videoId;
   final String videoName;
+
   const VideoDetailsPage({
     super.key,
     required this.videoId,
@@ -26,307 +26,445 @@ class VideoDetailsPage extends StatefulWidget {
   });
 
   @override
-  State<VideoDetailsPage> createState() => _VideoDetailsPageState();
+  State<VideoDetailsPage> createState() =>
+      _VideoDetailsPageState();
 }
 
-class _VideoDetailsPageState extends State<VideoDetailsPage> {
-  late VideoPlayerController videoPlayerController;
-  ChewieController? chewieController;
-
-  late final provider = Provider.of<VideoDetailsFunctionProvider>(context);
-  Timer? progressTimer;
+class _VideoDetailsPageState
+    extends State<VideoDetailsPage> {
   bool isFavorite = false;
+  bool _videoInitialized = false;
 
+  VideoDetailsFunctionProvider?
+  _videoFunctionProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _videoFunctionProvider ??=
+        context.read<
+            VideoDetailsFunctionProvider>();
+  }
+
+  @override
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<VideoDetailsProvider>().getDetails(id: widget.videoId);
-    });
-    videoPlayerController = VideoPlayerController.networkUrl(
-      Uri.parse(
-        'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
-      ),
-    );
 
-    videoPlayerController
-        .initialize()
-        .then((_) {
-          chewieController = ChewieController(
-            videoPlayerController: videoPlayerController,
-            autoPlay: false,
-            looping: false,
-            materialProgressColors: ChewieProgressColors(
-              playedColor: const Color(0xffE9C46A),
-              handleColor: const Color(0xffE9C46A),
-              bufferedColor: Colors.grey,
-              backgroundColor: Colors.white24,
-            ),
+    WidgetsBinding.instance.addPostFrameCallback(
+          (_) async {
+        if (!mounted) return;
+
+        final detailsProvider =
+        context.read<
+            VideoDetailsProvider>();
+
+        final videoFunctionProvider =
+        context.read<
+            VideoDetailsFunctionProvider>();
+
+        await detailsProvider.getDetails(
+          id: widget.videoId,
+        );
+
+        if (!mounted) return;
+
+        final details =
+            detailsProvider.videoDetails;
+
+        final String? videoUrl =
+            details?.videoFile;
+
+        final Object? durationSeconds =
+            details?.duration;
+
+        await videoFunctionProvider
+            .initializeVideo(
+          videoUrl,
+          durationSeconds:
+          durationSeconds,
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          _videoInitialized = true;
+        });
+      },
+    );
+  }
+
+  @override
+  void didUpdateWidget(
+      covariant VideoDetailsPage oldWidget,
+      ) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.videoId !=
+        widget.videoId) {
+      _videoInitialized = false;
+
+      WidgetsBinding.instance
+          .addPostFrameCallback(
+            (_) async {
+          if (!mounted) return;
+
+          final videoFunctionProvider =
+          context.read<
+              VideoDetailsFunctionProvider>();
+
+          final detailsProvider =
+          context.read<
+              VideoDetailsProvider>();
+
+          await videoFunctionProvider
+              .releaseVideo(
+            notify: false,
+            resetProgress: true,
           );
 
-          progressTimer = Timer.periodic(const Duration(milliseconds: 300), (
-            timer,
-          ) {
-            if (!mounted) return;
+          if (!mounted) return;
 
-            if (!videoPlayerController.value.isInitialized) return;
+          await detailsProvider.getDetails(
+            id: widget.videoId,
+          );
 
-            final duration =
-                videoPlayerController.value.duration.inMilliseconds;
-            final position =
-                videoPlayerController.value.position.inMilliseconds;
-            if (duration <= 0) return;
-            double progress = position / duration;
-            progress = (progress * 10).floor() / 10;
-            if (position >= duration) {
-              progress = 1.0;
-            }
-            if (progress != provider.watchProgress) {
-              setState(() {
-                provider.updateProgress(progress);
-              });
-            }
+          if (!mounted) return;
+
+          final details =
+              detailsProvider.videoDetails;
+
+          final String? videoUrl =
+              details?.videoFile;
+
+          final Object? durationSeconds =
+              details?.duration;
+
+          await videoFunctionProvider
+              .initializeVideo(
+            videoUrl,
+            durationSeconds:
+            durationSeconds,
+          );
+
+          if (!mounted) return;
+
+          setState(() {
+            _videoInitialized = true;
           });
-          setState(() {});
-        })
-        .catchError((e) {
-          debugPrint("VIDEO ERROR: $e");
-        });
+        },
+      );
+    }
   }
 
   @override
   void dispose() {
-    progressTimer?.cancel();
-    chewieController?.dispose();
-    videoPlayerController.dispose();
+    _videoFunctionProvider?.releaseVideo(
+      notify: false,
+      resetProgress: true,
+    );
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final favProvider = context.watch<AddVideoToFavProvider>();
-    final Myprovider = context.watch<VideoDetailsProvider>();
-    final details = Myprovider.videoDetails;
+    final AddVideoToFavProvider favProvider =
+    context.watch<AddVideoToFavProvider>();
+
+    final VideoDetailsProvider
+    detailsProvider =
+    context.watch<VideoDetailsProvider>();
+
+    final VideoDetailsFunctionProvider
+    functionProvider =
+    context.watch<
+        VideoDetailsFunctionProvider>();
+
+    final details =
+        detailsProvider.videoDetails;
+
+    final String? videoUrl =
+        details?.videoFile;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton:
+      FloatingActionButton.extended(
         onPressed: favProvider.isLoading
             ? null
             : () async {
-                await context.read<AddVideoToFavProvider>().addVidToFav(
-                  id: widget.videoId,
-                );
+          await context
+              .read<
+              AddVideoToFavProvider>()
+              .addVidToFav(
+            id: widget.videoId,
+          );
 
-                if (!mounted) return;
+          if (!mounted) return;
 
-                if (favProvider.isSuccess) {
-                  setState(() {
-                    isFavorite = !isFavorite;
-                  });
+          if (favProvider.isSuccess) {
+            setState(() {
+              isFavorite = !isFavorite;
+            });
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        isFavorite
-                            ? "تمت إضافة الفيديو إلى المفضلة"
-                            : "تمت إزالة الفيديو من المفضلة",
-                      ),
-                      backgroundColor: const Color(0xff2A9D8F),
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(favProvider.errorMessage ?? "حدث خطأ"),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
+            ScaffoldMessenger.of(context)
+                .showSnackBar(
+              SnackBar(
+                content: Text(
+                  isFavorite
+                      ? 'تمت إضافة الفيديو إلى المفضلة'
+                      : 'تمت إزالة الفيديو من المفضلة',
+                  style: const TextStyle(
+                    fontFamily: 'Tajawal',
+                  ),
+                ),
+                backgroundColor:
+                const Color(
+                  0xff2A9D8F,
+                ),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(
+              SnackBar(
+                content: Text(
+                  favProvider.errorMessage ??
+                      'حدث خطأ',
+                  style: const TextStyle(
+                    fontFamily: 'Tajawal',
+                  ),
+                ),
+                backgroundColor:
+                Colors.red,
+              ),
+            );
+          }
+        },
         elevation: isFavorite ? 2 : 8,
         backgroundColor: isFavorite
             ? const Color(0xff1F7A6D)
             : const Color(0xff2A9D8F),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        shape: RoundedRectangleBorder(
+          borderRadius:
+          BorderRadius.circular(18),
+        ),
         icon: favProvider.isLoading
             ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
+          width: 22,
+          height: 22,
+          child:
+          CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Colors.white,
+          ),
+        )
             : AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                child: Icon(
-                  isFavorite
-                      ? Icons.favorite_rounded
-                      : Icons.favorite_border_rounded,
-                  key: ValueKey(isFavorite),
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
+          duration:
+          const Duration(
+            milliseconds: 250,
+          ),
+          child: Icon(
+            isFavorite
+                ? Icons.favorite_rounded
+                : Icons
+                .favorite_border_rounded,
+            key: ValueKey(isFavorite),
+            color: Colors.white,
+            size: 24,
+          ),
+        ),
         label: Text(
-          isFavorite ? "تمت الإضافة" : "إضافة للمفضلة",
+          isFavorite
+              ? 'تمت الإضافة'
+              : 'إضافة للمفضلة',
           style: const TextStyle(
-            fontFamily: "Tajawal",
+            fontFamily: 'Tajawal',
             fontWeight: FontWeight.bold,
             fontSize: 16,
             color: Colors.white,
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-
+      floatingActionButtonLocation:
+      FloatingActionButtonLocation
+          .centerFloat,
       body: Stack(
         children: [
           SingleChildScrollView(
             child: Column(
               children: [
-                AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: chewieController == null
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: Color(0xffE9C46A),
+                if (detailsProvider.isLoading &&
+                    !_videoInitialized)
+                  const AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: ColoredBox(
+                      color: Colors.black,
+                      child: Center(
+                        child:
+                        CircularProgressIndicator(
+                          color: Color(
+                            0xffE9C46A,
                           ),
-                        )
-                      : Chewie(controller: chewieController!),
-                ),
-
-                const SizedBox(height: 10),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "${(provider.watchProgress * 100).toInt()}%",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xffE9C46A),
-                              fontSize: 13,
-
-                            ),
-                          ),
-                          Text(
-                            provider.watchProgress == 1
-                                ? "تمت مشاهدة: كامل الفيديو"
-                                : "تمت مشاهدة : %${(provider.watchProgress * 100).toInt()}",
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontFamily: "Tajawal",
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xff1A2429),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      LinearProgressIndicator(
-                        value: provider.watchProgress,
-                        minHeight: 8,
-                        borderRadius: BorderRadius.circular(20),
-                        color: const Color(0xffE9C46A),
-                        backgroundColor: Colors.grey.shade300,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                OptionCart(
-                  title: "تلخيص الفيديو",
-                  image: "assets/Images/SVGRepo_iconCarrier.png",
-                  subtitle: "احصل على ملخص مولد بالذكاء الاصطناعي لهذا الدرس",
-                  buttonText: "عرض الملخص",
-                  color: const Color(0xff2A9D8F),
-                  onPressed: () {
-                    if (provider.watchProgress < 1.0) {
-                      LockedDialog.show(context);
-                      return;
-                    }
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          print(widget.videoId);
-                          return SummaryPage(
-                            playlistId: widget.playlistId,
-                            id: widget.videoId,
-                            name: widget.videoName,
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-
-                OptionCart(
-                  title: "اختبار أسئلة متعددة",
-                  image: "assets/Images/SVGRepo_iconCarrier (1).png",
-                  subtitle: "اختبر فهمك للدرس عن طريق أسئلة اختيار من متعدد.",
-                  buttonText: "عرض الاختبار",
-                  color: const Color(0xffE76F51),
-                  onPressed: () {
-                    if (provider.watchProgress < 1.0) {
-                      LockedDialog.show(context);
-                      return;
-                    }
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => McqScreen(
-                          playlistId: widget.playlistId,
-                          videoId: widget.videoId,
-                          videoName: widget.videoName,
                         ),
                       ),
-                    );
-                  },
-                ),
-
+                    ),
+                  )
+                else
+                  VideoPlayerSection(
+                    apiVideoUrl: videoUrl,
+                  ),
+                const SizedBox(height: 10),
+                const VideoWatchProgress(),
+                if (functionProvider
+                    .isUsingFallbackVideo) ...[
+                  const SizedBox(height: 8),
+                  const Padding(
+                    padding:
+                    EdgeInsets.symmetric(
+                      horizontal: 15,
+                    ),
+                    child: Text(
+                      'تعذر تشغيل فيديو السيرفر، لذلك يتم عرض الفيديو الاحتياطي.',
+                      textAlign:
+                      TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 20),
                 OptionCart(
-                  title: "لديك أسئلة",
-                  image: "assets/Images/SVGRepo_iconCarrier (2).png",
-                  subtitle: "اسأل أي سؤال عن محتويات الفيديو",
-                  buttonText: "اسأل الآن",
-                  color: const Color(0xffE9C46A),
+                  title: 'تلخيص الفيديو',
+                  image:
+                  'assets/Images/SVGRepo_iconCarrier.png',
+                  subtitle:
+                  'احصل على ملخص مولد بالذكاء الاصطناعي لهذا الدرس',
+                  buttonText: 'عرض الملخص',
+                  color:
+                  const Color(0xff2A9D8F),
                   onPressed: () {
-                    if (provider.watchProgress < 1.0) {
-                      LockedDialog.show(context);
+                    if (!functionProvider
+                        .canAccessFeatures()) {
+                      LockedDialog.show(
+                        context,
+                      );
                       return;
                     }
 
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => ChatPage(id:widget.videoId, name: widget.videoName,playlistId: widget.playlistId,)),
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            SummaryPage(
+                              playlistId:
+                              widget.playlistId,
+                              id: widget.videoId,
+                              name:
+                              widget.videoName,
+                            ),
+                      ),
                     );
                   },
                 ),
+                OptionCart(
+                  title:
+                  'اختبار أسئلة متعددة',
+                  image:
+                  'assets/Images/SVGRepo_iconCarrier (1).png',
+                  subtitle:
+                  'اختبر فهمك للدرس عن طريق أسئلة اختيار من متعدد.',
+                  buttonText: 'عرض الاختبار',
+                  color:
+                  const Color(0xffE76F51),
+                  onPressed: () {
+                    if (!functionProvider
+                        .canAccessFeatures()) {
+                      LockedDialog.show(
+                        context,
+                      );
+                      return;
+                    }
 
-                const SizedBox(height: 20),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            McqScreen(
+                              playlistId:
+                              widget.playlistId,
+                              videoId:
+                              widget.videoId,
+                              videoName:
+                              widget.videoName,
+                            ),
+                      ),
+                    );
+                  },
+                ),
+                OptionCart(
+                  title: 'لديك أسئلة',
+                  image:
+                  'assets/Images/SVGRepo_iconCarrier (2).png',
+                  subtitle:
+                  'اسأل أي سؤال عن محتويات الفيديو',
+                  buttonText: 'اسأل الآن',
+                  color:
+                  const Color(0xffE9C46A),
+                  onPressed: () {
+                    if (!functionProvider
+                        .canAccessFeatures()) {
+                      LockedDialog.show(
+                        context,
+                      );
+                      return;
+                    }
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            ChatPage(
+                              id: widget.videoId,
+                              name:
+                              widget.videoName,
+                              playlistId:
+                              widget.playlistId,
+                            ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 100),
               ],
             ),
           ),
-
           Align(
             alignment: Alignment.topRight,
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.only(top: 10, right: 12),
+                padding:
+                const EdgeInsets.only(
+                  top: 10,
+                  right: 12,
+                ),
                 child: IconButton(
-    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context){return DisplayVideosPage(id: widget.playlistId,);})),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            DisplayVideosPage(
+                              id: widget.playlistId,
+                            ),
+                      ),
+                    );
+                  },
                   icon: const Icon(
                     Icons.chevron_right,
                     color: Color(0xffE9C46A),
@@ -340,18 +478,30 @@ class _VideoDetailsPageState extends State<VideoDetailsPage> {
             alignment: Alignment.topLeft,
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.only(top: 5, left: 10),
+                padding:
+                const EdgeInsets.only(
+                  top: 5,
+                  left: 10,
+                ),
                 child: IconButton(
-                  onPressed: () {
-                    if (details == null) return;
-                    showDialog(
+                  onPressed: details == null
+                      ? null
+                      : () {
+                    showDialog<void>(
                       context: context,
-                      builder: (_) => VideoInfoDialog(video: details),
+                      builder: (_) =>
+                          VideoInfoDialog(
+                            video: details,
+                          ),
                     );
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.info_outline,
-                    color: Color(0xffE9C46A),
+                    color: details == null
+                        ? Colors.grey
+                        : const Color(
+                      0xffE9C46A,
+                    ),
                     size: 20,
                   ),
                 ),
