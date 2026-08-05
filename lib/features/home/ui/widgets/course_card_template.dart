@@ -146,6 +146,7 @@ class _CourseCardTemplateState extends State<CourseCardTemplate> {
         alignment: Alignment.topCenter,
         child: Container(
           width: widget.width,
+          height: 230,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),

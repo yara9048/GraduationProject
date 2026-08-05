@@ -22,7 +22,7 @@ class NewAddedCourseTemplate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 20,bottom: 20),
+      padding: const EdgeInsets.only(top: 5,bottom: 20),
       child: Container(
         width: 270,
         height: 200,

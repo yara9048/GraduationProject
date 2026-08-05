@@ -101,7 +101,6 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
       context,
       MaterialPageRoute(
         builder: (_) => PlaylistDetailsPage(
-          course: course,
           id: widget.id,
         ),
       ),
@@ -582,13 +581,13 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                 ),
               ),
             ),
-            Positioned(
-              top: 130,
-              left: 16,
-              right: 16,
-              bottom: 16,
-              child: pageContent,
-            ),
+        Padding(
+          padding: const EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 120
+          ),child: pageContent,
+          )
           ],
         ),
       ),

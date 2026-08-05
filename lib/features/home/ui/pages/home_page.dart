@@ -105,9 +105,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                                  ],
                 ),
-
-
-
                 Expanded(
                   child: MediaQuery.removePadding(
                     context: context,
@@ -201,14 +198,14 @@ class _HomePageState extends State<HomePage> {
                                     return Padding(
                                       padding: const EdgeInsets.only(left: 16),
                                       child: CourseCardTemplate(
-                                        playlistId: playlist.id,
+                                        playlistId: playlist.courseDetail!.id,
                                         imagePath:
                                         'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
-                                        title: playlist.title,
+                                        title: playlist.courseDetail!.name,
                                         durationText:
-                                        "${playlist.duration ?? 0} دقيقة",
-                                        progress: 0.5,
-                                        description: playlist.description,
+                                        "${playlist.courseDetail?.totalDuration ?? 0} دقيقة",
+                                        progress: playlist.progressPercentage/100,
+                                        description: playlist.courseDetail!.description,
                                       ),
                                     );
                                   },
@@ -217,7 +214,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 30,),
+                        SizedBox(height: 10,),
                         Padding(
                           padding: const EdgeInsets.only(
                             right: 30,

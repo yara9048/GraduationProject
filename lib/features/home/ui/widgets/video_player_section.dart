@@ -19,44 +19,42 @@ class VideoPlayerSection extends StatelessWidget {
           provider,
           child,
           ) {
+        final bool isWaitingForVideo =
+            provider.isVideoLoading ||
+                (!provider.hasInitializedVideo &&
+                    provider.videoErrorMessage == null);
+
+        final bool hasReadyVideo =
+            provider.chewieController != null &&
+                provider.hasInitializedVideo;
+
         return Directionality(
-          /*
-           * مهم جدًا:
-           * مشغّل الفيديو وأزراره وشريط المدة يجب
-           * أن يكونوا LTR حتى لو التطبيق عربي.
-           */
           textDirection: TextDirection.ltr,
           child: ClipRect(
             child: AspectRatio(
               aspectRatio: 16 / 9,
               child: SizedBox(
                 width: double.infinity,
-                child: provider.isVideoLoading
+                child: isWaitingForVideo
                     ? const ColoredBox(
                   color: Colors.black,
                   child: Center(
-                    child:
-                    CircularProgressIndicator(
-                      color:
-                      Color(0xffE9C46A),
+                    child: CircularProgressIndicator(
+                      color: Color(0xffE9C46A),
                     ),
                   ),
                 )
-                    : provider.chewieController !=
-                    null &&
-                    provider
-                        .hasInitializedVideo
+                    : hasReadyVideo
                     ? Chewie(
-                  controller: provider
-                      .chewieController!,
+                  controller:
+                  provider.chewieController!,
                 )
                     : ColoredBox(
                   color: Colors.black,
                   child: Center(
                     child: Padding(
                       padding:
-                      const EdgeInsets
-                          .symmetric(
+                      const EdgeInsets.symmetric(
                         horizontal: 25,
                       ),
                       child: Column(
@@ -64,10 +62,8 @@ class VideoPlayerSection extends StatelessWidget {
                         MainAxisSize.min,
                         children: [
                           const Icon(
-                            Icons
-                                .video_file_outlined,
-                            color:
-                            Colors.white,
+                            Icons.video_file_outlined,
+                            color: Colors.white,
                             size: 48,
                           ),
                           const SizedBox(
@@ -78,12 +74,10 @@ class VideoPlayerSection extends StatelessWidget {
                                 .videoErrorMessage ??
                                 'تعذر تشغيل الفيديو',
                             textAlign:
-                            TextAlign
-                                .center,
+                            TextAlign.center,
                             style:
                             const TextStyle(
-                              color:
-                              Colors.white,
+                              color: Colors.white,
                               fontFamily:
                               'Tajawal',
                               fontSize: 15,
@@ -102,8 +96,7 @@ class VideoPlayerSection extends StatelessWidget {
                               );
                             },
                             style:
-                            OutlinedButton
-                                .styleFrom(
+                            OutlinedButton.styleFrom(
                               foregroundColor:
                               const Color(
                                 0xffE9C46A,
@@ -116,13 +109,11 @@ class VideoPlayerSection extends StatelessWidget {
                               ),
                             ),
                             icon: const Icon(
-                              Icons
-                                  .refresh_rounded,
+                              Icons.refresh_rounded,
                             ),
                             label: const Text(
                               'إعادة المحاولة',
-                              style:
-                              TextStyle(
+                              style: TextStyle(
                                 fontFamily:
                                 'Tajawal',
                               ),
@@ -141,39 +132,40 @@ class VideoPlayerSection extends StatelessWidget {
     );
   }
 }
-class VideoWatchProgress
-    extends StatelessWidget {
+
+class VideoWatchProgress extends StatelessWidget {
   const VideoWatchProgress({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<
-        VideoDetailsFunctionProvider>(
+    return Consumer<VideoDetailsFunctionProvider>(
       builder: (
           context,
           provider,
           child,
           ) {
-        /*
-         * المدة هنا مأخوذة من الفيديو نفسه:
-         * VideoPlayerController.value.duration
-         */
-        final bool hasApiDuration =
-            provider.videoDuration >
-                Duration.zero;
+        final bool hasDuration =
+            provider.videoDuration > Duration.zero;
+
+        final double displayedProgress =
+        hasDuration
+            ? provider.watchProgress
+            .clamp(
+          0.0,
+          1.0,
+        )
+            .toDouble()
+            : 0.0;
 
         final int progressPercentage =
-        hasApiDuration
-            ? (provider.watchProgress *
-            100)
+        (displayedProgress * 100)
             .round()
             .clamp(
           0,
           100,
-        )
-            : 0;
+        );
 
         final String currentPosition =
         provider.formatDuration(
@@ -181,7 +173,7 @@ class VideoWatchProgress
         );
 
         final String totalDuration =
-        hasApiDuration
+        hasDuration
             ? provider.formatDuration(
           provider.videoDuration,
         )
@@ -206,13 +198,11 @@ class VideoWatchProgress
                         fontFamily:
                         'Tajawal',
                         fontSize: 12,
-                        color:
-                        Color(
+                        color: Color(
                           0xff92A1A1,
                         ),
                         fontWeight:
-                        FontWeight
-                            .w600,
+                        FontWeight.w600,
                       ),
                     ),
                     const Text(
@@ -230,13 +220,11 @@ class VideoWatchProgress
                         fontFamily:
                         'Tajawal',
                         fontSize: 12,
-                        color:
-                        Color(
+                        color: Color(
                           0xff92A1A1,
                         ),
                         fontWeight:
-                        FontWeight
-                            .w600,
+                        FontWeight.w600,
                       ),
                     ),
                     const Spacer(),
@@ -267,21 +255,10 @@ class VideoWatchProgress
                   ),
                   child:
                   LinearProgressIndicator(
-                    /*
-                     * إذا لم تصل المدة الحقيقية بعد،
-                     * تكون القيمة صفر وليس 100%.
-                     */
-                    value: hasApiDuration
-                        ? provider
-                        .watchProgress
-                        .clamp(
-                      0.0,
-                      1.0,
-                    )
-                        : 0.0,
+                    value:
+                    displayedProgress,
                     minHeight: 8,
-                    color:
-                    const Color(
+                    color: const Color(
                       0xffE9C46A,
                     ),
                     backgroundColor:
@@ -296,9 +273,9 @@ class VideoWatchProgress
                 alignment:
                 Alignment.centerRight,
                 child: Text(
-                  !hasApiDuration
+                  !hasDuration
                       ? 'جاري قراءة مدة الفيديو...'
-                      : provider.isCompleted
+                      : displayedProgress >= 1.0
                       ? 'تمت مشاهدة كامل الفيديو'
                       : 'تمت مشاهدة $progressPercentage% من الفيديو',
                   textDirection:

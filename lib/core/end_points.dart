@@ -35,4 +35,6 @@ class ApiEndpoints {
       'video-progress/history/';
   static const purchaseSubscription =
       'subscriptions/purchase/';
+  static const progress = 'video-progress/';
+
 }

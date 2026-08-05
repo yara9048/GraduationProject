@@ -18,6 +18,7 @@ import 'package:graduationprojct/features/home/providers/display_subjects_provid
 import 'package:graduationprojct/features/home/providers/display_videos_provider.dart';
 import 'package:graduationprojct/features/home/providers/filtered_playlist_provider.dart';
 import 'package:graduationprojct/features/home/providers/funding_request_provider.dart';
+import 'package:graduationprojct/features/home/providers/get_video_progress_provider.dart';
 import 'package:graduationprojct/features/home/providers/main_navigation_provider.dart';
 import 'package:graduationprojct/features/home/providers/now_showing_playlist_provider.dart';
 import 'package:graduationprojct/features/home/providers/playlist_details_provider.dart';
@@ -38,6 +39,7 @@ import 'features/auth/providers/log_out_provider.dart';
 import 'features/auth/providers/send_otp_provider.dart';
 import 'features/auth/providers/sign_in_provider.dart';
 import 'features/auth/ui/pages/sign_in/sign_in_page.dart';
+import 'features/home/providers/video_progress_provider.dart';
 import 'features/home/ui/pages/main_navigation_page.dart';
 import 'firebase_options.dart';
 
@@ -112,7 +114,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => ResetPasswordRequestProvider(),
         ),
-
+        ChangeNotifierProvider(
+          create: (_) => GetVideoProgressProvider(),
+        ),
         ChangeNotifierProvider(
           create: (_) => PasswordSendOtpPrvider(),
         ),
@@ -124,7 +128,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => VideoDetailsFunctionProvider(),
         ),
-
+        ChangeNotifierProvider(
+          create: (_) =>
+              VideoProgressProvider(),
+        ),
         ChangeNotifierProvider(
           create: (_) => VideoDetailsProvider(),
         ),

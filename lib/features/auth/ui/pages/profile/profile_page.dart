@@ -56,6 +56,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       context.read<ProfileProvider>().getProfile();
     });
+
   }
 
   @override

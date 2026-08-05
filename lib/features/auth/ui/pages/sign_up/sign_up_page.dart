@@ -4,6 +4,7 @@ import 'package:graduationprojct/features/auth/providers/sign_up_provider.dart';
 import 'package:graduationprojct/features/auth/ui/widgets/sign_up_image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../home/providers/display_subjects_provider.dart';
 import '../../widgets/auth_pages_template.dart';
 import '../../widgets/button_template.dart';
 import '../../widgets/snack_bar.dart';
@@ -41,6 +42,19 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController();
 
   bool isValidationActive = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      context
+          .read<DisplaySubjectsProvider>()
+          .getSubjects();
+    });
+  }
 
   @override
   void dispose() {
@@ -217,103 +231,181 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    SizedBox(
-                      width: 280,
-                      height: 60,
-                      child: DropdownButtonFormField<String>(
-                        dropdownColor: Colors.white,
-                        alignment: AlignmentDirectional.centerEnd,
-                        value: selectedMajor,
-                        isExpanded: true,
-                        decoration: InputDecoration(
-                          hintText: 'تخصصك الأكاديمي',
-                          hintStyle: const TextStyle(
-                            color: Color(0xffD1D9D9),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            fontFamily: "Tajawal",
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(22),
-                            borderSide: const BorderSide(
-                              color: Colors.black26,
-                              width: 2,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(22),
-                            borderSide: const BorderSide(
-                              color: Colors.black26,
-                              width: 2,
+                    Consumer<DisplaySubjectsProvider>(
+                      builder: (
+                          context,
+                          subjectsProvider,
+                          child,
+                          ) {
+                        final subjects =
+                            subjectsProvider.subjects;
 
+                        if (subjectsProvider.isLoading) {
+                          return const SizedBox(
+                            width: 280,
+                            height: 60,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3,
+                                color: Color(0xff2A9D8F),
+                              ),
                             ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(22),
-                            borderSide: const BorderSide(
+                          );
+                        }
+
+                        if (subjectsProvider.errorMessage != null) {
+                          return SizedBox(
+                            width: 280,
+                            child: Column(
+                              children: [
+                                Text(
+                                  subjectsProvider.errorMessage ??
+                                      'تعذر تحميل الاختصاصات',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontFamily: 'Tajawal',
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                TextButton.icon(
+                                  onPressed: () {
+                                    context
+                                        .read<DisplaySubjectsProvider>()
+                                        .getSubjects();
+                                  },
+                                  icon: const Icon(
+                                    Icons.refresh_rounded,
+                                    color: Color(0xff2A9D8F),
+                                  ),
+                                  label: const Text(
+                                    'إعادة المحاولة',
+                                    style: TextStyle(
+                                      color: Color(0xff2A9D8F),
+                                      fontFamily: 'Tajawal',
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        return SizedBox(
+                          width: 280,
+                          child: DropdownButtonFormField<String>(
+                            value: selectedMajor,
+                            dropdownColor: Colors.white,
+                            alignment:
+                            AlignmentDirectional.centerEnd,
+                            isExpanded: true,
+                            decoration: InputDecoration(
+                              hintText: 'تخصصك الأكاديمي',
+                              hintStyle: const TextStyle(
+                                color: Color(0xffD1D9D9),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                fontFamily: 'Tajawal',
+                              ),
+                              contentPadding:
+                              const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 16,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                BorderRadius.circular(22),
+                                borderSide: const BorderSide(
+                                  color: Colors.black26,
+                                  width: 2,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius:
+                                BorderRadius.circular(22),
+                                borderSide: const BorderSide(
+                                  color: Colors.black26,
+                                  width: 2,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius:
+                                BorderRadius.circular(22),
+                                borderSide: const BorderSide(
+                                  color: Color(0xff2A9D8F),
+                                  width: 1.5,
+                                ),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderRadius:
+                                BorderRadius.circular(22),
+                                borderSide: const BorderSide(
+                                  color: Colors.red,
+                                ),
+                              ),
+                              focusedErrorBorder:
+                              OutlineInputBorder(
+                                borderRadius:
+                                BorderRadius.circular(22),
+                                borderSide: const BorderSide(
+                                  color: Colors.red,
+                                  width: 1.5,
+                                ),
+                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              size: 22,
                               color: Colors.black26,
-                              width: 2,
                             ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
+                            style: const TextStyle(
+                              color: Color(0xff1A2429),
+                              fontSize: 15,
+                              fontFamily: 'Tajawal',
                             ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1.5,
-                            ),
-                          ),
-                        ),
-                        icon: const Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          size: 22,
-                          color: Colors.black26,
-                        ),
-                        style: const TextStyle(
-                          color: Color(0xff1A2429),
-                          fontSize: 16,
-                          fontFamily: 'Tajawal',
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'ai',
-                            child: Text('AI'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'cs',
-                            child: Text('CS'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'general',
-                            child: Text('General'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'it',
-                            child: Text('IT'),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            selectedMajor = value;
-                          });
-                        },
-                        validator: (value) {
-                          if (!isValidationActive) {
-                            return null;
-                          }
 
-                          if (value == null || value.isEmpty) {
-                            return 'يرجى اختيار الاختصاص';
-                          }
+                            /*
+         * نعرض category_detail.name
+         * ونحفظ category_detail.slug.
+         */
+                            items: subjects.map((subject) {
+                              return DropdownMenuItem<String>(
+                                value: subject.categoryDetail.slug,
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    subject.categoryDetail.name,
+                                    textDirection: TextDirection.ltr,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: 'Tajawal',
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
 
-                          return null;
-                        },
-                      ),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedMajor = value;
+                              });
+                            },
+                            validator: (value) {
+                              if (!isValidationActive) {
+                                return null;
+                              }
+
+                              if (value == null ||
+                                  value.isEmpty) {
+                                return 'يرجى اختيار الاختصاص';
+                              }
+
+                              return null;
+                            },
+                          ),
+                        );
+                      },
                     ),
                     SizedBox(
                       height: isValidationActive ? 10 : 15,

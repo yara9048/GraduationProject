@@ -83,25 +83,6 @@ class VideoInfoDialog extends StatelessWidget {
               value: "${video.mcqCount}",
             ),
 
-            const SizedBox(height: 12),
-
-            if (video.transcript.isNotEmpty)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xffF5F7F8),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Text(
-                  video.transcript,
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    fontFamily: "Tajawal",
-                    fontSize: 14,
-                    height: 1.6,
-                  ),
-                ),
-              ),
 
             const SizedBox(height: 20),
 

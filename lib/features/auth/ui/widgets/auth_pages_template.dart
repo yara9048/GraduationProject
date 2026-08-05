@@ -48,7 +48,6 @@ class AuthPagesTemplate extends StatelessWidget {
               child: child,
             ),
 
-            // طبقة بيضاء تمنع ظهور الـ child خلف العنوان
             Positioned(
               top: 0,
               left: 0,
@@ -60,8 +59,6 @@ class AuthPagesTemplate extends StatelessWidget {
                 ),
               ),
             ),
-
-            // إعادة رسم الزخرفة العلوية فوق الخلفية البيضاء
             Positioned(
               top: 0,
               left: 0,
@@ -71,8 +68,6 @@ class AuthPagesTemplate extends StatelessWidget {
                 ),
               ),
             ),
-
-            // العنوان
             Positioned(
               top: 50,
               right: 30,
