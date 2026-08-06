@@ -21,7 +21,7 @@ class ChatMessageService {
   }) async {
     try {
       final response = await _dio.post(
-        ApiEndpoints.chats,
+        ApiEndpoints.messages,
         data: {
           'chat': id,
           'text':text,

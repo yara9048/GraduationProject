@@ -12,6 +12,7 @@ import 'package:graduationprojct/features/home/providers/add_playlist_to_fav_pro
 import 'package:graduationprojct/features/home/providers/add_video_to_fav_provider.dart';
 import 'package:graduationprojct/features/home/providers/ai_features_provider.dart';
 import 'package:graduationprojct/features/home/providers/chat_message_provider.dart';
+import 'package:graduationprojct/features/home/providers/chat_page_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_facourite_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_playlist_by_subject_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_playlists_provider.dart';
@@ -22,13 +23,16 @@ import 'package:graduationprojct/features/home/providers/funding_request_provide
 import 'package:graduationprojct/features/home/providers/get_video_progress_provider.dart';
 import 'package:graduationprojct/features/home/providers/main_navigation_provider.dart';
 import 'package:graduationprojct/features/home/providers/now_showing_playlist_provider.dart';
+import 'package:graduationprojct/features/home/providers/playlist_by_teachers_provider.dart';
 import 'package:graduationprojct/features/home/providers/playlist_details_provider.dart';
 import 'package:graduationprojct/features/home/providers/playlist_search_provider.dart';
 import 'package:graduationprojct/features/home/providers/rating_playlist_provider.dart';
 import 'package:graduationprojct/features/home/providers/subject_search_provider.dart';
 import 'package:graduationprojct/features/home/providers/subscribe_provider.dart';
+import 'package:graduationprojct/features/home/providers/teachers_provider.dart';
 import 'package:graduationprojct/features/home/providers/video_details_function_provider.dart';
 import 'package:graduationprojct/features/home/providers/video_details_provider.dart';
+import 'package:graduationprojct/features/home/providers/view_chat_provider.dart';
 import 'package:graduationprojct/features/home/providers/wallet_provider.dart';
 import 'package:graduationprojct/features/home/providers/wallet_transactions_provider.dart';
 import 'package:graduationprojct/features/home/providers/watching_history_provider.dart';
@@ -105,6 +109,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AiFeaturesProvider()),
 
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => ViewChatProvider()),
+        ChangeNotifierProvider(create: (_) => ChatPageProvider()),
+        ChangeNotifierProvider(create: (_) => TeachersProvider()),
+        ChangeNotifierProvider(create: (_) => PlaylistByTeachersProvider()),
 
         ChangeNotifierProvider(
           create: (_) => LogoutProvider(authProvider: authProvider),

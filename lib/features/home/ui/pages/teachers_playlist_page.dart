@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/display_playlist_by_subject_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_playlists_provider.dart';
+import 'package:graduationprojct/features/home/providers/playlist_by_teachers_provider.dart';
 import 'package:graduationprojct/features/home/providers/teachers_provider.dart';
 import 'package:graduationprojct/features/home/ui/pages/main_navigation_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/subject_search_page.dart';
@@ -9,27 +10,26 @@ import 'package:provider/provider.dart';
 
 import '../widgets/course_card_template.dart';
 import '../widgets/teacher_card_template.dart';
+import 'display_playlist_by_subject_page.dart';
 
-class DisplayPlaylistBySubjectPage extends StatefulWidget {
+class TeachersPlaylistPage extends StatefulWidget {
   final int id;
-  const DisplayPlaylistBySubjectPage({super.key, required this.id});
+  final int subjectId;
+  const TeachersPlaylistPage({super.key, required this.id, required this.subjectId});
 
   @override
-  State<DisplayPlaylistBySubjectPage> createState() =>
-      _DisplayPlaylistBySubjectPageState();
+  State<TeachersPlaylistPage> createState() =>
+      _TeachersPlaylistPageState();
 }
 
-class _DisplayPlaylistBySubjectPageState
-    extends State<DisplayPlaylistBySubjectPage> {
+class _TeachersPlaylistPageState
+    extends State<TeachersPlaylistPage> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DisplayPlaylistBySubjectProvider>().getPlaylists(
+      context.read<PlaylistByTeachersProvider>().playlistByTeacher(
         id: widget.id,
-      );
-      context.read<TeachersProvider>().getTeachers(
-        subjectId: widget.id,
       );
     });
   }
@@ -37,9 +37,7 @@ class _DisplayPlaylistBySubjectPageState
   Widget build(BuildContext context) {
     final provider = context.watch<DisplayPlaylistBySubjectProvider>();
     final playlists = provider.playlists;
-    final teachersProvider = context.watch<TeachersProvider>();
-    final teachers = teachersProvider.teachers;
-    if (provider.isLoading) {
+   if (provider.isLoading) {
       return const Scaffold(
         backgroundColor: Colors.white,
         body: Center(
@@ -77,7 +75,7 @@ class _DisplayPlaylistBySubjectPageState
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return MainNavigationPage();
+                      return DisplayPlaylistBySubjectPage(id: widget.subjectId,);
                     },
                   ),
                 ),
@@ -160,29 +158,8 @@ class _DisplayPlaylistBySubjectPageState
                 ],
               ),
             ),
-            Positioned(
-              top: 110,
-              right: 16,
-              left: 16,
-              child: SizedBox(
-                height: 110,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: teachers.length,
-                  itemBuilder: (context, index) {
-                    final teacher = teachers[index];
-                    return TeacherCard(
-                      subjectId: widget.id,
-                      name: teacher.name,
-                      image: teacher.image,
-                      id: teacher.id,
-                    );
-                  },
-                ),
-              ),
-            ),
             Positioned.fill(
-              top: 230,
+              top: 130,
               left: 16,
               right: 16,
               child: ListView.builder(
@@ -196,7 +173,7 @@ class _DisplayPlaylistBySubjectPageState
                     child: CourseCardTemplate(
                       playlistId: playlist.id,
                       imagePath:
-                          'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
+                      'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
                       title: playlist.name,
                       durationText: "${playlist.totalDuration ?? 0} دقيقة",
                       progress: playlist.completionRate / 100,

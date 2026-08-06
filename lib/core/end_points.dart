@@ -18,6 +18,8 @@ class ApiEndpoints {
       'courses/$id/';
   static String courseVideos(int id) =>
       'courses/$id/videos/';
+  static String teachers(int id) =>
+      'teachers/by-subject/$id/';
   static String coursesBySubject(int id) =>
       'courses/by-subject/$id/';
   static String togglePlaylistFavorite(int id) =>

@@ -18,11 +18,6 @@ class _PlaylistSearchPageState
     extends State<PlaylistSearchPage> {
   final TextEditingController controller =
   TextEditingController();
-
-  /*
-   * نستخدم متغير محلي لنعرف هل المستخدم
-   * نفذ عملية بحث أم لا.
-   */
   bool hasSearched = false;
 
   @override
