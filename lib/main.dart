@@ -11,6 +11,7 @@ import 'package:graduationprojct/features/auth/providers/sign_up_provider.dart';
 import 'package:graduationprojct/features/home/providers/add_playlist_to_fav_provider.dart';
 import 'package:graduationprojct/features/home/providers/add_video_to_fav_provider.dart';
 import 'package:graduationprojct/features/home/providers/ai_features_provider.dart';
+import 'package:graduationprojct/features/home/providers/chat_message_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_facourite_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_playlist_by_subject_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_playlists_provider.dart';
@@ -110,6 +111,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => CreateChatProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ChatMessageProvider(),
         ),
         ChangeNotifierProvider(create: (_) => EditProfileProvider()),
 
