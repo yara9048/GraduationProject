@@ -59,7 +59,7 @@ class _DisplayPlaylistsPageState extends State<DisplayPlaylistsPage> {
               child: Image.asset('assets/Images/Ellipse 7.png'),
             ),
             Positioned(
-              top: 55,
+              top: 70,
               right: 16,
               child: Text("قائمة التشغيل",style: TextStyle(fontWeight: FontWeight.bold,
                         color: Color(0xff2A9D8F),
@@ -91,7 +91,7 @@ class _DisplayPlaylistsPageState extends State<DisplayPlaylistsPage> {
               child: Image.asset('assets/Images/Ellipse 7.png'),
             ),
             Positioned(
-              top: 55,
+              top: 70,
               right: 16,
               child: Text("قوائم التشغيل",style: TextStyle(fontWeight: FontWeight.bold,
                       color: Color(0xff2A9D8F),

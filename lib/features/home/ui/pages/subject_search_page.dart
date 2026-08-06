@@ -105,7 +105,7 @@ class _SubjectSearchPageState
             ),
 
             Positioned(
-              top: 130,
+              top: 120,
               left: 10,
               right: 5,
               child: TextFieldTemplate(
@@ -151,10 +151,6 @@ class _SubjectSearchPageState
                     );
                   }
 
-                  /*
-                   * عند فتح الصفحة لأول مرة
-                   * لا نعرض لا نتائج ولا رسالة.
-                   */
                   if (controller.text
                       .trim()
                       .isEmpty) {
@@ -230,7 +226,7 @@ class _SubjectSearchPageState
             ),
 
             Positioned(
-              top: 70,
+              top: 55,
               right: 16,
               child: InkWell(
                 onTap: closeSearchPage,

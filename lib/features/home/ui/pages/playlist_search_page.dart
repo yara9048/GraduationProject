@@ -111,11 +111,8 @@ class _PlaylistSearchPageState
               ),
             ),
 
-            /*
-             * زر الرجوع والعنوان.
-             */
             Positioned(
-              top: 70,
+              top: 55,
               right: 16,
               child: InkWell(
                 borderRadius:
@@ -154,12 +151,8 @@ class _PlaylistSearchPageState
                 ),
               ),
             ),
-
-            /*
-             * حقل البحث.
-             */
             Positioned(
-              top: 140,
+              top: 120,
               left: 5,
               right: 5,
               child: TextFieldTemplate(

@@ -31,6 +31,8 @@ class _ChatPageState extends State<ChatPage> {
 
   static const int fixedChatId = 2;
 
+  bool webSearch = false;
+
   @override
   void initState() {
     super.initState();
@@ -245,18 +247,12 @@ class _ChatPageState extends State<ChatPage> {
 
         final message = provider.messages[index];
 
-        if (message.isUser) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-
-            child: UserMessage(text: message.text),
-          );
-        }
-
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
 
-          child: BotMessage(text: message.text),
+          child: message.isUser
+              ? UserMessage(text: message.text)
+              : BotMessage(text: message.text),
         );
       },
     );
@@ -311,6 +307,26 @@ class _ChatPageState extends State<ChatPage> {
                   borderRadius: BorderRadius.circular(22),
 
                   borderSide: BorderSide.none,
+                ),
+
+                suffixIcon: IconButton(
+                  tooltip: webSearch
+                      ? "إيقاف البحث عبر الويب"
+                      : "تفعيل البحث عبر الويب",
+                  onPressed: () {
+                    setState(() {
+                      webSearch = !webSearch;
+                      print(webSearch);
+                    });
+                  },
+
+                  icon: Icon(
+                    webSearch
+                        ? Icons.travel_explore_rounded
+                        : Icons.travel_explore_outlined,
+
+                    color: webSearch ? const Color(0xff2A9D8F) : Colors.grey,
+                  ),
                 ),
               ),
             ),

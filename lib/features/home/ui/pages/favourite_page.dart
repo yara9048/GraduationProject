@@ -111,7 +111,7 @@ class _FavouritePageState
             ),
 
             const Positioned(
-              top: 55,
+              top: 70,
               right: 16,
               left: 16,
               child: Text(

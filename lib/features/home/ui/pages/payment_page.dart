@@ -54,9 +54,8 @@ class _PaymentPageState extends State<PaymentPage> {
               child: Image.asset('assets/Images/Ellipse 7.png'),
             ),
 
-            // العنوان
             Positioned(
-              top: 55,
+              top: 70,
               right: 16,
               child: Text(
                 'سجل الدفع',
@@ -69,7 +68,6 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
             ),
 
-            // كرت الرصيد
             Positioned(
               top: 120,
               right: 18,
@@ -175,7 +173,6 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
             ),
 
-            // زر الشحن
             Positioned(
               top: 255,
 
