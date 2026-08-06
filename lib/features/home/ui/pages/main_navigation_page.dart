@@ -6,8 +6,12 @@ import '../../../auth/providers/profile_provider.dart';
 import '../../../auth/ui/pages/profile/profile_page.dart';
 import '../../providers/display_facourite_provider.dart';
 import '../../providers/display_playlists_provider.dart';
+import '../../providers/display_subjects_provider.dart';
 import '../../providers/filtered_playlist_provider.dart';
 import '../../providers/main_navigation_provider.dart';
+import '../../providers/now_showing_playlist_provider.dart';
+import '../../providers/wallet_provider.dart';
+import '../../providers/wallet_transactions_provider.dart';
 import 'display_playlists_page.dart';
 import 'favourite_page.dart';
 import 'home_page.dart';
@@ -65,15 +69,65 @@ class _MainNavigationPageState
 
     await navigationProvider.changeTab(
       index: index,
+
       displayPlaylistsProvider:
       context.read<DisplayPlaylistsProvider>(),
+
       filteredPlaylistProvider:
       context.read<FilteredPlaylistProvider>(),
+
       displayFavouriteProvider:
       context.read<DisplayFavouriteProvider>(),
+
       profileProvider:
       context.read<ProfileProvider>(),
     );
+
+
+    if (!mounted) return;
+
+
+    switch (index) {
+
+      case 0:
+        context.read<NowShowingPlaylistProvider>().getPlaylists();
+        context.read<FilteredPlaylistProvider>().getFilteredPlaylists();
+        context.read<DisplaySubjectsProvider>().getSubjects();
+        break;
+      case 1:
+        context
+            .read<DisplayPlaylistsProvider>()
+            .getPlayLists();
+        break;
+
+
+      case 2:
+        context
+            .read<DisplayFavouriteProvider>()
+            .getFavourites();
+
+        break;
+
+
+      case 3:
+        context
+            .read<WalletProvider>()
+            .getWallet();
+
+        context
+            .read<WalletTransactionsProvider>()
+            .getTransactions();
+
+        break;
+
+
+      case 4:
+        context
+            .read<ProfileProvider>()
+            .getProfile();
+
+        break;
+    }
   }
 
   Future<void> _onTabPressed(int index) async {

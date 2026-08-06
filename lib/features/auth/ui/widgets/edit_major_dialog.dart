@@ -360,12 +360,6 @@ class _EditMajorDialogState
         ),
       );
     }
-
-    /*
-     * نحذف التكرار اعتمادًا على slug،
-     * لأن أكثر من Subject قد يحمل
-     * نفس Category.
-     */
     final Map<String, dynamic>
     uniqueCategories = {};
 

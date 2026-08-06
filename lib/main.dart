@@ -29,6 +29,7 @@ import 'package:graduationprojct/features/home/providers/subscribe_provider.dart
 import 'package:graduationprojct/features/home/providers/video_details_function_provider.dart';
 import 'package:graduationprojct/features/home/providers/video_details_provider.dart';
 import 'package:graduationprojct/features/home/providers/wallet_provider.dart';
+import 'package:graduationprojct/features/home/providers/wallet_transactions_provider.dart';
 import 'package:graduationprojct/features/home/providers/watching_history_provider.dart';
 import 'package:graduationprojct/features/home/ui/pages/playlist_search_page.dart';
 import 'package:provider/provider.dart';
@@ -39,187 +40,116 @@ import 'features/auth/providers/log_out_provider.dart';
 import 'features/auth/providers/send_otp_provider.dart';
 import 'features/auth/providers/sign_in_provider.dart';
 import 'features/auth/ui/pages/sign_in/sign_in_page.dart';
+import 'features/home/providers/create_chat_provider.dart';
+import 'features/home/providers/refund_request_provider.dart';
+import 'features/home/providers/subscriptions_provider.dart';
 import 'features/home/providers/video_progress_provider.dart';
 import 'features/home/ui/pages/main_navigation_page.dart';
 import 'firebase_options.dart';
 
 @pragma('vm:entry-point')
-Future<void> firebaseMessagingBackgroundHandler(
-    RemoteMessage message,
-    ) async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  debugPrint(
-    'Background message: ${message.messageId}',
-  );
+  debugPrint('Background message: ${message.messageId}');
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  FirebaseMessaging.onBackgroundMessage(
-    firebaseMessagingBackgroundHandler,
-  );
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   await FirebaseMessagingService.instance.initialize();
 
   final authProvider = AuthProvider();
   await authProvider.checkLogin();
 
-  runApp(
-    MyApp(
-      authProvider: authProvider,
-    ),
-  );
+  runApp(MyApp(authProvider: authProvider));
 }
 
 class MyApp extends StatelessWidget {
   final AuthProvider authProvider;
 
-  const MyApp({
-    super.key,
-    required this.authProvider,
-  });
+  const MyApp({super.key, required this.authProvider});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<AuthProvider>.value(
-          value: authProvider,
-        ),
+        ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
 
         ChangeNotifierProvider(
-          create: (_) => SignInProvider(authProvider: authProvider,),
+          create: (_) => SignInProvider(authProvider: authProvider),
         ),
 
-        ChangeNotifierProvider(
-          create: (_) => SignUpProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => SignUpProvider()),
+
+        ChangeNotifierProvider(create: (_) => ResendOtpProvider()),
+
+        ChangeNotifierProvider(create: (_) => SendOtpProvider()),
+
+        ChangeNotifierProvider(create: (_) => ResetPasswordRequestProvider()),
+        ChangeNotifierProvider(create: (_) => WalletTransactionsProvider()),
+        ChangeNotifierProvider(create: (_) => GetVideoProgressProvider()),
+        ChangeNotifierProvider(create: (_) => PasswordSendOtpPrvider()),
+
+        ChangeNotifierProvider(create: (_) => NewPasswordProvider()),
+
+        ChangeNotifierProvider(create: (_) => VideoDetailsFunctionProvider()),
+        ChangeNotifierProvider(create: (_) => VideoProgressProvider()),
+        ChangeNotifierProvider(create: (_) => VideoDetailsProvider()),
+
+        ChangeNotifierProvider(create: (_) => AiFeaturesProvider()),
+
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
 
         ChangeNotifierProvider(
-          create: (_) => ResendOtpProvider(),
+          create: (_) => LogoutProvider(authProvider: authProvider),
         ),
+        ChangeNotifierProvider(
+          create: (_) => CreateChatProvider(),
+        ),
+        ChangeNotifierProvider(create: (_) => EditProfileProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => SendOtpProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => DisplayPlaylistsProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => ResetPasswordRequestProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => GetVideoProgressProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => PasswordSendOtpPrvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => AddPlaylistToFavProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => NewPasswordProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => DisplayVideosProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => VideoDetailsFunctionProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) =>
-              VideoProgressProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => VideoDetailsProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => FilteredPlaylistProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => AiFeaturesProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => AddVideoToFavProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => ProfileProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => DisplayFavouriteProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => LogoutProvider(authProvider: authProvider,),
-        ),
+        ChangeNotifierProvider(create: (_) => PlaylistDetailsProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => EditProfileProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => MainNavigationProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => DisplayPlaylistsProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => NowShowingPlaylistProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => AddPlaylistToFavProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => DisplaySubjectsProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => DisplayVideosProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => SubscribeProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => FilteredPlaylistProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => RatingPlaylistProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => AddVideoToFavProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => WalletProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => DisplayFavouriteProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => WatchingHistoryProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => PlaylistDetailsProvider(),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) => MainNavigationProvider(),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) => NowShowingPlaylistProvider(),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) => DisplaySubjectsProvider(),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) => SubscribeProvider(),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) => RatingPlaylistProvider(),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) => WalletProvider(),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) => WatchingHistoryProvider(),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) => FundingRequestProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => FundingRequestProvider()),
 
         ChangeNotifierProvider(
           create: (_) => DisplayPlaylistBySubjectProvider(),
         ),
-        ChangeNotifierProvider(
-          create: (_) => PlaylistSearchProvider(),
-        ),ChangeNotifierProvider(
-          create: (_) => SubjectSearchProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => PlaylistSearchProvider()),
+        ChangeNotifierProvider(create: (_) => SubjectSearchProvider()),
+        ChangeNotifierProvider(create: (_) => RefundRequestProvider()),
+        ChangeNotifierProvider(create: (_) => SubscriptionsProvider()),
       ],
       child: const AppRoot(),
     );

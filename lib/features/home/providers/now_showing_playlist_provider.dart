@@ -15,7 +15,9 @@ class NowShowingPlaylistProvider with ChangeNotifier {
   List<NowShowingPlaylistModel> _playlists = [];
 
   bool get isLoading => _isLoading;
+
   String? get errorMessage => _errorMessage;
+
   bool get isSuccess => _isSuccess;
 
   List<NowShowingPlaylistModel> get playlists => _playlists;
@@ -38,7 +40,24 @@ class NowShowingPlaylistProvider with ChangeNotifier {
         throw Exception("Authentication token not found");
       }
 
-      _playlists = await _service.getNowShowingPlaylists(token);
+      final result =
+      await _service.getNowShowingPlaylists(token);
+
+      print("API items count: ${result.length}");
+
+      final Map<int, NowShowingPlaylistModel> uniqueCourses = {};
+
+      for (final item in result) {
+        final courseId = item.courseDetail?.id;
+
+        if (courseId != null) {
+          uniqueCourses[courseId] = item;
+        }
+      }
+
+      _playlists = uniqueCourses.values.toList();
+
+      print("Unique courses count: ${_playlists.length}");
 
       _isSuccess = true;
     } catch (e) {

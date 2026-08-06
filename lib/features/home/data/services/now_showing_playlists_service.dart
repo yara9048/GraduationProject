@@ -24,7 +24,7 @@ class NowShowingPlaylistsService {
         "Expected API response to be a list, but received: ${data.runtimeType}",
       );
     }
-
+    print(response.data);
     return data
         .map(
           (item) => NowShowingPlaylistModel.fromJson(

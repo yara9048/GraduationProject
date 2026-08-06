@@ -364,11 +364,6 @@ class _SignUpPageState extends State<SignUpPage> {
                               fontSize: 15,
                               fontFamily: 'Tajawal',
                             ),
-
-                            /*
-         * نعرض category_detail.name
-         * ونحفظ category_detail.slug.
-         */
                             items: subjects.map((subject) {
                               return DropdownMenuItem<String>(
                                 value: subject.categoryDetail.slug,

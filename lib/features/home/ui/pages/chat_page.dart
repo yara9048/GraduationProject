@@ -6,9 +6,10 @@ import '../widgets/user_mesaage_template.dart';
 
 class ChatPage extends StatelessWidget {
   final int id;
+  final int chatId;
   final String name;
   final int playlistId;
-  const ChatPage({super.key, required this.id, required this.name, required this.playlistId});
+  const ChatPage({super.key, required this.id, required this.name, required this.playlistId, required this.chatId});
 
   @override
   Widget build(BuildContext context) {

@@ -9,6 +9,7 @@ class ApiEndpoints {
   static const logout = 'logout/';
   static const profile = 'profile/';
   static const courses = 'courses/';
+  static const walletTransactions = 'wallet-transactions/';
   static const filteredPlaylists = 'courses/for_you/';
   static const subjects = 'subjects/';
   static const favourites = 'favorites/';
@@ -28,7 +29,9 @@ class ApiEndpoints {
   static String videoAiFeatures(int videoId) =>
       'videos/$videoId/ai_features/';
   static const wallet = 'wallet/';
-  static const fundingRequest = 'funding-request/';
+  static const refundRequest = 'refund-requests/';
+  static const subscriptions = 'subscriptions/';
+  static const fundingRequest = 'funding-requests/';
   static const watchingNow =
       'video-progress/watching_now/';
   static const watchingHistory =
@@ -36,5 +39,8 @@ class ApiEndpoints {
   static const purchaseSubscription =
       'subscriptions/purchase/';
   static const progress = 'video-progress/';
+  static const chats = 'chats/';
+  static const messages = 'messages/';
+
 
 }

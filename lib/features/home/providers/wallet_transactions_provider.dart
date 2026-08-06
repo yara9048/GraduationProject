@@ -1,32 +1,33 @@
 import 'package:flutter/cupertino.dart';
 import 'package:graduationprojct/features/home/data/models/display_playlists_model.dart';
+import 'package:graduationprojct/features/home/data/models/wallet_transactions_model.dart';
+import 'package:graduationprojct/features/home/data/services/playlist_by_teachers_service.dart';
 import 'package:graduationprojct/features/home/data/services/playlist_search_service.dart';
+import 'package:graduationprojct/features/home/data/services/wallet_transactions_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PlaylistSearchProvider with ChangeNotifier {
-  final PlaylistSearchService _service =
-  PlaylistSearchService();
+class WalletTransactionsProvider with ChangeNotifier {
+  final WalletTransactionsService _service =
+  WalletTransactionsService();
 
   bool _isLoading = false;
   String? _errorMessage;
   bool _isSuccess = false;
 
-  List<DisplayPlaylistsModel> _playlists = [];
+  List<WalletTransactionsModel> _transactions = [];
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isSuccess => _isSuccess;
 
-  List<DisplayPlaylistsModel> get playlists =>
-      _playlists;
+  List<WalletTransactionsModel> get transactions =>
+      _transactions;
 
-  Future<void> playlistSearch({
-    required String query,
-  }) async {
+  Future<void> getTransactions() async {
     _isLoading = true;
     _errorMessage = null;
     _isSuccess = false;
-    _playlists = [];
+    _transactions = [];
 
     notifyListeners();
 
@@ -43,15 +44,12 @@ class PlaylistSearchProvider with ChangeNotifier {
         );
       }
 
-      _playlists =
-      await _service.playlistSearch(
-        token: token,
-        query: query,
-      );
+      _transactions =
+      await _service.getTransactions(token: token);
 
       _isSuccess = true;
     } catch (e) {
-      _playlists = [];
+      _transactions = [];
       _errorMessage = e.toString();
       _isSuccess = false;
     } finally {
@@ -60,8 +58,7 @@ class PlaylistSearchProvider with ChangeNotifier {
     }
   }
 
-  void resetSearch() {
-    _playlists.clear();
+  void reset() {
     _errorMessage = null;
     _isLoading = false;
     _isSuccess = false;

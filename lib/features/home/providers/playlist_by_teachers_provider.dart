@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:graduationprojct/features/home/data/models/display_playlists_model.dart';
+import 'package:graduationprojct/features/home/data/services/playlist_by_teachers_service.dart';
 import 'package:graduationprojct/features/home/data/services/playlist_search_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PlaylistSearchProvider with ChangeNotifier {
-  final PlaylistSearchService _service =
-  PlaylistSearchService();
+class PlaylistByTeachersProvider with ChangeNotifier {
+  final PlaylistByTeachersService _service =
+  PlaylistByTeachersService();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -20,8 +21,8 @@ class PlaylistSearchProvider with ChangeNotifier {
   List<DisplayPlaylistsModel> get playlists =>
       _playlists;
 
-  Future<void> playlistSearch({
-    required String query,
+  Future<void> playlistByTeacher({
+    required int id,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -44,9 +45,9 @@ class PlaylistSearchProvider with ChangeNotifier {
       }
 
       _playlists =
-      await _service.playlistSearch(
+      await _service.playlistByTeacher(
         token: token,
-        query: query,
+        id: id,
       );
 
       _isSuccess = true;

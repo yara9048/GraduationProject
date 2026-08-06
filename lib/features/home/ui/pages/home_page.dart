@@ -162,7 +162,6 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   );
                                 }
-
                                 if (nowShowingProvider.errorMessage != null) {
                                   return Center(
                                     child: Text(
@@ -188,7 +187,6 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   );
                                 }
-
                                 return ListView.builder(
                                   scrollDirection: Axis.horizontal,
                                   itemCount: nowShowingPlaylists.length,
@@ -284,7 +282,7 @@ class _HomePageState extends State<HomePage> {
                         Padding(
                           padding: const EdgeInsets.only(right: 20),
                           child: SizedBox(
-                            height: 330,
+                            height: 223,
                             child: Builder(
                               builder: (context) {
                                 if (filterProvider.isLoading) {
