@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/ui/pages/chat_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/display_videos_page.dart';
+import 'package:graduationprojct/features/home/ui/pages/pdf_viewer_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/summary_page.dart';
 import 'package:provider/provider.dart';
 
@@ -314,10 +315,35 @@ class _VideoDetailsPageState extends State<VideoDetailsPage> {
                     VideoPlayerSection(apiVideoUrl: videoUrl),
                   const SizedBox(height: 10),
                   const VideoWatchProgress(),
-                  const SizedBox(height: 20),
+                  if (details != null &&
+                      details.attachments.isNotEmpty)
+                    OptionCart(
+                      title: 'ملف المحاضرة',
+                      subtitle:
+                      'تصفح الملف المرفق مع هذا الدرس',
+                      buttonText: 'عرض الملف',
+                      color: const Color(0xff264653),
+                      onPressed: () {
+                        final attachment =
+                            details.attachments.first;
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PdfViewerPage(
+                              pdfUrl: attachment.file,
+                              fileName:
+                              attachment.originalName,
+                              title: widget.videoName,
+                            ),
+                          ),
+                        );
+                      },
+                      child:
+                      Icon(Icons.file_copy,size: 25,color: Color(0xff264653),)
+                    ),
                   OptionCart(
                     title: 'تلخيص الفيديو',
-                    image: 'assets/Images/SVGRepo_iconCarrier.png',
                     subtitle: 'احصل على ملخص مولد بالذكاء الاصطناعي لهذا الدرس',
                     buttonText: 'عرض الملخص',
                     color: const Color(0xff2A9D8F),
@@ -338,10 +364,14 @@ class _VideoDetailsPageState extends State<VideoDetailsPage> {
                         ),
                       );
                     },
+                    child: Image.asset(
+    'assets/Images/SVGRepo_iconCarrier.png',
+    width: 20,
+    height: 20,
+    ),
                   ),
                   OptionCart(
                     title: 'اختبار أسئلة متعددة',
-                    image: 'assets/Images/SVGRepo_iconCarrier (1).png',
                     subtitle: 'اختبر فهمك للدرس عن طريق أسئلة اختيار من متعدد.',
                     buttonText: 'عرض الاختبار',
                     color: const Color(0xffE76F51),
@@ -362,10 +392,14 @@ class _VideoDetailsPageState extends State<VideoDetailsPage> {
                         ),
                       );
                     },
+                    child: Image.asset(
+    'assets/Images/SVGRepo_iconCarrier (1).png',
+    width: 20,
+    height: 20,
+    ),
                   ),
                   OptionCart(
                     title: 'لديك أسئلة',
-                    image: 'assets/Images/SVGRepo_iconCarrier (2).png',
                     subtitle: 'اسأل أي سؤال عن محتويات الفيديو',
                     buttonText: 'اسأل الآن',
                     color: const Color(0xffE9C46A),
@@ -404,6 +438,11 @@ class _VideoDetailsPageState extends State<VideoDetailsPage> {
                         );
                       }
                     },
+                    child: Image.asset(
+                      'assets/Images/SVGRepo_iconCarrier (2).png',
+                      width: 20,
+                      height: 20,
+                    ),
                   ),
                   const SizedBox(height: 100),
                 ],

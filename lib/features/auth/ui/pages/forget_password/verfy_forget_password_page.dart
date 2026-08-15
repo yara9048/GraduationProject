@@ -33,7 +33,7 @@ class _VerifyForgetPasswordPageState extends State<VerifyForgetPasswordPage> {
         text1: "أدخل الرمز المرسل إلى بريدك الالكتروني",
         size1: 17,
         size2: 17,
-        text2: ". لتعديل كلمة المرور",
+        text2: "لتعديل كلمة المرور .",
         child: Center(
           child: Form(
             key: _formKey,

@@ -1,16 +1,12 @@
 import 'dart:convert';
 
-VideoDetailsModel videoDetailsModelFromJson(
-    String str,
-    ) {
+VideoDetailsModel videoDetailsModelFromJson(String str) {
   return VideoDetailsModel.fromJson(
     json.decode(str) as Map<String, dynamic>,
   );
 }
 
-String videoDetailsModelToJson(
-    VideoDetailsModel data,
-    ) {
+String videoDetailsModelToJson(VideoDetailsModel data) {
   return json.encode(data.toJson());
 }
 
@@ -18,8 +14,12 @@ class VideoDetailsModel {
   final int id;
   final String title;
   final String description;
+
   final int playlist;
+  final PlaylistDetail? playlistDetail;
+
   final int owner;
+  final OwnerDetail? ownerDetail;
 
   final String? videoFile;
   final String? thumbnail;
@@ -31,6 +31,8 @@ class VideoDetailsModel {
   final String approvalStatus;
   final String rejectionReason;
   final String transcript;
+
+  final List<VideoAttachment> attachments;
 
   final int mcqCount;
   final String accessStatus;
@@ -44,7 +46,9 @@ class VideoDetailsModel {
     required this.title,
     required this.description,
     required this.playlist,
+    required this.playlistDetail,
     required this.owner,
+    required this.ownerDetail,
     required this.videoFile,
     required this.thumbnail,
     required this.duration,
@@ -53,6 +57,7 @@ class VideoDetailsModel {
     required this.approvalStatus,
     required this.rejectionReason,
     required this.transcript,
+    required this.attachments,
     required this.mcqCount,
     required this.accessStatus,
     required this.canWatch,
@@ -65,11 +70,31 @@ class VideoDetailsModel {
       ) {
     return VideoDetailsModel(
       id: _parseInt(json['id']),
+
       title: json['title']?.toString() ?? '',
+
       description:
       json['description']?.toString() ?? '',
-      playlist: _parseInt(json['playlist']),
-      owner: _parseInt(json['owner']),
+
+      playlist: _parseInt(
+        json['playlist'],
+      ),
+
+      playlistDetail: json['playlist_detail'] is Map<String, dynamic>
+          ? PlaylistDetail.fromJson(
+        json['playlist_detail'],
+      )
+          : null,
+
+      owner: _parseInt(
+        json['owner'],
+      ),
+
+      ownerDetail: json['owner_detail'] is Map<String, dynamic>
+          ? OwnerDetail.fromJson(
+        json['owner_detail'],
+      )
+          : null,
 
       videoFile: _parseNullableString(
         json['video_file'],
@@ -87,7 +112,8 @@ class VideoDetailsModel {
         json['views'],
       ),
 
-      status: json['status']?.toString() ?? '',
+      status:
+      json['status']?.toString() ?? '',
 
       approvalStatus:
       json['approval_status']?.toString() ?? '',
@@ -98,8 +124,16 @@ class VideoDetailsModel {
       transcript:
       json['transcript']?.toString() ?? '',
 
+      attachments:
+      (json['attachments'] as List<dynamic>?)
+          ?.whereType<Map<String, dynamic>>()
+          .map(VideoAttachment.fromJson)
+          .toList() ??
+          [],
+
       mcqCount: _parseInt(
-        json['mcqCount'] ?? json['mcq_count'],
+        json['mcqCount'] ??
+            json['mcq_count'],
       ),
 
       accessStatus:
@@ -124,21 +158,40 @@ class VideoDetailsModel {
       'id': id,
       'title': title,
       'description': description,
+
       'playlist': playlist,
+      'playlist_detail':
+      playlistDetail?.toJson(),
+
       'owner': owner,
+      'owner_detail':
+      ownerDetail?.toJson(),
+
       'video_file': videoFile,
       'thumbnail': thumbnail,
+
       'duration': duration,
       'views': views,
+
       'status': status,
       'approval_status': approvalStatus,
       'rejection_reason': rejectionReason,
       'transcript': transcript,
+
+      'attachments': attachments
+          .map((e) => e.toJson())
+          .toList(),
+
       'mcqCount': mcqCount,
+
       'access_status': accessStatus,
       'can_watch': canWatch,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
+
+      'created_at':
+      createdAt?.toIso8601String(),
+
+      'updated_at':
+      updatedAt?.toIso8601String(),
     };
   }
 
@@ -182,7 +235,11 @@ class VideoDetailsModel {
     }
 
     final String cleanedValue =
-        value?.toString().trim().toLowerCase() ?? '';
+        value
+            ?.toString()
+            .trim()
+            .toLowerCase() ??
+            '';
 
     return cleanedValue == 'true' ||
         cleanedValue == '1';
@@ -199,7 +256,8 @@ class VideoDetailsModel {
     value.toString().trim();
 
     if (cleanedValue.isEmpty ||
-        cleanedValue.toLowerCase() == 'null') {
+        cleanedValue.toLowerCase() ==
+            'null') {
       return null;
     }
 
@@ -216,5 +274,113 @@ class VideoDetailsModel {
     return DateTime.tryParse(
       value.toString(),
     );
+  }
+}
+
+class PlaylistDetail {
+  final int id;
+  final String name;
+
+  const PlaylistDetail({
+    required this.id,
+    required this.name,
+  });
+
+  factory PlaylistDetail.fromJson(
+      Map<String, dynamic> json,
+      ) {
+    return PlaylistDetail(
+      id: VideoDetailsModel._parseInt(
+        json['id'],
+      ),
+      name: json['name']?.toString() ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+    };
+  }
+}
+
+class OwnerDetail {
+  final int id;
+  final String name;
+  final String email;
+
+  const OwnerDetail({
+    required this.id,
+    required this.name,
+    required this.email,
+  });
+
+  factory OwnerDetail.fromJson(
+      Map<String, dynamic> json,
+      ) {
+    return OwnerDetail(
+      id: VideoDetailsModel._parseInt(
+        json['id'],
+      ),
+      name: json['name']?.toString() ?? '',
+      email:
+      json['email']?.toString() ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'email': email,
+    };
+  }
+}
+
+class VideoAttachment {
+  final int id;
+  final String file;
+  final String originalName;
+  final DateTime? uploadedAt;
+
+  const VideoAttachment({
+    required this.id,
+    required this.file,
+    required this.originalName,
+    required this.uploadedAt,
+  });
+
+  factory VideoAttachment.fromJson(
+      Map<String, dynamic> json,
+      ) {
+    return VideoAttachment(
+      id: VideoDetailsModel._parseInt(
+        json['id'],
+      ),
+
+      file:
+      json['file']?.toString() ?? '',
+
+      originalName:
+      json['original_name']
+          ?.toString() ??
+          '',
+
+      uploadedAt:
+      VideoDetailsModel._parseDateTime(
+        json['uploaded_at'],
+      ),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'file': file,
+      'original_name': originalName,
+      'uploaded_at':
+      uploadedAt?.toIso8601String(),
+    };
   }
 }

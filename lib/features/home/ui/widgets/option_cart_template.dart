@@ -5,7 +5,7 @@ class OptionCart extends StatelessWidget {
   final String subtitle;
   final String buttonText;
   final Color color;
-  final String image;
+  final Widget child;
   final VoidCallback? onPressed;
 
   const OptionCart({
@@ -14,7 +14,7 @@ class OptionCart extends StatelessWidget {
     required this.subtitle,
     required this.buttonText,
     required this.color,
-    required this.image,
+    required this.child,
     this.onPressed,
   });
 
@@ -52,11 +52,7 @@ class OptionCart extends StatelessWidget {
                   ),
                 ),
               ),
-              Image.asset(
-                image,
-                width: 20,
-                height: 20,
-              ),
+              child
             ],
           ),
           const SizedBox(height: 10),

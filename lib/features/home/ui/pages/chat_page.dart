@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/chat_page_provider.dart';
+import '../../providers/web_search_provider.dart';
 import '../widgets/bot_message_template.dart';
 import '../widgets/user_mesaage_template.dart';
 import 'video_details_page.dart';
@@ -26,7 +27,6 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _controller = TextEditingController();
-
   final ScrollController _scrollController = ScrollController();
 
   static const int fixedChatId = 2;
@@ -38,7 +38,9 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await context.read<ChatPageProvider>().loadHistory(chatId: fixedChatId);
+      await context
+          .read<ChatPageProvider>()
+          .loadHistory(chatId: fixedChatId);
 
       _scrollToBottom();
     });
@@ -51,9 +53,64 @@ class _ChatPageState extends State<ChatPage> {
 
     _controller.clear();
 
-    final provider = context.read<ChatPageProvider>();
+    final chatProvider = context.read<ChatPageProvider>();
 
-    await provider.sendMessage(text: text);
+    // =========================================================
+    // WEB SEARCH
+    // =========================================================
+    if (webSearch) {
+      final webSearchProvider =
+      context.read<WebSearchProvider>();
+
+      // عرض سؤال المستخدم مباشرة
+      chatProvider.addUserMessage(text);
+
+      _scrollToBottom();
+
+      // إرسال السؤال للـ Web Search API
+      await webSearchProvider.webSearch(
+        question: text,
+      );
+
+      if (!mounted) return;
+
+      // خطأ بالـ Web Search
+      if (webSearchProvider.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              webSearchProvider.errorMessage!,
+              style: const TextStyle(
+                fontFamily: "Tajawal",
+              ),
+            ),
+          ),
+        );
+
+        return;
+      }
+
+      // جواب الـ Web Search
+      final response = webSearchProvider.answer;
+
+      if (response != null &&
+          response.answer.trim().isNotEmpty) {
+        chatProvider.addBotMessage(
+          response.answer,
+        );
+      }
+
+      _scrollToBottom();
+
+      return;
+    }
+
+    // =========================================================
+    // NORMAL CHAT
+    // =========================================================
+    await chatProvider.sendMessage(
+      text: text,
+    );
 
     if (!mounted) return;
 
@@ -66,9 +123,7 @@ class _ChatPageState extends State<ChatPage> {
 
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-
         duration: const Duration(milliseconds: 300),
-
         curve: Curves.easeOut,
       );
     });
@@ -77,7 +132,6 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void dispose() {
     _controller.dispose();
-
     _scrollController.dispose();
 
     super.dispose();
@@ -85,24 +139,56 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<ChatPageProvider>();
+    final provider =
+    context.watch<ChatPageProvider>();
+
+    final webSearchProvider =
+    context.watch<WebSearchProvider>();
 
     return Directionality(
       textDirection: TextDirection.rtl,
-
       child: Scaffold(
-        backgroundColor: const Color(0xffF6F8F8),
+        backgroundColor:
+        const Color(0xffF6F8F8),
 
         appBar: _buildAppBar(),
 
         body: SafeArea(
           child: Column(
             children: [
-              Expanded(child: _buildMessagesArea(provider)),
+              // =================================================
+              // الرسائل
+              // =================================================
+              Expanded(
+                child: _buildMessagesArea(
+                  provider,
+                  webSearchProvider,
+                ),
+              ),
 
-              if (provider.errorMessage != null) _buildErrorMessage(provider),
+              // =================================================
+              // خطأ الشات العادي
+              // =================================================
+              if (provider.errorMessage != null)
+                _buildErrorMessage(
+                  provider.errorMessage!,
+                ),
 
-              _buildMessageInput(provider),
+              // =================================================
+              // خطأ Web Search
+              // =================================================
+              if (webSearchProvider.errorMessage != null)
+                _buildErrorMessage(
+                  webSearchProvider.errorMessage!,
+                ),
+
+              // =================================================
+              // TextField + Send Button
+              // =================================================
+              _buildMessageInput(
+                provider,
+                webSearchProvider,
+              ),
             ],
           ),
         ),
@@ -110,32 +196,27 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  // ===========================================================
+  // APP BAR
+  // ===========================================================
+
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       automaticallyImplyLeading: false,
-
       toolbarHeight: 78,
-
       elevation: 0,
-
       centerTitle: true,
-
       backgroundColor: Colors.white,
 
       title: const Column(
         mainAxisSize: MainAxisSize.min,
-
         children: [
           Text(
             "المساعد الذكي",
-
             style: TextStyle(
               fontFamily: "Tajawal",
-
               fontSize: 20,
-
               fontWeight: FontWeight.bold,
-
               color: Color(0xff181C1F),
             ),
           ),
@@ -144,12 +225,9 @@ class _ChatPageState extends State<ChatPage> {
 
           Text(
             "جاهز لمساعدتك",
-
             style: TextStyle(
               fontFamily: "Tajawal",
-
               fontSize: 12,
-
               color: Color(0xff777777),
             ),
           ),
@@ -158,15 +236,15 @@ class _ChatPageState extends State<ChatPage> {
 
       leading: Padding(
         padding: const EdgeInsets.all(12),
-
         child: Container(
           decoration: const BoxDecoration(
             color: Color(0xff2A9D8F),
-
             shape: BoxShape.circle,
           ),
-
-          child: const Icon(Icons.smart_toy_rounded, color: Colors.white),
+          child: const Icon(
+            Icons.smart_toy_rounded,
+            color: Colors.white,
+          ),
         ),
       ),
 
@@ -175,186 +253,296 @@ class _ChatPageState extends State<ChatPage> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-
               MaterialPageRoute(
-                builder: (_) => VideoDetailsPage(
-                  videoId: widget.id,
-
-                  videoName: widget.name,
-
-                  playlistId: widget.playlistId,
-                ),
+                builder: (_) =>
+                    VideoDetailsPage(
+                      videoId: widget.id,
+                      videoName: widget.name,
+                      playlistId:
+                      widget.playlistId,
+                    ),
               ),
             );
           },
-
           icon: const Icon(
             Icons.arrow_forward_ios_rounded,
-
             color: Color(0xffD9A63A),
           ),
         ),
       ],
 
       bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(1),
-
-        child: Divider(height: 1, color: Color(0xffEEEEEE)),
+        preferredSize:
+        Size.fromHeight(1),
+        child: Divider(
+          height: 1,
+          color: Color(0xffEEEEEE),
+        ),
       ),
     );
   }
 
-  Widget _buildMessagesArea(ChatPageProvider provider) {
-    if (provider.isLoadingHistory && provider.messages.isEmpty) {
+  // ===========================================================
+  // MESSAGES AREA
+  // ===========================================================
+
+  Widget _buildMessagesArea(
+      ChatPageProvider provider,
+      WebSearchProvider webSearchProvider,
+      ) {
+    final bool isSending = webSearch
+        ? webSearchProvider.isLoading
+        : provider.isSending;
+
+    if (provider.isLoadingHistory &&
+        provider.messages.isEmpty) {
       return const Center(
-        child: CircularProgressIndicator(color: Color(0xff2A9D8F)),
+        child: CircularProgressIndicator(
+          color: Color(0xff2A9D8F),
+        ),
       );
     }
 
-    if (provider.messages.isEmpty) {
+    if (provider.messages.isEmpty &&
+        !isSending) {
       return const Center(
         child: Text(
           "ابدأ المحادثة مع المساعد",
-
-          style: TextStyle(fontFamily: "Tajawal", color: Colors.grey),
+          style: TextStyle(
+            fontFamily: "Tajawal",
+            color: Colors.grey,
+          ),
         ),
       );
     }
 
     return ListView.builder(
       controller: _scrollController,
-
       padding: const EdgeInsets.all(16),
 
-      itemCount: provider.messages.length + (provider.isSending ? 1 : 0),
+      itemCount:
+      provider.messages.length +
+          (isSending ? 1 : 0),
 
       itemBuilder: (context, index) {
-        if (provider.isSending && index == provider.messages.length) {
+        if (isSending &&
+            index ==
+                provider.messages.length) {
           return const Align(
-            alignment: Alignment.centerRight,
-
+            alignment:
+            Alignment.centerRight,
             child: Padding(
-              padding: EdgeInsets.all(12),
-
-              child: Text(
-                "جاري التفكير...",
-
-                style: TextStyle(fontFamily: "Tajawal", color: Colors.grey),
+              padding:
+              EdgeInsets.only(
+                bottom: 16,
+              ),
+              child: Row(
+                mainAxisSize:
+                MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child:
+                    CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color:
+                      Color(0xff2A9D8F),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    "جاري التفكير...",
+                    style: TextStyle(
+                      fontFamily:
+                      "Tajawal",
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
               ),
             ),
           );
         }
 
-        final message = provider.messages[index];
+        final message =
+        provider.messages[index];
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-
+          padding:
+          const EdgeInsets.only(
+            bottom: 16,
+          ),
           child: message.isUser
-              ? UserMessage(text: message.text)
-              : BotMessage(text: message.text),
+              ? UserMessage(
+            text: message.text,
+          )
+              : BotMessage(
+            text: message.text,
+          ),
         );
       },
     );
   }
 
-  Widget _buildErrorMessage(ChatPageProvider provider) {
+
+  Widget _buildErrorMessage(
+      String message,
+      ) {
     return Container(
-      margin: const EdgeInsets.all(10),
-
-      padding: const EdgeInsets.all(10),
-
-      decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
-
-        borderRadius: BorderRadius.circular(12),
+      margin: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 5,
       ),
-
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color:
+        Colors.red.withOpacity(0.1),
+        borderRadius:
+        BorderRadius.circular(12),
+      ),
       child: Text(
-        provider.errorMessage!,
-
-        style: const TextStyle(fontFamily: "Tajawal", color: Colors.red),
+        message,
+        style: const TextStyle(
+          fontFamily: "Tajawal",
+          color: Colors.red,
+        ),
       ),
     );
   }
 
-  Widget _buildMessageInput(ChatPageProvider provider) {
+  Widget _buildMessageInput(
+      ChatPageProvider provider,
+      WebSearchProvider webSearchProvider,
+      ) {
+    final bool isSending = webSearch
+        ? webSearchProvider.isLoading
+        : provider.isSending;
+
     return Container(
       padding: const EdgeInsets.all(10),
-
       color: Colors.white,
 
       child: Row(
+        crossAxisAlignment:
+        CrossAxisAlignment.end,
         children: [
           Expanded(
             child: TextField(
+              cursorColor: const Color(0xff2A9D8F),
               controller: _controller,
-
               maxLines: 4,
-
               minLines: 1,
-
+              enabled: !isSending,
               decoration: InputDecoration(
-                hintText: "اكتب سؤالك...",
 
-                hintStyle: const TextStyle(fontFamily: "Tajawal"),
+                hintText: webSearch
+                    ? "اسأل مع البحث عبر الويب..."
+                    : "اكتب سؤالك...",
+
+                hintStyle:
+                const TextStyle(
+                  fontFamily: "Tajawal",
+                ),
 
                 filled: true,
 
-                fillColor: const Color(0xffF5FAF9),
-
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(22),
-
-                  borderSide: BorderSide.none,
+                fillColor:
+                const Color(
+                  0xffF5FAF9,
                 ),
 
-                suffixIcon: IconButton(
+                contentPadding:
+                const EdgeInsets
+                    .symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+
+                border:
+                OutlineInputBorder(
+                  borderRadius:
+                  BorderRadius.circular(
+                    22,
+                  ),
+                  borderSide:
+                  BorderSide.none,
+                ),
+                suffixIcon:
+                IconButton(
                   tooltip: webSearch
                       ? "إيقاف البحث عبر الويب"
                       : "تفعيل البحث عبر الويب",
-                  onPressed: () {
+
+                  onPressed: isSending
+                      ? null
+                      : () {
                     setState(() {
-                      webSearch = !webSearch;
-                      print(webSearch);
+                      webSearch =
+                      !webSearch;
                     });
+
+                    context
+                        .read<
+                        WebSearchProvider>()
+                        .reset();
                   },
 
                   icon: Icon(
                     webSearch
-                        ? Icons.travel_explore_rounded
-                        : Icons.travel_explore_outlined,
+                        ? Icons
+                        .travel_explore_rounded
+                        : Icons
+                        .travel_explore_outlined,
 
-                    color: webSearch ? const Color(0xff2A9D8F) : Colors.grey,
+                    color: webSearch
+                        ? const Color(
+                      0xff2A9D8F,
+                    )
+                        : Colors.grey,
                   ),
                 ),
               ),
+
+              onSubmitted: (_) {
+                if (!isSending) {
+                  _sendMessage();
+                }
+              },
             ),
           ),
 
           const SizedBox(width: 8),
-
           GestureDetector(
-            onTap: provider.isSending ? null : _sendMessage,
+            onTap: isSending
+                ? null
+                : _sendMessage,
 
             child: CircleAvatar(
               radius: 25,
 
-              backgroundColor: const Color(0xff2A9D8F),
+              backgroundColor:
+              isSending
+                  ? Colors.grey
+                  : const Color(
+                0xff2A9D8F,
+              ),
 
-              child: provider.isSending
+              child: isSending
                   ? const SizedBox(
-                      width: 20,
-
-                      height: 20,
-
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Icon(Icons.send_rounded, color: Colors.white),
+                width: 20,
+                height: 20,
+                child:
+                CircularProgressIndicator(
+                  color:
+                  Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+                  : const Icon(
+                Icons.send_rounded,
+                color: Colors.white,
+              ),
             ),
           ),
         ],

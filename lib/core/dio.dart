@@ -21,8 +21,6 @@ class DioHelper {
     );
   }
 
-
-
   Future<Response> get(
       String endpoint, {
         Map<String, dynamic>? query,

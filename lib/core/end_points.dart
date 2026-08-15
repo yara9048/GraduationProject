@@ -14,6 +14,7 @@ class ApiEndpoints {
   static const subjects = 'subjects/';
   static const favourites = 'favorites/';
   static const ratings = 'ratings/';
+  static const notifications = 'notifications/';
   static String courseDetails(int id) =>
       'courses/$id/';
   static String courseVideos(int id) =>

@@ -28,8 +28,8 @@ class BotMessage extends StatelessWidget {
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontFamily: "Tajawal",
-            fontSize: 18,
-            height: 1.8,
+            fontSize: 16,
+            height: 1.5,
             color: Color(0xff181C1F),
           ),
         ),

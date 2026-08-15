@@ -254,6 +254,13 @@ class VideoDetailsFunctionProvider with ChangeNotifier {
 
       _videoPosition = controller.value.position;
 
+      final Duration actualDuration =
+          controller.value.duration;
+
+      if (actualDuration.inMilliseconds > 0) {
+        _videoDuration = actualDuration;
+      }
+
       _watchProgress = 0.0;
 
       controller.addListener(() {
@@ -388,19 +395,25 @@ class VideoDetailsFunctionProvider with ChangeNotifier {
       return null;
     }
 
-    if (value is num) {
-      final int seconds = value.round();
+    double? durationMinutes;
 
-      return seconds > 0 ? seconds : null;
+    if (value is num) {
+      durationMinutes = value.toDouble();
+    } else {
+      durationMinutes = double.tryParse(
+        value.toString().trim(),
+      );
     }
 
-    final double? parsedValue = double.tryParse(value.toString().trim());
-
-    if (parsedValue == null || parsedValue <= 0) {
+    if (durationMinutes == null ||
+        durationMinutes <= 0) {
       return null;
     }
 
-    return parsedValue.round();
+    final int seconds =
+    (durationMinutes * 60).round();
+
+    return seconds > 0 ? seconds : null;
   }
 
   bool isValidVideoUrl(String? value) {

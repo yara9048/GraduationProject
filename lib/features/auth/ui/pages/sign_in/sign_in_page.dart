@@ -39,10 +39,7 @@ class _SignInPageState extends State<SignInPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-      // يسمح للصفحة أن تصغر عند فتح الكيبورد
       resizeToAvoidBottomInset: true,
-
       body: AuthPagesTemplate(
         text1: 'مرحبا بعودتك',
         text2: 'يرجى ادخال بياناتك لتسجيل الدخول',
@@ -68,7 +65,7 @@ class _SignInPageState extends State<SignInPage> {
                       key: _formKey,
                       child: Column(
                         children: [
-                          const SizedBox(height: 230),
+                          const SizedBox(height: 200),
 
                           const Padding(
                             padding:
@@ -190,7 +187,7 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                           ),
 
-                          const SizedBox(height: 60),
+                          const SizedBox(height: 70),
 
                           Consumer<SignInProvider>(
                             builder: (

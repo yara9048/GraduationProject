@@ -58,7 +58,35 @@ class ChatPageProvider extends ChangeNotifier {
 
     return token;
   }
+  void addUserMessage(String text) {
+    final cleanText = text.trim();
 
+    if (cleanText.isEmpty) return;
+
+    _messages.add(
+      ChatUiMessage(
+        type: 'user',
+        text: cleanText,
+      ),
+    );
+
+    notifyListeners();
+  }
+
+  void addBotMessage(String text) {
+    final cleanText = text.trim();
+
+    if (cleanText.isEmpty) return;
+
+    _messages.add(
+      ChatUiMessage(
+        type: 'bot',
+        text: cleanText,
+      ),
+    );
+
+    notifyListeners();
+  }
   Future<void> loadHistory({
     int chatId = 2,
   }) async {

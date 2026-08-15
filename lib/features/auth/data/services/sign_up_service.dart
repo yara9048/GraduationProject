@@ -17,6 +17,7 @@ class SignUpService {
     required String password1,
     required String password2,
     required File image,
+    required String token
   }) async {
     try {
       final String imageName =
@@ -24,6 +25,7 @@ class SignUpService {
 
       final FormData formData = FormData.fromMap({
         'email': email,
+        'fcm_token': token,
         'password1': password1,
         'password2': password2,
         'last_name': lastName,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/home/providers/notifications_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../widgets/notification_card_template.dart';
 import 'main_navigation_page.dart';
@@ -12,11 +14,24 @@ class NotificationPage extends StatefulWidget {
 
 class _NotificationPageState extends State<NotificationPage> {
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NotificationsProvider>().getNotifications();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final provider = context.watch<NotificationsProvider>();
+    final notifications = provider.notifications;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
+          /// Background top
           Positioned(
             top: 0,
             left: 0,
@@ -25,6 +40,7 @@ class _NotificationPageState extends State<NotificationPage> {
             ),
           ),
 
+          /// Background bottom
           Positioned(
             bottom: 0,
             right: 0,
@@ -33,70 +49,37 @@ class _NotificationPageState extends State<NotificationPage> {
             ),
           ),
 
-          Positioned(
-            top: 10,
-            right: 16,
-            child: SafeArea(
-              bottom: false,
-              child: Row(
-                children: [
-                  const Text(
-                    "الإشعارات",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xff2A9D8F),
-                      fontFamily: "Tajawal",
-                      fontSize: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
 
-                  IconButton(
-                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context){return MainNavigationPage();})),
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      textDirection: TextDirection.rtl,
-                      color: Color(0xff2A9D8F),
-                      size: 20,
-                    ),
-                  ),
-
-
-                ],
-              ),
-            ),
-          ),
+          /// Notifications list
           Positioned.fill(
-            top: 130,
-            child: ListView(
+            top: 110,
+            child: notifications.isEmpty
+                ? const Center(
+              child: Text(
+                "لا يوجد إشعارات حالياً",
+                style: TextStyle(
+                  fontFamily: "Tajawal",
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+            )
+                : ListView.builder(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16,
-                vertical: 10,
+                vertical: 16,
               ),
-              children: const [
-                NotificationCard(
-                  title: "تم إضافة درس جديد",
-                  message:
-                  "تم إضافة درس الذكاء الاصطناعي إلى قائمة التشغيل الخاصة بك.",
-                  time: "منذ 5 دقائق",
-                ),
+              scrollDirection: Axis.vertical,
+              itemCount: notifications.length,
+              itemBuilder: (context, index) {
+                final notification = notifications[index];
 
-                NotificationCard(
-                  title: "تم إكمال الاختبار",
-                  message:
-                  "تهانينا! لقد حصلت على 92% في اختبار Flutter.",
-                  time: "اليوم 10:30",
-                ),
-
-                NotificationCard(
-                  title: "تجديد الاشتراك",
-                  message:
-                  "يتبقى 3 أيام على انتهاء اشتراكك الحالي.",
-                  time: "أمس",
-                ),
-
-                SizedBox(height: 100),
-              ],
+                return NotificationCard(
+                  title: notification.title,
+                  message: notification.message,
+                  time: notification.createdAt,
+                );
+              },
             ),
           ),
         ],

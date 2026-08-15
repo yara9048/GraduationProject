@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:graduationprojct/features/auth/data/models/sign_up_model.dart';
 import 'package:graduationprojct/features/auth/data/services/sign_up_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpProvider with ChangeNotifier {
   final SignUpService _service = SignUpService();
@@ -125,8 +126,16 @@ class SignUpProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+
+      final prefs = await SharedPreferences.getInstance();
+
+      final String token = prefs.getString("fcm_token") ?? '';
+
+      print("Saved token: $token");
+
       final SignUpModel user = await _service.signUp(
         email: email.trim(),
+        token: token,
         password1: password1,
         password2: password2,
         firstName: firstName.trim(),

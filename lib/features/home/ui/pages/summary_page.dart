@@ -50,6 +50,7 @@ class _SummaryPageState extends State<SummaryPage> {
 
     if (provider.errorMessage != null) {
       return Scaffold(
+        backgroundColor: Colors.white,
         body: Center(
           child: Text(
             provider.errorMessage!,

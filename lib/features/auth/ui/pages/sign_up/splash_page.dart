@@ -59,7 +59,7 @@ class _SplashPageState extends State<SplashPage> {
             right: 100,
             top: 100,
             child: Image.asset(
-              'assets/Images/لوغو.png',
+              'assets/Images/Asset 1.png',
             ),
           ),
         ],

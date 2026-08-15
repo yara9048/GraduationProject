@@ -90,6 +90,7 @@ class _OtpInputTemplateState extends State<OtpInputTemplate> {
               width: widget.fieldWidth,
               height: widget.fieldHeight,
               child: TextField(
+                cursorColor: const Color(0xff2A9D8F),
                 controller: _controllers[index],
                 focusNode: _focusNodes[index],
                 textAlign: TextAlign.center,
