@@ -46,7 +46,7 @@ class _WatchingHistoryPageState extends State<WatchingHistoryPage> {
               top: 120,
               right: 16,
               left: 16,
-              bottom: 20,
+              bottom: 0,
               child: SizedBox(
                 height: 200,
                 child: ListView.builder(

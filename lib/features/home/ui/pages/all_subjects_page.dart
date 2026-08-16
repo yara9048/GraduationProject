@@ -27,8 +27,14 @@ class _AllSubjectsPageState extends State<AllSubjectsPage> {
     final subjectsProvider = context.watch<DisplaySubjectsProvider>();
     final subjects = subjectsProvider.subjects;
     final List<String> subjectImages = [
-      'assets/Images/Group 51.png',
-      'assets/Images/Group 52.png',
+      'assets/Images/Group 42.png',
+      'assets/Images/Group 48.png',
+      'assets/Images/Group 47.png',
+    ];
+    final List<Color> subjectColors = [
+      Color(0xffE76F51),
+      Color(0xff2A9D8F),
+      Color(0xffA67500)
     ];
     return Scaffold(
       backgroundColor: Colors.white,
@@ -113,7 +119,8 @@ class _AllSubjectsPageState extends State<AllSubjectsPage> {
                                     title: sub.name,
                                     imagePath: subjectImages[
                                     index % subjectImages.length],
-                                    textColor: Color(0xffA67500),
+                                    textColor: subjectColors[
+                                    index % subjectColors.length],
                                     width: 300,
                                     top: 10,
                                     width2: 250,

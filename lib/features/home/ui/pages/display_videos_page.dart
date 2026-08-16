@@ -173,153 +173,161 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
         ),
       );
     } else if (videosProvider.errorMessage != null) {
-      pageContent = SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 28,
-          vertical: 20,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 70),
-            Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                color: subscriptionRequired
-                    ? const Color(0xffE9C46A)
-                    .withValues(alpha: 0.15)
-                    : Colors.red.withValues(
-                  alpha: 0.1,
-                ),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                subscriptionRequired
-                    ? Icons.lock_outline_rounded
-                    : Icons.error_outline_rounded,
-                size: 52,
-                color: subscriptionRequired
-                    ? const Color(0xffE9C46A)
-                    : Colors.red,
-              ),
+      pageContent = SizedBox.expand(
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 28,
+            vertical: 20,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.sizeOf(context).height - 180,
             ),
-            const SizedBox(height: 20),
-            Text(
-              subscriptionRequired
-                  ? 'المحتوى يحتاج إلى اشتراك'
-                  : 'تعذر تحميل الفيديوهات',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Tajawal',
-                fontSize: 21,
-                fontWeight: FontWeight.bold,
-                color: Color(0xff264653),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              subscriptionRequired
-                  ? 'يجب أن يكون لديك اشتراك فعّال في قائمة التشغيل حتى تتمكن من مشاهدة الفيديوهات.'
-                  : cleanedErrorMessage,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Tajawal',
-                fontSize: 15,
-                height: 1.6,
-                color: Color(0xff6C7A7A),
-              ),
-            ),
-            const SizedBox(height: 26),
-            if (subscriptionRequired)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _openPlaylistDetails,
-                  icon: const Icon(
-                    Icons.info_outline,
-                    color: Colors.white,
-                    size: 20,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      color: subscriptionRequired
+                          ? const Color(0xffE9C46A).withValues(alpha: 0.15)
+                          : Colors.red.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      subscriptionRequired
+                          ? Icons.lock_outline_rounded
+                          : Icons.error_outline_rounded,
+                      size: 52,
+                      color: subscriptionRequired
+                          ? const Color(0xffE9C46A)
+                          : Colors.red,
+                    ),
                   ),
-                  label: const Text(
-                    'عرض معلومات القائمة والاشتراك',
-                    style: TextStyle(
+                  const SizedBox(height: 20),
+
+                  Text(
+                    subscriptionRequired
+                        ? 'المحتوى يحتاج إلى اشتراك'
+                        : 'تعذر تحميل الفيديوهات',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
                       fontFamily: 'Tajawal',
-                      fontSize: 13,
+                      fontSize: 21,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Color(0xff264653),
                     ),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                    const Color(0xff2A9D8F),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    padding:
-                    const EdgeInsets.symmetric(
-                      vertical: 14,
+
+                  const SizedBox(height: 10),
+
+                  Text(
+                    subscriptionRequired
+                        ? 'يجب أن يكون لديك اشتراك فعّال في قائمة التشغيل حتى تتمكن من مشاهدة الفيديوهات.'
+                        : cleanedErrorMessage,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: 'Tajawal',
+                      fontSize: 15,
+                      height: 1.6,
+                      color: Color(0xff6C7A7A),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                      BorderRadius.circular(14),
+                  ),
+
+                  const SizedBox(height: 26),
+
+                  if (subscriptionRequired)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _openPlaylistDetails,
+                        icon: const Icon(
+                          Icons.info_outline,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        label: const Text(
+                          'عرض معلومات القائمة والاشتراك',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xff2A9D8F),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  if (subscriptionRequired)
+                    const SizedBox(height: 12),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        context
+                            .read<DisplayVideosProvider>()
+                            .getVideos(
+                          id: widget.id,
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.refresh_rounded,
+                        color: Color(0xff2A9D8F),
+                      ),
+                      label: const Text(
+                        'إعادة المحاولة',
+                        style: TextStyle(
+                          fontFamily: 'Tajawal',
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xff2A9D8F),
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 13,
+                        ),
+                        side: const BorderSide(
+                          color: Color(0xff2A9D8F),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            if (subscriptionRequired)
-              const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  context
-                      .read<DisplayVideosProvider>()
-                      .getVideos(
-                    id: widget.id,
-                  );
-                },
-                icon: const Icon(
-                  Icons.refresh_rounded,
-                  color: Color(0xff2A9D8F),
-                ),
-                label: const Text(
-                  'إعادة المحاولة',
-                  style: TextStyle(
-                    fontFamily: 'Tajawal',
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xff2A9D8F),
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding:
-                  const EdgeInsets.symmetric(
-                    vertical: 13,
-                  ),
-                  side: const BorderSide(
-                    color: Color(0xff2A9D8F),
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius.circular(14),
-                  ),
-                ),
+
+                  if (!subscriptionRequired) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      cleanedErrorMessage,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-            if (!subscriptionRequired) ...[
-              const SizedBox(height: 12),
-              Text(
-                cleanedErrorMessage,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontFamily: 'Tajawal',
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
-              ),
-            ],
-          ],
+          ),
         ),
       );
     } else if (videosProvider.videos.isEmpty) {

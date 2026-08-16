@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/video_details_function_provider.dart';
 import 'package:provider/provider.dart';
 
-class VideoPlayerSection extends StatelessWidget {
+class VideoPlayerSection
+    extends StatelessWidget {
   final String? apiVideoUrl;
 
   const VideoPlayerSection({
@@ -13,7 +14,8 @@ class VideoPlayerSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<VideoDetailsFunctionProvider>(
+    return Consumer<
+        VideoDetailsFunctionProvider>(
       builder: (
           context,
           provider,
@@ -21,53 +23,79 @@ class VideoPlayerSection extends StatelessWidget {
           ) {
         final bool isWaitingForVideo =
             provider.isVideoLoading ||
-                (!provider.hasInitializedVideo &&
-                    provider.videoErrorMessage == null);
+                (!provider
+                    .hasInitializedVideo &&
+                    provider
+                        .videoErrorMessage ==
+                        null);
 
         final bool hasReadyVideo =
-            provider.chewieController != null &&
-                provider.hasInitializedVideo;
+            provider.chewieController !=
+                null &&
+                provider
+                    .hasInitializedVideo;
 
         return Directionality(
-          textDirection: TextDirection.ltr,
+          textDirection:
+          TextDirection.ltr,
           child: ClipRect(
             child: AspectRatio(
               aspectRatio: 16 / 9,
               child: SizedBox(
-                width: double.infinity,
-                child: isWaitingForVideo
+                width:
+                double.infinity,
+                child:
+                isWaitingForVideo
                     ? const ColoredBox(
-                  color: Colors.black,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xffE9C46A),
+                  color:
+                  Colors.black,
+                  child:
+                  Center(
+                    child:
+                    CircularProgressIndicator(
+                      color:
+                      Color(
+                        0xffE9C46A,
+                      ),
                     ),
                   ),
                 )
                     : hasReadyVideo
                     ? Chewie(
                   controller:
-                  provider.chewieController!,
+                  provider
+                      .chewieController!,
                 )
                     : ColoredBox(
-                  color: Colors.black,
-                  child: Center(
-                    child: Padding(
+                  color:
+                  Colors.black,
+                  child:
+                  Center(
+                    child:
+                    Padding(
                       padding:
-                      const EdgeInsets.symmetric(
-                        horizontal: 25,
+                      const EdgeInsets
+                          .symmetric(
+                        horizontal:
+                        25,
                       ),
-                      child: Column(
+                      child:
+                      Column(
                         mainAxisSize:
-                        MainAxisSize.min,
+                        MainAxisSize
+                            .min,
                         children: [
                           const Icon(
-                            Icons.video_file_outlined,
-                            color: Colors.white,
-                            size: 48,
+                            Icons
+                                .video_file_outlined,
+                            color:
+                            Colors.white,
+                            size:
+                            48,
                           ),
                           const SizedBox(
-                            height: 10,
+                            height:
+                            10,
                           ),
                           Text(
                             provider
@@ -77,17 +105,22 @@ class VideoPlayerSection extends StatelessWidget {
                             TextAlign.center,
                             style:
                             const TextStyle(
-                              color: Colors.white,
+                              color:
+                              Colors.white,
                               fontFamily:
                               'Tajawal',
-                              fontSize: 15,
+                              fontSize:
+                              15,
                             ),
                           ),
                           const SizedBox(
-                            height: 15,
+                            height:
+                            15,
                           ),
-                          OutlinedButton.icon(
-                            onPressed: () {
+                          OutlinedButton
+                              .icon(
+                            onPressed:
+                                () {
                               context
                                   .read<
                                   VideoDetailsFunctionProvider>()
@@ -96,24 +129,30 @@ class VideoPlayerSection extends StatelessWidget {
                               );
                             },
                             style:
-                            OutlinedButton.styleFrom(
+                            OutlinedButton
+                                .styleFrom(
                               foregroundColor:
                               const Color(
                                 0xffE9C46A,
                               ),
                               side:
                               const BorderSide(
-                                color: Color(
+                                color:
+                                Color(
                                   0xffE9C46A,
                                 ),
                               ),
                             ),
-                            icon: const Icon(
-                              Icons.refresh_rounded,
+                            icon:
+                            const Icon(
+                              Icons
+                                  .refresh_rounded,
                             ),
-                            label: const Text(
+                            label:
+                            const Text(
                               'إعادة المحاولة',
-                              style: TextStyle(
+                              style:
+                              TextStyle(
                                 fontFamily:
                                 'Tajawal',
                               ),
@@ -133,25 +172,33 @@ class VideoPlayerSection extends StatelessWidget {
   }
 }
 
-class VideoWatchProgress extends StatelessWidget {
+// ========================================================
+// Progress الموجود تحت الفيديو
+// ========================================================
+
+class VideoWatchProgress
+    extends StatelessWidget {
   const VideoWatchProgress({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<VideoDetailsFunctionProvider>(
+    return Consumer<
+        VideoDetailsFunctionProvider>(
       builder: (
           context,
           provider,
           child,
           ) {
         final bool hasDuration =
-            provider.videoDuration > Duration.zero;
+            provider.durationSeconds >
+                0;
 
         final double displayedProgress =
         hasDuration
-            ? provider.watchProgress
+            ? provider
+            .watchProgress
             .clamp(
           0.0,
           1.0,
@@ -160,7 +207,8 @@ class VideoWatchProgress extends StatelessWidget {
             : 0.0;
 
         final int progressPercentage =
-        (displayedProgress * 100)
+        (displayedProgress *
+            100)
             .round()
             .clamp(
           0,
@@ -174,14 +222,20 @@ class VideoWatchProgress extends StatelessWidget {
 
         final String totalDuration =
         hasDuration
-            ? provider.formatDuration(
-          provider.videoDuration,
+            ? provider
+            .formatDuration(
+          Duration(
+            seconds:
+            provider
+                .durationSeconds,
+          ),
         )
             : '--:--';
 
         return Padding(
           padding:
-          const EdgeInsets.symmetric(
+          const EdgeInsets
+              .symmetric(
             horizontal: 15,
           ),
           child: Column(
@@ -198,21 +252,27 @@ class VideoWatchProgress extends StatelessWidget {
                         fontFamily:
                         'Tajawal',
                         fontSize: 12,
-                        color: Color(
+                        color:
+                        Color(
                           0xff92A1A1,
                         ),
                         fontWeight:
-                        FontWeight.w600,
+                        FontWeight
+                            .w600,
                       ),
                     ),
+
                     const Text(
                       ' / ',
-                      style: TextStyle(
-                        color: Color(
+                      style:
+                      TextStyle(
+                        color:
+                        Color(
                           0xff92A1A1,
                         ),
                       ),
                     ),
+
                     Text(
                       totalDuration,
                       style:
@@ -220,62 +280,75 @@ class VideoWatchProgress extends StatelessWidget {
                         fontFamily:
                         'Tajawal',
                         fontSize: 12,
-                        color: Color(
+                        color:
+                        Color(
                           0xff92A1A1,
                         ),
                         fontWeight:
-                        FontWeight.w600,
+                        FontWeight
+                            .w600,
                       ),
                     ),
+
                     const Spacer(),
+
                     Text(
                       '$progressPercentage%',
                       style:
                       const TextStyle(
                         fontWeight:
-                        FontWeight.bold,
-                        color: Color(
+                        FontWeight
+                            .bold,
+                        color:
+                        Color(
                           0xffE9C46A,
                         ),
-                        fontSize: 13,
+                        fontSize:
+                        13,
                       ),
                     ),
                   ],
                 ),
               ),
+
               const SizedBox(
                 height: 8,
               ),
-              SizedBox(
-                width: double.infinity,
-                child: ClipRRect(
-                  borderRadius:
-                  BorderRadius.circular(
-                    20,
+
+              ClipRRect(
+                borderRadius:
+                BorderRadius
+                    .circular(
+                  20,
+                ),
+                child:
+                LinearProgressIndicator(
+                  value:
+                  displayedProgress,
+                  minHeight: 8,
+                  color:
+                  const Color(
+                    0xffE9C46A,
                   ),
-                  child:
-                  LinearProgressIndicator(
-                    value:
-                    displayedProgress,
-                    minHeight: 8,
-                    color: const Color(
-                      0xffE9C46A,
-                    ),
-                    backgroundColor:
-                    Colors.grey.shade300,
-                  ),
+                  backgroundColor:
+                  Colors.grey
+                      .shade300,
                 ),
               ),
+
               const SizedBox(
                 height: 8,
               ),
+
               Align(
                 alignment:
-                Alignment.centerRight,
+                Alignment
+                    .centerRight,
                 child: Text(
                   !hasDuration
                       ? 'جاري قراءة مدة الفيديو...'
-                      : displayedProgress >= 1.0
+                      : displayedProgress >=
+                      1.0
                       ? 'تمت مشاهدة كامل الفيديو'
                       : 'تمت مشاهدة $progressPercentage% من الفيديو',
                   textDirection:
@@ -286,8 +359,10 @@ class VideoWatchProgress extends StatelessWidget {
                     fontFamily:
                     'Tajawal',
                     fontWeight:
-                    FontWeight.bold,
-                    color: Color(
+                    FontWeight
+                        .bold,
+                    color:
+                    Color(
                       0xff1A2429,
                     ),
                   ),

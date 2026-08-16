@@ -1,57 +1,102 @@
-import 'package:flutter/cupertino.dart';
-import 'package:graduationprojct/features/home/data/models/view_chat_model.dart';
-import 'package:graduationprojct/features/home/data/services/view_chat_service.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/models/display_favourite_model.dart';
-import '../data/services/display_favourite_service.dart';
+import '../data/models/view_chat_model.dart';
+import '../data/services/view_chat_service.dart';
 
 class ViewChatProvider with ChangeNotifier {
-  final ViewChatService _service = ViewChatService();
+  final ViewChatService _service =
+  ViewChatService();
 
   bool _isLoading = false;
-  String? _errorMessage;
   bool _isSuccess = false;
 
+  String? _errorMessage;
+
+  ViewChatModel? _chat;
+
   bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+
   bool get isSuccess => _isSuccess;
 
-  List<ViewChatModel> _chat = [];
+  String? get errorMessage =>
+      _errorMessage;
 
-  List<ViewChatModel> get chat => _chat;
+  ViewChatModel? get chat =>
+      _chat;
 
-  Future<void> getChat({required int id}) async {
+  Future<void> getChat({
+    required int videoId,
+  }) async {
     _isLoading = true;
-    _errorMessage = null;
     _isSuccess = false;
+    _errorMessage = null;
+    _chat = null;
+
     notifyListeners();
 
     try {
-      final prefs = await SharedPreferences.getInstance();
+      debugPrint(
+        '========== VIEW CHAT PROVIDER ==========',
+      );
 
-      final token = prefs.getString("auth_token");
+      debugPrint(
+        'videoId = $videoId',
+      );
 
-      if (token == null || token.isEmpty) {
-        throw Exception("Authentication token not found");
+      final prefs =
+      await SharedPreferences.getInstance();
+
+      final token =
+      prefs.getString("auth_token");
+
+      if (token == null ||
+          token.isEmpty) {
+        throw Exception(
+          "Authentication token not found",
+        );
       }
 
-      _chat = await _service.getChat(token: token, id: id);
+      _chat =
+      await _service.getChat(
+        token: token,
+        videoId: videoId,
+      );
 
       _isSuccess = true;
-    } catch (e) {
-      _errorMessage = e.toString();
-    }
 
-    _isLoading = false;
-    notifyListeners();
+      debugPrint(
+        'Provider chatId = ${_chat?.id}',
+      );
+
+      debugPrint(
+        'Provider messages = ${_chat?.messages.length}',
+      );
+    } catch (e, stackTrace) {
+      _errorMessage =
+          e.toString();
+
+      _isSuccess = false;
+
+      debugPrint(
+        'VIEW CHAT PROVIDER ERROR',
+      );
+
+      debugPrint('$e');
+      debugPrint('$stackTrace');
+    } finally {
+      _isLoading = false;
+
+      notifyListeners();
+    }
   }
 
   void reset() {
     _isLoading = false;
-    _errorMessage = null;
     _isSuccess = false;
-    _chat = [];
+    _errorMessage = null;
+    _chat = null;
+
     notifyListeners();
   }
 }

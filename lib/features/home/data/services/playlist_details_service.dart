@@ -18,7 +18,7 @@ class PlayListDetailsService {
         },
       ),
     );
-
+    print(response.data);
     return PlayListDetailsModel.fromJson(response.data);
   }
 }

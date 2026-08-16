@@ -1,33 +1,32 @@
 import 'package:flutter/cupertino.dart';
-import 'package:graduationprojct/features/home/data/models/create_chat_model.dart';
 import 'package:graduationprojct/features/home/data/models/funding_request_model.dart';
 import 'package:graduationprojct/features/home/data/models/rating_playlist_model.dart';
-import 'package:graduationprojct/features/home/data/models/refund_request_model.dart';
-import 'package:graduationprojct/features/home/data/services/create_chat_service.dart';
+import 'package:graduationprojct/features/home/data/models/send_rag_message_model.dart';
 import 'package:graduationprojct/features/home/data/services/funding_request_service.dart';
 import 'package:graduationprojct/features/home/data/services/rating_playlist_service.dart';
-import 'package:graduationprojct/features/home/data/services/refund_request_service.dart';
+import 'package:graduationprojct/features/home/data/services/send_rag_message_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/models/add_video_to_fav_model.dart';
 import '../data/services/add_video_to_fav_service.dart';
 
-class CreateChatProvider with ChangeNotifier {
-  final CreateChatService _service = CreateChatService();
+class SendRagMessageProvider with ChangeNotifier {
+  final SendRagMessageService _service = SendRagMessageService();
 
   bool _isLoading = false;
   String? _errorMessage;
   bool _isSuccess = false;
 
-  CreateChatModel? _response;
+  SendRagMessage? _response;
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isSuccess => _isSuccess;
-  CreateChatModel? get response => _response;
+  SendRagMessage? get response => _response;
 
-  Future<void> createChat({
-    required int videoId
+  Future<void> sendRag({
+    required String text,
+    required int chatId,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -43,9 +42,10 @@ class CreateChatProvider with ChangeNotifier {
         throw Exception("Authentication token not found");
       }
 
-      _response = await _service.create(
+      _response = await _service.sendRag(
         token: token,
-        videoId: videoId,
+        text:text,
+        chatId:chatId,
       );
 
       _isSuccess = true;

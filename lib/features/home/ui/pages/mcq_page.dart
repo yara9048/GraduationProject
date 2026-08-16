@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:graduationprojct/features/home/providers/regenerate_mcq_provider.dart';
 import 'package:graduationprojct/features/home/ui/pages/video_details_page.dart';
 import 'package:provider/provider.dart';
 
@@ -9,6 +9,7 @@ class McqScreen extends StatefulWidget {
   final int videoId;
   final String videoName;
   final int playlistId;
+
   const McqScreen({
     super.key,
     required this.videoName,
@@ -22,519 +23,1057 @@ class McqScreen extends StatefulWidget {
 
 class _McqScreenState extends State<McqScreen> {
   int currentQuestion = 0;
+
   String? selectedAnswer;
-  double progress = 0;
+
   final Map<int, String> userAnswers = {};
+
+  // ============================================================
+  // Init
+  // ============================================================
 
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AiFeaturesProvider>().getAiFeatures(videoId: widget.videoId);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await context.read<AiFeaturesProvider>().getAiFeatures(
+        videoId: widget.videoId,
+      );
     });
   }
 
+  // ============================================================
+  // Reset quiz
+  // ============================================================
+
+  void _resetQuizState() {
+    currentQuestion = 0;
+    selectedAnswer = null;
+    userAnswers.clear();
+  }
+
+
+  void _finishQuiz() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => VideoDetailsPage(
+          videoId: widget.videoId,
+          playlistId: widget.playlistId,
+          videoName: widget.videoName,
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // Result Dialog
+  // ============================================================
+
+  void _showResultDialog({
+    required int score,
+    required int totalQuestions,
+  }) {
+    String message;
+
+    if (score == totalQuestions) {
+      message = "ممتاز! أجبت على جميع الأسئلة بشكل صحيح";
+    } else if (score >= totalQuestions / 2) {
+      message =
+      "أحسنت! أجبت على $score من $totalQuestions بشكل صحيح";
+    } else {
+      message =
+      "لا بأس، أجبت على $score من $totalQuestions بشكل صحيح. حاول مرة أخرى 💪";
+    }
+
+    final bool passed =
+        score >= totalQuestions / 2;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Dialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // =================================================
+                  // Result icon
+                  // =================================================
+
+                  Container(
+                    width: 86,
+                    height: 86,
+                    decoration: BoxDecoration(
+                      color:
+                          const Color(0xff2A9D8F)
+                          .withOpacity(0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      passed
+                          ? Icons.check_circle_rounded
+                          : Icons.quiz_rounded,
+                      size: 62,
+                      color: const Color(0xff2A9D8F)
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 20,
+                  ),
+
+                  // =================================================
+                  // Title
+                  // =================================================
+
+                  const Text(
+                    "نتيجة الاختبار",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: "Tajawal",
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xff1A2429),
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 8,
+                  ),
+
+                  // =================================================
+                  // Score
+                  // =================================================
+
+                  Text(
+                    "$score / $totalQuestions",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: "Tajawal",
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xff2A9D8F),
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 10,
+                  ),
+
+                  // =================================================
+                  // Message
+                  // =================================================
+
+                  Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: "Tajawal",
+                      fontSize: 15,
+                      height: 1.5,
+                      color: Colors.black87,
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 24,
+                  ),
+
+                  // =================================================
+                  // Result progress
+                  // =================================================
+
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: LinearProgressIndicator(
+                      value: totalQuestions == 0
+                          ? 0
+                          : score / totalQuestions,
+                      minHeight: 10,
+                      backgroundColor:
+                      Colors.grey.shade300,
+                      valueColor:
+                      const AlwaysStoppedAnimation(
+                        Color(0xff2A9D8F),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 26,
+                  ),
+
+                  // =================================================
+                  // Regenerate button
+                  // =================================================
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final mcqProvider =
+                        context.read<RegenerateMcqProvider>();
+                        await mcqProvider.regenerate(
+                          videoId: widget.videoId,
+                        );
+                        if (!context.mounted) return;
+                        if (mcqProvider.errorMessage != null) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                mcqProvider.errorMessage!,
+                              ),
+                            ),
+                          );
+
+                          return;
+                        }
+
+                        final mcq =
+                            mcqProvider.mcq;
+
+                        if (mcq == null) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'تعذر',
+                              ),
+                            ),
+                          );
+
+                          return;
+                        }
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return VideoDetailsPage(
+                                playlistId:  widget.playlistId, videoId: widget.videoId, videoName:  widget.videoName,
+                              );
+                            },
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                        const Color(0xff2A9D8F),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                          BorderRadius.circular(15),
+                        ),
+                      ),
+                      icon: const Icon(
+                        Icons.refresh_rounded,
+                        color: Colors.white,
+                        size: 23,
+                      ),
+                      label: const Text(
+                        "اعادة توليد اسئلة",
+                        style: TextStyle(
+                          fontFamily: "Tajawal",
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 12,
+                  ),
+
+                  // =================================================
+                  // Finish button
+                  // =================================================
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: OutlinedButton(
+                      onPressed: _finishQuiz,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor:
+                        const Color(0xff2A9D8F),
+                        side: const BorderSide(
+                          color: Color(0xff2A9D8F),
+                          width: 1.5,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                          BorderRadius.circular(15),
+                        ),
+                      ),
+                      child: const Text(
+                        "إنهاء",
+                        style: TextStyle(
+                          fontFamily: "Tajawal",
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xff2A9D8F),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ============================================================
+  // Next question
+  // ============================================================
+
+  void _nextQuestion(
+      AiFeaturesProvider provider,
+      ) {
+    if (selectedAnswer == null) {
+      return;
+    }
+
+    final question =
+    provider.mcqs[currentQuestion];
+
+    userAnswers[question.id] =
+    selectedAnswer!;
+
+    // ============================================================
+    // More questions
+    // ============================================================
+
+    if (currentQuestion <
+        provider.mcqs.length - 1) {
+      setState(() {
+        currentQuestion++;
+
+        final nextQuestion =
+        provider.mcqs[currentQuestion];
+
+        selectedAnswer =
+        userAnswers[nextQuestion.id];
+      });
+
+      return;
+    }
+
+    // ============================================================
+    // Finished
+    // ============================================================
+
+    int score = 0;
+
+    for (final q in provider.mcqs) {
+      if (userAnswers[q.id] ==
+          q.answer) {
+        score++;
+      }
+    }
+
+    _showResultDialog(
+      score: score,
+      totalQuestions:
+      provider.mcqs.length,
+    );
+  }
+
+  // ============================================================
+  // Build
+  // ============================================================
+
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<AiFeaturesProvider>();
+    final provider =
+    context.watch<AiFeaturesProvider>();
+
+    // ============================================================
+    // Loading
+    // ============================================================
 
     if (provider.isLoading) {
       return const Scaffold(
         backgroundColor: Colors.white,
         body: Center(
-          child: CircularProgressIndicator(
+          child:
+          CircularProgressIndicator(
             strokeWidth: 3,
-            color: Color(0xff2A9D8F),
+            color: Color(
+              0xff2A9D8F,
+            ),
           ),
         ),
       );
     }
 
-    if (provider.errorMessage != null) {
-      return Scaffold(body: Center(child: Text(provider.errorMessage!)));
+    // ============================================================
+    // Error
+    // ============================================================
+
+    if (provider.errorMessage !=
+        null) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: Padding(
+            padding:
+            const EdgeInsets.all(
+              24,
+            ),
+            child: Text(
+              provider.errorMessage!,
+              textAlign:
+              TextAlign.center,
+              style:
+              const TextStyle(
+                fontFamily:
+                "Tajawal",
+              ),
+            ),
+          ),
+        ),
+      );
     }
+
+    // ============================================================
+    // Empty
+    // ============================================================
 
     if (provider.mcqs.isEmpty) {
-      return const Scaffold(body: Center(child: Text("لا توجد أسئلة")));
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: Text(
+            "لا توجد أسئلة",
+            style: TextStyle(
+              fontFamily: "Tajawal",
+            ),
+          ),
+        ),
+      );
     }
 
-    final question = provider.mcqs[currentQuestion];
+    // ============================================================
+    // Safety
+    // ============================================================
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            child: Image.asset('assets/Images/Ellipse 4.png'),
-          ),
+    if (currentQuestion >=
+        provider.mcqs.length) {
+      currentQuestion = 0;
+      selectedAnswer = null;
+    }
 
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: Image.asset('assets/Images/Ellipse 7.png'),
-          ),
+    final question =
+    provider.mcqs[currentQuestion];
 
-          SafeArea(
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 100,
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: 20,
-                        right: 16,
-                        child: IconButton(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return VideoDetailsPage(
-                                  videoId: widget.videoId,
-                                  videoName: widget.videoName,
-                                  playlistId: widget.playlistId,
-                                );
-                              },
+    final double progress =
+        (currentQuestion + 1) /
+            provider.mcqs.length;
+
+    // ============================================================
+    // UI
+    // ============================================================
+
+    return Directionality(
+      textDirection:
+      TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor:
+        Colors.white,
+
+        body: Stack(
+          children: [
+            // ======================================================
+            // Background decoration
+            // ======================================================
+
+            Positioned(
+              top: 0,
+              left: 0,
+              child: Image.asset(
+                'assets/Images/Ellipse 4.png',
+              ),
+            ),
+
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Image.asset(
+                'assets/Images/Ellipse 7.png',
+              ),
+            ),
+
+            // ======================================================
+            // Content
+            // ======================================================
+
+            SafeArea(
+              child: Column(
+                children: [
+                  // =================================================
+                  // Header
+                  // =================================================
+
+                  SizedBox(
+                    height: 100,
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          top: 30,
+                          right: 10,
+                          child: InkWell(
+                            onTap:
+                            _finishQuiz,
+                            borderRadius:
+                            BorderRadius.circular(
+                              12,
+                            ),
+                            child:
+                            const Padding(
+                              padding:
+                              EdgeInsets.symmetric(
+                                horizontal:
+                                8,
+                                vertical:
+                                8,
+                              ),
+                              child: Row(
+                                mainAxisSize:
+                                MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'اختبار الفيديو',
+                                    style:
+                                    TextStyle(
+                                      fontWeight:
+                                      FontWeight.bold,
+                                      color:
+                                      Color(
+                                        0xff2A9D8F,
+                                      ),
+                                      fontFamily:
+                                      'Tajawal',
+                                      fontSize:
+                                      20,
+                                    ),
+                                  ),
+
+                                  SizedBox(
+                                    width:
+                                    10,
+                                  ),
+
+                                  Icon(
+                                    Icons
+                                        .arrow_back_ios_new_rounded,
+                                    textDirection:
+                                    TextDirection.rtl,
+                                    color:
+                                    Color(
+                                      0xff2A9D8F,
+                                    ),
+                                    size:
+                                    20,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          icon: const Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            textDirection: TextDirection.rtl,
-                            color: Color(0xff2A9D8F),
-                            size: 30,
-                          ),
                         ),
-                      ),
+                      ],
+                    ),
+                  ),
 
-                      const Positioned(
-                        top: 20,
-                        right: 70,
-                        child: Text(
-                          "لمّاح ",
-                          style: TextStyle(
-                            fontSize: 43,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xff2A9D8F),
-                            fontFamily: "Tajawal",
-                            shadows: [
-                              Shadow(
-                                offset: Offset(-1, 4),
-                                blurRadius: 16,
-                                color: Colors.black26,
+                  // =================================================
+                  // Scroll
+                  // =================================================
+
+                  Expanded(
+                    child:
+                    MediaQuery.removePadding(
+                      removeTop: true,
+                      context:
+                      context,
+                      child:
+                      SingleChildScrollView(
+                        physics:
+                        const BouncingScrollPhysics(),
+                        child:
+                        Padding(
+                          padding:
+                          const EdgeInsets.symmetric(
+                            horizontal:
+                            15,
+                          ),
+                          child:
+                          Column(
+                            crossAxisAlignment:
+                            CrossAxisAlignment.end,
+                            children: [
+                              // =====================================
+                              // Progress text
+                              // =====================================
+
+                              Row(
+                                children: [
+                                  Text(
+                                    "${(progress * 100).toStringAsFixed(0)}%",
+                                    style:
+                                    const TextStyle(
+                                      fontFamily:
+                                      "Tajawal",
+                                      color:
+                                      Color(
+                                        0xff2A9D8F,
+                                      ),
+                                      fontWeight:
+                                      FontWeight.bold,
+                                    ),
+                                  ),
+
+                                  const Spacer(),
+
+                                  Text(
+                                    "السؤال ${currentQuestion + 1} من ${provider.mcqs.length}",
+                                    style:
+                                    const TextStyle(
+                                      fontFamily:
+                                      "Tajawal",
+                                      fontWeight:
+                                      FontWeight.w500,
+                                      color:
+                                      Color(
+                                        0xff4D5A5D,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(
+                                height:
+                                10,
+                              ),
+
+                              // =====================================
+                              // Progress
+                              // =====================================
+
+                              ClipRRect(
+                                borderRadius:
+                                BorderRadius.circular(
+                                  20,
+                                ),
+                                child:
+                                LinearProgressIndicator(
+                                  value:
+                                  progress,
+                                  minHeight:
+                                  8,
+                                  backgroundColor:
+                                  const Color(
+                                    0xffE0E0E0,
+                                  ),
+                                  valueColor:
+                                  const AlwaysStoppedAnimation(
+                                    Color(
+                                      0xff2A9D8F,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(
+                                height:
+                                20,
+                              ),
+
+                              // =====================================
+                              // Question Card
+                              // =====================================
+
+                              Card(
+                                color:
+                                Colors.white,
+                                elevation:
+                                3,
+                                surfaceTintColor:
+                                Colors.white,
+                                shape:
+                                RoundedRectangleBorder(
+                                  borderRadius:
+                                  BorderRadius.circular(
+                                    20,
+                                  ),
+                                ),
+                                child:
+                                Padding(
+                                  padding:
+                                  const EdgeInsets.all(
+                                    20,
+                                  ),
+                                  child:
+                                  Column(
+                                    children: [
+                                      // =================================
+                                      // Category
+                                      // =================================
+
+                                      if (question
+                                          .category
+                                          .trim()
+                                          .isNotEmpty)
+                                        Container(
+                                          padding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal:
+                                            12,
+                                            vertical:
+                                            6,
+                                          ),
+                                          margin:
+                                          const EdgeInsets.only(
+                                            bottom:
+                                            14,
+                                          ),
+                                          decoration:
+                                          BoxDecoration(
+                                            color:
+                                            const Color(
+                                              0xff2A9D8F,
+                                            ).withOpacity(
+                                              0.10,
+                                            ),
+                                            borderRadius:
+                                            BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
+                                          child:
+                                          Text(
+                                            question
+                                                .category,
+                                            style:
+                                            const TextStyle(
+                                              fontFamily:
+                                              "Tajawal",
+                                              color:
+                                              Color(
+                                                0xff2A9D8F,
+                                              ),
+                                              fontWeight:
+                                              FontWeight.bold,
+                                              fontSize:
+                                              12,
+                                            ),
+                                          ),
+                                        ),
+
+                                      // =================================
+                                      // Question
+                                      // =================================
+
+                                      Text(
+                                        question
+                                            .question,
+                                        textAlign:
+                                        TextAlign.center,
+                                        style:
+                                        const TextStyle(
+                                          fontSize:
+                                          17,
+                                          height:
+                                          1.5,
+                                          fontWeight:
+                                          FontWeight.bold,
+                                          fontFamily:
+                                          "Tajawal",
+                                          color:
+                                          Color(
+                                            0xff181C1F,
+                                          ),
+                                        ),
+                                      ),
+
+                                      const SizedBox(
+                                        height:
+                                        24,
+                                      ),
+
+                                      // =================================
+                                      // Options
+                                      // =================================
+
+                                      ...question
+                                          .options
+                                          .map(
+                                            (
+                                            option,
+                                            ) {
+                                          final bool
+                                          selected =
+                                              selectedAnswer ==
+                                                  option;
+
+                                          return Padding(
+                                            padding:
+                                            const EdgeInsets.only(
+                                              bottom:
+                                              14,
+                                            ),
+                                            child:
+                                            Material(
+                                              color:
+                                              selected
+                                                  ? const Color(
+                                                0xff2A9D8F,
+                                              ).withOpacity(
+                                                0.09,
+                                              )
+                                                  : Colors.white,
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                14,
+                                              ),
+                                              child:
+                                              RadioListTile<String>(
+                                                value:
+                                                option,
+                                                groupValue:
+                                                selectedAnswer,
+                                                selected:
+                                                selected,
+
+                                                shape:
+                                                RoundedRectangleBorder(
+                                                  borderRadius:
+                                                  BorderRadius.circular(
+                                                    14,
+                                                  ),
+                                                  side:
+                                                  BorderSide(
+                                                    color:
+                                                    selected
+                                                        ? const Color(
+                                                      0xff2A9D8F,
+                                                    )
+                                                        : Colors.grey.shade300,
+                                                    width:
+                                                    2,
+                                                  ),
+                                                ),
+
+                                                tileColor:
+                                                Colors.white,
+
+                                                selectedTileColor:
+                                                const Color(
+                                                  0xff2A9D8F,
+                                                ).withOpacity(
+                                                  0.09,
+                                                ),
+
+                                                radioScaleFactor:
+                                                1.2,
+
+                                                fillColor:
+                                                WidgetStateProperty.resolveWith<Color>(
+                                                      (
+                                                      states,
+                                                      ) {
+                                                    if (states.contains(
+                                                      WidgetState.selected,
+                                                    )) {
+                                                      return const Color(
+                                                        0xff2A9D8F,
+                                                      );
+                                                    }
+
+                                                    return const Color(
+                                                      0xffB8C1D1,
+                                                    );
+                                                  },
+                                                ),
+
+                                                activeColor:
+                                                const Color(
+                                                  0xff2A9D8F,
+                                                ),
+
+                                                contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                  horizontal:
+                                                  12,
+                                                  vertical:
+                                                  2,
+                                                ),
+
+                                                title:
+                                                Text(
+                                                  option,
+                                                  textAlign:
+                                                  TextAlign.center,
+                                                  style:
+                                                  TextStyle(
+                                                    fontSize:
+                                                    15,
+                                                    fontFamily:
+                                                    "Tajawal",
+                                                    fontWeight:
+                                                    selected
+                                                        ? FontWeight.bold
+                                                        : FontWeight.w500,
+                                                    color:
+                                                    const Color(
+                                                      0xff181C1F,
+                                                    ),
+                                                  ),
+                                                ),
+
+                                                controlAffinity:
+                                                ListTileControlAffinity.trailing,
+
+                                                onChanged:
+                                                    (
+                                                    value,
+                                                    ) {
+                                                  setState(
+                                                        () {
+                                                      selectedAnswer =
+                                                          value;
+                                                    },
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(
+                                height:
+                                30,
+                              ),
+
+                              // =====================================
+                              // Next / Finish button
+                              // =====================================
+
+                              Center(
+                                child:
+                                SizedBox(
+                                  width:
+                                  240,
+                                  height:
+                                  52,
+                                  child:
+                                  ElevatedButton.icon(
+                                    onPressed:
+                                    selectedAnswer ==
+                                        null
+                                        ? null
+                                        : () {
+                                      _nextQuestion(
+                                        provider,
+                                      );
+                                    },
+
+                                    icon:
+                                    Icon(
+                                      currentQuestion ==
+                                          provider.mcqs.length -
+                                              1
+                                          ? Icons
+                                          .check_rounded
+                                          : Icons
+                                          .arrow_back_rounded,
+                                    ),
+
+                                    label:
+                                    Text(
+                                      currentQuestion ==
+                                          provider.mcqs.length -
+                                              1
+                                          ? "إنهاء الاختبار"
+                                          : "التالي",
+                                      style:
+                                      const TextStyle(
+                                        color:
+                                        Colors.white,
+                                        fontWeight:
+                                        FontWeight.bold,
+                                        fontFamily:
+                                        "Tajawal",
+                                        fontSize:
+                                        16,
+                                      ),
+                                    ),
+
+                                    style:
+                                    ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                      const Color(
+                                        0xff2A9D8F,
+                                      ),
+                                      foregroundColor:
+                                      Colors.white,
+                                      disabledBackgroundColor:
+                                      const Color(
+                                        0xffC7D5D3,
+                                      ),
+                                      disabledForegroundColor:
+                                      Colors.white,
+                                      elevation:
+                                      0,
+                                      shape:
+                                      RoundedRectangleBorder(
+                                        borderRadius:
+                                        BorderRadius.circular(
+                                          14,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(
+                                height:
+                                40,
                               ),
                             ],
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-
-                Expanded(
-                  child: MediaQuery.removePadding(
-                    removeTop: true,
-                    context: context,
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              "اختبار: ${widget.videoName}",
-                              textDirection: TextDirection.rtl,
-                              style: const TextStyle(
-                                color: Color(0xff1A2429),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                fontFamily: "Tajawal",
-                              ),
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            Row(
-                              children: [
-                                Text(
-                                  "${(progress * 100).toStringAsFixed(0)}%",
-                                  style: const TextStyle(
-                                    fontFamily: "Tajawal",
-                                    color: Colors.teal,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const Spacer(),
-                                Text(
-                                  "السؤال ${currentQuestion + 1} من ${provider.mcqs.length}",
-                                  style: const TextStyle(fontFamily: "Tajawal"),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 10),
-
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Directionality(
-                                textDirection: TextDirection.rtl,
-                                child: LinearProgressIndicator(
-                                  value: progress,
-                                  minHeight: 8,
-                                  borderRadius: BorderRadius.circular(20),
-                                  backgroundColor: const Color(0xffE0E0E0),
-                                  valueColor: const AlwaysStoppedAnimation(
-                                    Color(0xff2A9D8F),
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 15),
-
-                            Card(
-                              color: Colors.white,
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(20),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      question.question,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: "Tajawal",
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 20),
-
-                                    ...question.options.map((option) {
-                                      final selected = selectedAnswer == option;
-
-                                      return Container(
-                                        margin: const EdgeInsets.only(
-                                          bottom: 18,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: selected
-                                              ? const Color(
-                                                  0xff2A9D8F,
-                                                ).withOpacity(0.09)
-                                              : Colors.white,
-                                          border: Border.all(
-                                            color: selected
-                                                ? const Color(0xff2A9D8F)
-                                                : Colors.grey.shade300,
-                                            width: 2.2,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            14,
-                                          ),
-                                        ),
-                                        child: RadioListTile<String>(
-                                          value: option,
-                                          groupValue: selectedAnswer,
-                                          radioScaleFactor: 1.3,
-                                          fillColor:
-                                              WidgetStateProperty.resolveWith<
-                                                Color
-                                              >((states) {
-                                                if (states.contains(
-                                                  WidgetState.selected,
-                                                )) {
-                                                  return const Color(
-                                                    0xff2A9D8F,
-                                                  );
-                                                }
-                                                return const Color(0xffB8C1D1);
-                                              }),
-                                          activeColor: const Color(0xff2A9D8F),
-                                          title: Text(
-                                            option,
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontFamily: "Tajawal",
-                                              fontWeight: selected
-                                                  ? FontWeight.bold
-                                                  : FontWeight.w500,
-                                              color: const Color(0xff181C1F),
-                                            ),
-                                          ),
-                                          controlAffinity:
-                                              ListTileControlAffinity.trailing,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              selectedAnswer = value;
-                                            });
-                                          },
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 30),
-
-                            Center(
-                              child: SizedBox(
-                                width: 240,
-                                height: 52,
-                                child: ElevatedButton.icon(
-                                  onPressed: selectedAnswer == null
-                                      ? null
-                                      : () {
-                                          userAnswers[question.id] =
-                                              selectedAnswer!;
-
-                                          if (currentQuestion <
-                                              provider.mcqs.length - 1) {
-                                            setState(() {
-                                              currentQuestion++;
-                                              progress =
-                                                  currentQuestion /
-                                                  provider.mcqs.length;
-
-                                              selectedAnswer =
-                                                  userAnswers[provider
-                                                      .mcqs[currentQuestion]
-                                                      .id];
-                                            });
-                                          } else {
-                                            setState(() {
-                                              progress = 1;
-                                            });
-                                            int score = 0;
-
-                                            for (final q in provider.mcqs) {
-                                              if (userAnswers[q.id] ==
-                                                  q.answer) {
-                                                score++;
-                                              }
-                                            }
-                                            String message;
-
-                                            if (score == provider.mcqs.length) {
-                                              message =
-                                                  "ممتاز! أجبت على جميع الأسئلة بشكل صحيح";
-                                            } else if (score >=
-                                                provider.mcqs.length / 2) {
-                                              message =
-                                                  "أحسنت! أجبت على $score من ${provider.mcqs.length} بشكل صحيح";
-                                            } else {
-                                              message =
-                                                  "لا بأس، أجبت على $score من ${provider.mcqs.length} بشكل صحيح. حاول مرة أخرى 💪";
-                                            }
-
-                                            final isCorrect =
-                                                selectedAnswer ==
-                                                question.answer;
-                                            showDialog(
-                                              context: context,
-                                              barrierDismissible: false,
-                                              builder: (_) => Dialog(
-                                                backgroundColor: Colors.white,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(24),
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(
-                                                    24,
-                                                  ),
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Container(
-                                                        width: 80,
-                                                        height: 80,
-                                                        decoration: BoxDecoration(
-                                                          color: isCorrect
-                                                              ? Colors.green
-                                                                    .withOpacity(
-                                                                      .12,
-                                                                    )
-                                                              : Colors.red
-                                                                    .withOpacity(
-                                                                      .12,
-                                                                    ),
-                                                          shape:
-                                                              BoxShape.circle,
-                                                        ),
-                                                        child: Icon(
-                                                          isCorrect
-                                                              ? Icons
-                                                                    .check_circle_rounded
-                                                              : Icons
-                                                                    .cancel_rounded,
-                                                          size: 60,
-                                                          color: isCorrect
-                                                              ? Colors.green
-                                                              : Colors.red,
-                                                        ),
-                                                      ),
-
-                                                      const SizedBox(
-                                                        height: 20,
-                                                      ),
-
-                                                      Text(
-                                                        isCorrect
-                                                            ? "أحسنت الاجابة صحيحة "
-                                                            : "الاجابة خاطئة",
-                                                        style: TextStyle(
-                                                          fontFamily: "Tajawal",
-                                                          fontSize: 20,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Color(
-                                                            0xff1A2429,
-                                                          ),
-                                                        ),
-                                                      ),
-
-                                                      const SizedBox(
-                                                        height: 10,
-                                                      ),
-
-                                                      Text(
-                                                        message,
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        style: const TextStyle(
-                                                          fontFamily: "Tajawal",
-                                                          fontSize: 16,
-                                                          color: Colors.black87,
-                                                        ),
-                                                      ),
-
-                                                      const SizedBox(
-                                                        height: 25,
-                                                      ),
-
-                                                      LinearProgressIndicator(
-                                                        value:
-                                                            score /
-                                                            provider
-                                                                .mcqs
-                                                                .length,
-                                                        minHeight: 10,
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              20,
-                                                            ),
-                                                        backgroundColor: Colors
-                                                            .grey
-                                                            .shade300,
-                                                        valueColor:
-                                                            const AlwaysStoppedAnimation(
-                                                              Color(0xff2A9D8F),
-                                                            ),
-                                                      ),
-
-                                                      const SizedBox(
-                                                        height: 25,
-                                                      ),
-
-                                                      SizedBox(
-                                                        width: double.infinity,
-                                                        height: 50,
-                                                        child: ElevatedButton(
-                                                          style: ElevatedButton.styleFrom(
-                                                            backgroundColor:
-                                                                const Color(
-                                                                  0xff2A9D8F,
-                                                                ),
-                                                            shape: RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius.circular(
-                                                                    15,
-                                                                  ),
-                                                            ),
-                                                          ),
-                                                          onPressed: () => Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                              builder: (context) {
-                                                                return VideoDetailsPage(
-                                                                  videoId: widget
-                                                                      .videoId,
-                                                                  videoName: widget
-                                                                      .videoName,
-                                                                  playlistId: widget
-                                                                      .playlistId,
-                                                                );
-                                                              },
-                                                            ),
-                                                          ),
-
-                                                          child: const Text(
-                                                            "إنهاء",
-                                                            style: TextStyle(
-                                                              fontFamily:
-                                                                  "Tajawal",
-                                                              fontSize: 16,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  Colors.white,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          }
-                                        },
-                                  icon: const Icon(Icons.arrow_back),
-                                  label: Text(
-                                    currentQuestion == provider.mcqs.length - 1
-                                        ? "إنهاء"
-                                        : "التالي",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: "Tajawal",
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xff2A9D8F),
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 40),
-                          ],
-                        ),
-                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -4,25 +4,25 @@ import 'package:graduationprojct/features/auth/data/models/new_password_model.da
 import 'package:graduationprojct/features/auth/data/models/resend_otp_model.dart';
 import 'package:graduationprojct/features/auth/data/models/reset_password_request_model.dart';
 import 'package:graduationprojct/features/home/data/models/add_playlist_to_fav_model.dart';
-import 'package:graduationprojct/features/home/data/models/create_chat_model.dart';
-import 'package:graduationprojct/features/home/data/models/funding_request_model.dart';
 import 'package:graduationprojct/features/home/data/models/rating_playlist_model.dart';
+import 'package:graduationprojct/features/home/data/models/send_web_search_model.dart';
 import '../../../../../core/dio.dart';
-import '../models/refund_request_model.dart';
+import '../models/send_rag_message_model.dart';
 
-class CreateChatService {
+class SendWebSearchMessageService {
   final DioHelper _dio = DioHelper();
 
-  Future<CreateChatModel> create({
+  Future<SendWebSearchModel> sendWeb({
     required String token,
-    required int videoId,
+    required String text,
+    required int chatId,
   }) async {
     try {
       final response = await _dio.post(
-        ApiEndpoints.chats,
+        'messages/ask-web/',
         data: {
-          'title': "title",
-          'video':videoId,
+          'text':text,
+          'chat':chatId
         },
         options: Options(
           headers: {
@@ -32,7 +32,7 @@ class CreateChatService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return CreateChatModel.fromJson(response.data);
+        return SendWebSearchModel.fromJson(response.data);
       } else {
         throw Exception('فشل مع: ${response.statusCode}');
       }

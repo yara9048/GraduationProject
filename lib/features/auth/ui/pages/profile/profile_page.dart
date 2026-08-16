@@ -394,26 +394,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           );
                         },
                       ),
-                      profileItem(
-                        Icons.favorite_border,
-                        'المفضلة',
-                        onTap: () {
-                          if (widget.onFavouritePressed !=
-                              null) {
-                            widget.onFavouritePressed!.call();
-                            return;
-                          }
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                              const FavouritePage(),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 5),
                       SizedBox(
                         width: 240,
                         height: 52,
@@ -486,6 +467,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 95),
                     ],
                   ),
                 ),

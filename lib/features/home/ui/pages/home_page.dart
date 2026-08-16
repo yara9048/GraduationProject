@@ -43,9 +43,14 @@ class _HomePageState extends State<HomePage> {
     final subjectsProvider = context.watch<DisplaySubjectsProvider>();
     final subjects = subjectsProvider.subjects;
     final List<String> subjectImages = [
-      'assets/Images/Group 47.png',
+      'assets/Images/Group 42.png',
       'assets/Images/Group 48.png',
-      'assets/Images/Group 49.png',
+      'assets/Images/Group 47.png',
+    ];
+    final List<Color> subjectColors = [
+      Color(0xffE76F51),
+      Color(0xff2A9D8F),
+      Color(0xffA67500)
     ];
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -59,7 +64,7 @@ class _HomePageState extends State<HomePage> {
               child: Image.asset('assets/Images/Ellipse 4.png'),
             ),
             Positioned(
-              top: 47.5,
+              top: 56,
               left: 8,
               child: IconButton(
                 onPressed: (){
@@ -68,7 +73,7 @@ class _HomePageState extends State<HomePage> {
                 icon: Icon(
                   Icons.notifications_none_outlined,
                   color: const Color(0xff2A9D8F),
-                  size: 40,
+                  size: 35,
                 ),
               ),
             ),
@@ -268,7 +273,8 @@ class _HomePageState extends State<HomePage> {
                                     title: sub.name,
                                     imagePath: subjectImages[
                                     index % subjectImages.length],
-                                    textColor: const Color(0xffA67500),
+                                    textColor: subjectColors[
+                                    index % subjectColors.length],
                                     width: 150,
                                   ),
                                 );

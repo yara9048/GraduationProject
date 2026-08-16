@@ -7,15 +7,9 @@ import '../../../../core/end_points.dart';
 
 class DisplaySubjectsService {
   Future<List<DisplaySubjectsModel>> getSubjects(
-      String token,
       ) async {
     final response = await DioHelper().get(
       ApiEndpoints.subjects,
-      options: Options(
-        headers: {
-          "Authorization": "Bearer $token",
-        },
-      ),
     );
 
     final data = response.data;
@@ -25,7 +19,7 @@ class DisplaySubjectsService {
         "Expected API response to be a list, but received: ${data.runtimeType}",
       );
     }
-
+    print(response.data);
     return data
         .map(
           (item) => DisplaySubjectsModel.fromJson(

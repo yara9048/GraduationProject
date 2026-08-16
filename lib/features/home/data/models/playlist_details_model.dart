@@ -4,9 +4,11 @@ PlayListDetailsModel playListDetailsModelFromJson(
     String str,
     ) {
   try {
-    final dynamic decodedData = json.decode(str);
+    final dynamic decodedData =
+    json.decode(str);
 
-    if (decodedData is! Map<String, dynamic>) {
+    if (decodedData
+    is! Map<String, dynamic>) {
       throw const FormatException(
         'Playlist details response is not a JSON object',
       );
@@ -27,7 +29,9 @@ PlayListDetailsModel playListDetailsModelFromJson(
 String playListDetailsModelToJson(
     PlayListDetailsModel data,
     ) {
-  return json.encode(data.toJson());
+  return json.encode(
+    data.toJson(),
+  );
 }
 
 class PlayListDetailsModel {
@@ -40,11 +44,18 @@ class PlayListDetailsModel {
   final SubjectDetail? subjectDetail;
   final String? thumbnail;
   final String price;
+
   final int totalVideoCount;
   final double? totalDuration;
   final int studentsCount;
   final double completionRate;
-  final dynamic rating;
+
+  // التقييم العام للقائمة
+  final double? rating;
+
+  // تقييم المستخدم الحالي
+  final bool hasUserRating;
+  final double? userRating;
 
   final bool hasSubscription;
   final bool hasActiveSubscription;
@@ -68,6 +79,8 @@ class PlayListDetailsModel {
     required this.studentsCount,
     required this.completionRate,
     required this.rating,
+    required this.hasUserRating,
+    required this.userRating,
     required this.hasSubscription,
     required this.hasActiveSubscription,
     required this.canAccessContent,
@@ -79,8 +92,12 @@ class PlayListDetailsModel {
       Map<String, dynamic> json,
       ) {
     return PlayListDetailsModel(
-      id: _parseInt(json['id']),
-      name: _parseString(json['name']),
+      id: _parseInt(
+        json['id'],
+      ),
+      name: _parseString(
+        json['name'],
+      ),
       description: _parseString(
         json['description'],
       ),
@@ -88,45 +105,71 @@ class PlayListDetailsModel {
       category: _parseString(
         json['category'],
       ),
-      subject: _parseInt(json['subject']),
-      subjectDetail: _parseSubjectDetail(
+      subject: _parseInt(
+        json['subject'],
+      ),
+      subjectDetail:
+      _parseSubjectDetail(
         json['subject_detail'],
       ),
-      thumbnail: _parseNullableString(
+      thumbnail:
+      _parseNullableString(
         json['thumbnail'],
       ),
-      price: _parsePrice(json['price']),
-      totalVideoCount: _parseInt(
+      price: _parsePrice(
+        json['price'],
+      ),
+      totalVideoCount:
+      _parseInt(
         json['total_video_count'],
       ),
-      totalDuration: _parseNullableDouble(
+      totalDuration:
+      _parseNullableDouble(
         json['total_duration'],
       ),
-      studentsCount: _parseInt(
+      studentsCount:
+      _parseInt(
         json['students_count'],
       ),
-      completionRate: _parseDouble(
+      completionRate:
+      _parseDouble(
         json['completion_rate'],
       ),
-      rating: _parseRating(
+
+      rating:
+      _parseNullableDouble(
         json['rating'],
       ),
 
-      // أهم ثلاثة أسطر
-      hasSubscription: _parseBool(
+      hasUserRating:
+      _parseBool(
+        json['has_user_rating'],
+      ),
+
+      userRating:
+      _parseNullableDouble(
+        json['user_rating'],
+      ),
+
+      hasSubscription:
+      _parseBool(
         json['has_subscription'],
       ),
-      hasActiveSubscription: _parseBool(
+      hasActiveSubscription:
+      _parseBool(
         json['has_active_subscription'],
       ),
-      canAccessContent: _parseBool(
+      canAccessContent:
+      _parseBool(
         json['can_access_content'],
       ),
 
-      createdAt: _parseDateTime(
+      createdAt:
+      _parseDateTime(
         json['created_at'],
       ),
-      updatedAt: _parseDateTime(
+      updatedAt:
+      _parseDateTime(
         json['updated_at'],
       ),
     );
@@ -136,30 +179,45 @@ class PlayListDetailsModel {
     return {
       'id': id,
       'name': name,
-      'description': description,
+      'description':
+      description,
       'owner': owner,
       'category': category,
       'subject': subject,
       'subject_detail':
-      subjectDetail?.toJson(),
-      'thumbnail': thumbnail,
+      subjectDetail
+          ?.toJson(),
+      'thumbnail':
+      thumbnail,
       'price': price,
       'total_video_count':
       totalVideoCount,
-      'total_duration': totalDuration,
-      'students_count': studentsCount,
-      'completion_rate': completionRate,
+      'total_duration':
+      totalDuration,
+      'students_count':
+      studentsCount,
+      'completion_rate':
+      completionRate,
+
       'rating': rating,
+      'has_user_rating':
+      hasUserRating,
+      'user_rating':
+      userRating,
+
       'has_subscription':
       hasSubscription,
       'has_active_subscription':
       hasActiveSubscription,
       'can_access_content':
       canAccessContent,
+
       'created_at':
-      createdAt?.toIso8601String(),
+      createdAt
+          ?.toIso8601String(),
       'updated_at':
-      updatedAt?.toIso8601String(),
+      updatedAt
+          ?.toIso8601String(),
     };
   }
 }
@@ -169,7 +227,8 @@ class SubjectDetail {
   final String name;
   final String slug;
   final int category;
-  final CategoryDetail? categoryDetail;
+  final CategoryDetail?
+  categoryDetail;
   final String description;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -205,31 +264,40 @@ class SubjectDetail {
       _parseCategoryDetail(
         json['category_detail'],
       ),
-      description: _parseString(
+      description:
+      _parseString(
         json['description'],
       ),
-      createdAt: _parseDateTime(
+      createdAt:
+      _parseDateTime(
         json['created_at'],
       ),
-      updatedAt: _parseDateTime(
+      updatedAt:
+      _parseDateTime(
         json['updated_at'],
       ),
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic>
+  toJson() {
     return {
       'id': id,
       'name': name,
       'slug': slug,
-      'category': category,
+      'category':
+      category,
       'category_detail':
-      categoryDetail?.toJson(),
-      'description': description,
+      categoryDetail
+          ?.toJson(),
+      'description':
+      description,
       'created_at':
-      createdAt?.toIso8601String(),
+      createdAt
+          ?.toIso8601String(),
       'updated_at':
-      updatedAt?.toIso8601String(),
+      updatedAt
+          ?.toIso8601String(),
     };
   }
 }
@@ -262,54 +330,69 @@ class CategoryDetail {
       slug: _parseString(
         json['slug'],
       ),
-      createdAt: _parseDateTime(
+      createdAt:
+      _parseDateTime(
         json['created_at'],
       ),
-      updatedAt: _parseDateTime(
+      updatedAt:
+      _parseDateTime(
         json['updated_at'],
       ),
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic>
+  toJson() {
     return {
       'id': id,
       'name': name,
       'slug': slug,
       'created_at':
-      createdAt?.toIso8601String(),
+      createdAt
+          ?.toIso8601String(),
       'updated_at':
-      updatedAt?.toIso8601String(),
+      updatedAt
+          ?.toIso8601String(),
     };
   }
 }
 
-SubjectDetail? _parseSubjectDetail(
+SubjectDetail?
+_parseSubjectDetail(
     dynamic value,
     ) {
-  if (value is Map<String, dynamic>) {
-    return SubjectDetail.fromJson(value);
+  if (value
+  is Map<String, dynamic>) {
+    return SubjectDetail
+        .fromJson(value);
   }
 
   if (value is Map) {
-    return SubjectDetail.fromJson(
-      Map<String, dynamic>.from(value),
+    return SubjectDetail
+        .fromJson(
+      Map<String, dynamic>
+          .from(value),
     );
   }
 
   return null;
 }
 
-CategoryDetail? _parseCategoryDetail(
+CategoryDetail?
+_parseCategoryDetail(
     dynamic value,
     ) {
-  if (value is Map<String, dynamic>) {
-    return CategoryDetail.fromJson(value);
+  if (value
+  is Map<String, dynamic>) {
+    return CategoryDetail
+        .fromJson(value);
   }
 
   if (value is Map) {
-    return CategoryDetail.fromJson(
-      Map<String, dynamic>.from(value),
+    return CategoryDetail
+        .fromJson(
+      Map<String, dynamic>
+          .from(value),
     );
   }
 
@@ -332,10 +415,14 @@ int _parseInt(
   }
 
   return int.tryParse(
-    value.toString().trim(),
+    value
+        .toString()
+        .trim(),
   ) ??
       double.tryParse(
-        value.toString().trim(),
+        value
+            .toString()
+            .trim(),
       )?.toInt() ??
       0;
 }
@@ -352,7 +439,9 @@ double _parseDouble(
   }
 
   return double.tryParse(
-    value.toString().trim(),
+    value
+        .toString()
+        .trim(),
   ) ??
       0.0;
 }
@@ -369,15 +458,21 @@ double? _parseNullableDouble(
   }
 
   final String text =
-  value.toString().trim();
+  value
+      .toString()
+      .trim();
 
   if (text.isEmpty ||
-      text.toLowerCase() == 'null' ||
-      text.toUpperCase() == 'N/A') {
+      text.toLowerCase() ==
+          'null' ||
+      text.toUpperCase() ==
+          'N/A') {
     return null;
   }
 
-  return double.tryParse(text);
+  return double.tryParse(
+    text,
+  );
 }
 
 String _parseString(
@@ -398,10 +493,13 @@ String? _parseNullableString(
   }
 
   final String text =
-  value.toString().trim();
+  value
+      .toString()
+      .trim();
 
   if (text.isEmpty ||
-      text.toLowerCase() == 'null') {
+      text.toLowerCase() ==
+          'null') {
     return null;
   }
 
@@ -416,45 +514,23 @@ String _parsePrice(
   }
 
   if (value is num) {
-    return value.toDouble().toStringAsFixed(
+    return value
+        .toDouble()
+        .toStringAsFixed(
       2,
     );
   }
 
   final String text =
-  value.toString().trim();
+  value
+      .toString()
+      .trim();
 
   if (text.isEmpty) {
     return '0.00';
   }
 
   return text;
-}
-
-dynamic _parseRating(
-    dynamic value,
-    ) {
-  if (value == null) {
-    return 'N/A';
-  }
-
-  if (value is num) {
-    return value.toDouble();
-  }
-
-  final String text =
-  value.toString().trim();
-
-  if (text.isEmpty ||
-      text.toLowerCase() == 'null' ||
-      text.toUpperCase() == 'N/A') {
-    return 'N/A';
-  }
-
-  final double? numericRating =
-  double.tryParse(text);
-
-  return numericRating ?? text;
 }
 
 bool _parseBool(
@@ -472,7 +548,8 @@ bool _parseBool(
     return value != 0;
   }
 
-  final String text = value
+  final String text =
+  value
       .toString()
       .trim()
       .toLowerCase();
@@ -490,12 +567,17 @@ DateTime? _parseDateTime(
   }
 
   final String text =
-  value.toString().trim();
+  value
+      .toString()
+      .trim();
 
   if (text.isEmpty ||
-      text.toLowerCase() == 'null') {
+      text.toLowerCase() ==
+          'null') {
     return null;
   }
 
-  return DateTime.tryParse(text);
+  return DateTime.tryParse(
+    text,
+  );
 }

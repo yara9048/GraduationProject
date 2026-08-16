@@ -31,7 +31,6 @@ class _NotificationPageState extends State<NotificationPage> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          /// Background top
           Positioned(
             top: 0,
             left: 0,
@@ -39,8 +38,6 @@ class _NotificationPageState extends State<NotificationPage> {
               'assets/Images/Ellipse 4.png',
             ),
           ),
-
-          /// Background bottom
           Positioned(
             bottom: 0,
             right: 0,
@@ -49,8 +46,6 @@ class _NotificationPageState extends State<NotificationPage> {
             ),
           ),
 
-
-          /// Notifications list
           Positioned.fill(
             top: 110,
             child: notifications.isEmpty
@@ -80,6 +75,48 @@ class _NotificationPageState extends State<NotificationPage> {
                   time: notification.createdAt,
                 );
               },
+            ),
+          ),
+          Positioned(
+            top: 55,
+            right: 16,
+            child: InkWell(
+              borderRadius:
+              BorderRadius.circular(20),
+              onTap: (){Navigator.push(context, MaterialPageRoute(builder: (context){return MainNavigationPage();}));},
+              child: const Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      "سجل الاشعارات",
+                      style: TextStyle(
+                        fontWeight:
+                        FontWeight.bold,
+                        color:
+                        Color(0xff2A9D8F),
+                        fontFamily: "Tajawal",
+                        fontSize: 20,
+                      ),
+                    ),
+
+                    SizedBox(width: 10),
+                    Icon(
+                      Icons
+                          .arrow_back_ios_new_rounded,
+                      textDirection:
+                      TextDirection.rtl,
+                      color:
+                      Color(0xff2A9D8F),
+                      size: 20,
+                    ),
+
+                  ],
+                ),
+              ),
             ),
           ),
         ],

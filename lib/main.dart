@@ -11,8 +11,7 @@ import 'package:graduationprojct/features/auth/providers/sign_up_provider.dart';
 import 'package:graduationprojct/features/home/providers/add_playlist_to_fav_provider.dart';
 import 'package:graduationprojct/features/home/providers/add_video_to_fav_provider.dart';
 import 'package:graduationprojct/features/home/providers/ai_features_provider.dart';
-import 'package:graduationprojct/features/home/providers/chat_message_provider.dart';
-import 'package:graduationprojct/features/home/providers/chat_page_provider.dart';
+import 'package:graduationprojct/features/home/providers/chat_logic_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_facourite_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_playlist_by_subject_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_playlists_provider.dart';
@@ -28,6 +27,9 @@ import 'package:graduationprojct/features/home/providers/playlist_by_teachers_pr
 import 'package:graduationprojct/features/home/providers/playlist_details_provider.dart';
 import 'package:graduationprojct/features/home/providers/playlist_search_provider.dart';
 import 'package:graduationprojct/features/home/providers/rating_playlist_provider.dart';
+import 'package:graduationprojct/features/home/providers/regenerate_mcq_provider.dart';
+import 'package:graduationprojct/features/home/providers/send_rag_message_provider.dart';
+import 'package:graduationprojct/features/home/providers/send_web_search_message_provider.dart';
 import 'package:graduationprojct/features/home/providers/subject_search_provider.dart';
 import 'package:graduationprojct/features/home/providers/subscribe_provider.dart';
 import 'package:graduationprojct/features/home/providers/teachers_provider.dart';
@@ -37,7 +39,6 @@ import 'package:graduationprojct/features/home/providers/view_chat_provider.dart
 import 'package:graduationprojct/features/home/providers/wallet_provider.dart';
 import 'package:graduationprojct/features/home/providers/wallet_transactions_provider.dart';
 import 'package:graduationprojct/features/home/providers/watching_history_provider.dart';
-import 'package:graduationprojct/features/home/providers/web_search_provider.dart';
 import 'package:graduationprojct/features/home/ui/pages/home_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/main_navigation_page.dart';
 import 'package:provider/provider.dart';
@@ -49,7 +50,6 @@ import 'features/auth/providers/log_out_provider.dart';
 import 'features/auth/providers/send_otp_provider.dart';
 import 'features/auth/providers/sign_in_provider.dart';
 import 'features/auth/ui/pages/sign_up/splash_page.dart';
-import 'features/home/providers/create_chat_provider.dart';
 import 'features/home/providers/refund_request_provider.dart';
 import 'features/home/providers/subscriptions_provider.dart';
 import 'features/home/providers/video_progress_provider.dart';
@@ -170,7 +170,18 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => SignUpProvider(),
         ),
-
+        ChangeNotifierProvider(
+          create: (_) => ViewChatProvider(),
+        ),ChangeNotifierProvider(
+          create: (_) => SendRagMessageProvider(),
+        ),ChangeNotifierProvider(
+          create: (_) => SendWebSearchMessageProvider(),
+        ),ChangeNotifierProvider(
+          create: (_) => ChatLogicProvider(),
+        ),
+    ChangeNotifierProvider(
+    create: (_) => RegenerateMcqProvider(),
+    ),
         ChangeNotifierProvider(
           create: (_) => ResendOtpProvider(),
         ),
@@ -185,9 +196,6 @@ class MyApp extends StatelessWidget {
 
         ChangeNotifierProvider(
           create: (_) => WalletTransactionsProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => WebSearchProvider(),
         ),
         ChangeNotifierProvider(
           create: (_) => GetVideoProgressProvider(),
@@ -221,13 +229,6 @@ class MyApp extends StatelessWidget {
           create: (_) => ProfileProvider(),
         ),
 
-        ChangeNotifierProvider(
-          create: (_) => ViewChatProvider(),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) => ChatPageProvider(),
-        ),
 
         ChangeNotifierProvider(
           create: (_) => TeachersProvider(),
@@ -241,14 +242,6 @@ class MyApp extends StatelessWidget {
           create: (_) => LogoutProvider(
             authProvider: authProvider,
           ),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) => CreateChatProvider(),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) => ChatMessageProvider(),
         ),
 
         ChangeNotifierProvider(

@@ -64,6 +64,38 @@ class _CourseCardTemplateState extends State<CourseCardTemplate> {
       isFavorite = savedStatus;
     });
   }
+  String _formatDurationToHours(String value) {
+    final cleaned = value
+        .replaceAll(RegExp(r'[^0-9.]'), '')
+        .trim();
+
+    final double? totalMinutes =
+    double.tryParse(cleaned);
+
+    if (totalMinutes == null ||
+        totalMinutes <= 0) {
+      return '0 دقيقة';
+    }
+
+    final int totalRoundedMinutes =
+    totalMinutes.round();
+
+    final int hours =
+        totalRoundedMinutes ~/ 60;
+
+    final int minutes =
+        totalRoundedMinutes % 60;
+
+    if (hours > 0 && minutes > 0) {
+      return '$hours ساعة و $minutes دقيقة';
+    }
+
+    if (hours > 0) {
+      return '$hours ساعة';
+    }
+
+    return '$minutes دقيقة';
+  }
 
   Future<void> _toggleFavorite() async {
     if (isFavoriteLoading) {
@@ -239,7 +271,8 @@ class _CourseCardTemplateState extends State<CourseCardTemplate> {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        widget.durationText,
+                        _formatDurationToHours(
+                          widget.durationText,),
                         style: const TextStyle(
                           fontSize: 13,
                           fontFamily: "Tajawal",

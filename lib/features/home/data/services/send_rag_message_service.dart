@@ -4,27 +4,24 @@ import 'package:graduationprojct/features/auth/data/models/new_password_model.da
 import 'package:graduationprojct/features/auth/data/models/resend_otp_model.dart';
 import 'package:graduationprojct/features/auth/data/models/reset_password_request_model.dart';
 import 'package:graduationprojct/features/home/data/models/add_playlist_to_fav_model.dart';
-import 'package:graduationprojct/features/home/data/models/chat_message_model.dart';
-import 'package:graduationprojct/features/home/data/models/create_chat_model.dart';
-import 'package:graduationprojct/features/home/data/models/funding_request_model.dart';
 import 'package:graduationprojct/features/home/data/models/rating_playlist_model.dart';
 import '../../../../../core/dio.dart';
-import '../models/refund_request_model.dart';
+import '../models/send_rag_message_model.dart';
 
-class ChatMessageService {
+class SendRagMessageService {
   final DioHelper _dio = DioHelper();
 
-  Future<ChatMessageModel> create({
+  Future<SendRagMessage> sendRag({
     required String token,
-    required int id,
-    required String text
+    required String text,
+    required int chatId,
   }) async {
     try {
       final response = await _dio.post(
-        ApiEndpoints.messages,
+        'messages/',
         data: {
-          'chat': id,
           'text':text,
+          'chat':chatId
         },
         options: Options(
           headers: {
@@ -34,7 +31,7 @@ class ChatMessageService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return ChatMessageModel.fromJson(response.data);
+        return SendRagMessage.fromJson(response.data);
       } else {
         throw Exception('فشل مع: ${response.statusCode}');
       }

@@ -81,29 +81,31 @@ class NotificationCard extends StatelessWidget {
 
                   const SizedBox(height: 10),
 
-                  Row(
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.access_time_rounded,
-                            size: 15,
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      textDirection: TextDirection.ltr,
+                      children: [
+                        const Icon(
+                          Icons.access_time_rounded,
+                          size: 15,
+                          color: Color(0xff264653),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '\u202A$time\u202C',
+                          textDirection: TextDirection.ltr,
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(
+                            fontFamily: "Tajawal",
+                            fontSize: 13,
                             color: Color(0xff264653),
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            time,
-                            style: const TextStyle(
-                              fontFamily: "Tajawal",
-                              fontSize: 13,
-                              color: Color(0xff264653),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                        ),
+                      ],
+                    ),
+                  ),                ],
               ),
             ),
           ],

@@ -1,19 +1,10 @@
 import 'dart:convert';
 
-List<ViewChatModel> viewChatModelFromJson(String str) =>
-    List<ViewChatModel>.from(
-      json.decode(str).map(
-            (x) => ViewChatModel.fromJson(x),
-      ),
-    );
+ViewChatModel viewChatModelFromJson(String str) =>
+    ViewChatModel.fromJson(json.decode(str));
 
-String viewChatModelToJson(List<ViewChatModel> data) =>
-    json.encode(
-      List<dynamic>.from(
-        data.map((x) => x.toJson()),
-      ),
-    );
-
+String viewChatModelToJson(ViewChatModel data) =>
+    json.encode(data.toJson());
 
 class ViewChatModel {
   final int id;
@@ -24,38 +15,32 @@ class ViewChatModel {
   final DateTime? updatedAt;
   final List<Message> messages;
 
-  ViewChatModel({
+  const ViewChatModel({
     required this.id,
     required this.user,
     required this.video,
     required this.title,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
     required this.messages,
   });
 
-
   factory ViewChatModel.fromJson(Map<String, dynamic> json) {
     return ViewChatModel(
-      id: json["id"] ?? 0,
-      user: json["user"] ?? 0,
-      video: json["video"] ?? 0,
-      title: json["title"] ?? "",
-
-      createdAt: _parseDate(json["created_at"]),
-      updatedAt: _parseDate(json["updated_at"]),
-
-      messages: json["messages"] != null
-          ? List<Message>.from(
-        (json["messages"] as List)
-            .map(
-              (x) => Message.fromJson(x),
-        ),
-      )
+      id: _toInt(json["id"]),
+      user: _toInt(json["user"]),
+      video: _toInt(json["video"]),
+      title: json["title"]?.toString() ?? "",
+      createdAt: _toDateTime(json["created_at"]),
+      updatedAt: _toDateTime(json["updated_at"]),
+      messages: json["messages"] is List
+          ? (json["messages"] as List)
+          .whereType<Map<String, dynamic>>()
+          .map(Message.fromJson)
+          .toList()
           : [],
     );
   }
-
 
   Map<String, dynamic> toJson() => {
     "id": id,
@@ -68,8 +53,6 @@ class ViewChatModel {
   };
 }
 
-
-
 class Message {
   final int id;
   final int chat;
@@ -78,33 +61,29 @@ class Message {
   final Metadata metadata;
   final DateTime? createdAt;
 
-
-  Message({
+  const Message({
     required this.id,
     required this.chat,
     required this.sender,
     required this.text,
     required this.metadata,
-    required this.createdAt,
+    this.createdAt,
   });
 
-
   factory Message.fromJson(Map<String, dynamic> json) {
-
     return Message(
-      id: json["id"] ?? 0,
-      chat: json["chat"] ?? 0,
-      sender: json["sender"] ?? "",
-      text: json["text"] ?? "",
-
-      metadata: json["metadata"] != null
-          ? Metadata.fromJson(json["metadata"])
-          : Metadata(),
-
-      createdAt: _parseDate(json["created_at"]),
+      id: _toInt(json["id"]),
+      chat: _toInt(json["chat"]),
+      sender: json["sender"]?.toString() ?? "",
+      text: json["text"]?.toString() ?? "",
+      metadata: json["metadata"] is Map<String, dynamic>
+          ? Metadata.fromJson(
+        json["metadata"] as Map<String, dynamic>,
+      )
+          : const Metadata(),
+      createdAt: _toDateTime(json["created_at"]),
     );
   }
-
 
   Map<String, dynamic> toJson() => {
     "id": id,
@@ -116,39 +95,82 @@ class Message {
   };
 }
 
-
-
-
 class Metadata {
+  final String? provider;
+  final bool? webSearch;
 
-  Metadata();
-
+  const Metadata({
+    this.provider,
+    this.webSearch,
+  });
 
   factory Metadata.fromJson(Map<String, dynamic>? json) {
-    return Metadata();
+    if (json == null) {
+      return const Metadata();
+    }
+
+    return Metadata(
+      provider: json["provider"]?.toString(),
+      webSearch: _toBool(json["web_search"]),
+    );
   }
 
-
-  Map<String, dynamic> toJson() => {};
+  Map<String, dynamic> toJson() => {
+    "provider": provider,
+    "web_search": webSearch,
+  };
 }
 
+/// Safe int converter.
+/// Accepts:
+/// 1
+/// "1"
+/// 1.0
+/// null
+int _toInt(dynamic value) {
+  if (value == null) return 0;
 
+  if (value is int) return value;
 
+  if (value is num) return value.toInt();
 
+  return int.tryParse(value.toString()) ?? 0;
+}
 
-DateTime? _parseDate(dynamic value) {
+/// Safe DateTime parser.
+DateTime? _toDateTime(dynamic value) {
+  if (value == null) return null;
 
-  if(value == null || value.toString().isEmpty){
-    return null;
+  if (value is DateTime) return value;
+
+  return DateTime.tryParse(value.toString());
+}
+
+/// Safe bool converter.
+/// Accepts:
+/// true
+/// false
+/// 1 / 0
+/// "true" / "false"
+/// "1" / "0"
+bool? _toBool(dynamic value) {
+  if (value == null) return null;
+
+  if (value is bool) return value;
+
+  if (value is num) {
+    return value != 0;
   }
 
-  try {
+  final normalized = value.toString().trim().toLowerCase();
 
-    return DateTime.parse(value.toString());
-
-  } catch(e){
-
-    return null;
-
+  if (normalized == "true" || normalized == "1") {
+    return true;
   }
+
+  if (normalized == "false" || normalized == "0") {
+    return false;
+  }
+
+  return null;
 }

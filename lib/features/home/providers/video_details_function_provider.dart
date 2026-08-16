@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoProgressSnapshot {
@@ -18,90 +21,50 @@ class VideoDetailsFunctionProvider with ChangeNotifier {
   static const String fallbackVideoUrl =
       'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
 
-  double _watchProgress = 0.0;
-  double _initialWatchProgress = 0.0;
-  Duration _videoDuration = Duration.zero;
-  Duration _videoPosition = Duration.zero;
+  VideoPlayerController? _videoPlayerController;
+  ChewieController? _chewieController;
+
+  Timer? _progressTimer;
+
+  String? _currentVideoUrl;
+  String? _requestedApiVideoUrl;
+
+  String? _videoErrorMessage;
 
   bool _isVideoLoading = false;
   bool _isUsingFallbackVideo = false;
 
-  String? _videoErrorMessage;
-  String? _currentVideoUrl;
-  String? _requestedApiVideoUrl;
+  bool _isPlaying = false;
+  bool _isMuted = false;
 
-  int? _requestedDurationSeconds;
+  // ========================================
+  // Progress
+  // ========================================
 
-  VideoPlayerController? _videoPlayerController;
-  ChewieController? _chewieController;
+  double _watchProgress = 0.0;
+  double _initialWatchProgress = 0.0;
 
-  double get watchProgress {
-    final double currentProgress =
-    _watchProgress
-        .clamp(0.0, 1.0)
-        .toDouble();
+  Duration _videoPosition = Duration.zero;
 
-    final double savedProgress =
-    _initialWatchProgress
-        .clamp(0.0, 1.0)
-        .toDouble();
+  // ========================================
+  // Duration
+  //
+  // المصدر الوحيد هو API
+  // API يرجع بالدقائق
+  // ========================================
 
-    if (currentProgress >
-        savedProgress) {
-      return currentProgress;
-    }
+  double? _apiDurationMinutes;
+  int _apiDurationSeconds = 0;
 
-    return savedProgress;
-  }
-  void setInitialWatchProgress(
-      double progress,
-      ) {
-    _initialWatchProgress =
-        progress
-            .clamp(0.0, 1.0)
-            .toDouble();
+  // ========================================
+  // Getters
+  // ========================================
 
-    notifyListeners();
-  }
+  VideoPlayerController? get videoPlayerController =>
+      _videoPlayerController;
 
-  Duration get videoDuration => _videoDuration;
-
-  Duration get videoPosition => _videoPosition;
-
-  int get currentProgressSeconds {
-    final int seconds = _videoPosition.inSeconds;
-
-    if (seconds < 0) {
-      return 0;
-    }
-
-    final int durationSeconds = _videoDuration.inSeconds;
-
-    if (durationSeconds > 0 && seconds > durationSeconds) {
-      return durationSeconds;
-    }
-
-    return seconds;
-  }
-
-  int get durationSeconds {
-    final int seconds = _videoDuration.inSeconds;
-
-    return seconds > 0 ? seconds : 0;
-  }
-
-  bool get isCompleted {
-    final int durationMilliseconds = _videoDuration.inMilliseconds;
-
-    final int positionMilliseconds = _videoPosition.inMilliseconds;
-
-    if (durationMilliseconds <= 0) {
-      return false;
-    }
-
-    return durationMilliseconds > 1000 &&
-        positionMilliseconds >= durationMilliseconds - 1000;
-  }
+  ChewieController? get chewieController =>
+      _chewieController;
 
   bool get isVideoLoading => _isVideoLoading;
 
@@ -113,61 +76,162 @@ class VideoDetailsFunctionProvider with ChangeNotifier {
 
   String? get requestedApiVideoUrl => _requestedApiVideoUrl;
 
-  VideoPlayerController? get videoPlayerController => _videoPlayerController;
+  bool get isPlaying => _isPlaying;
 
-  ChewieController? get chewieController => _chewieController;
+  bool get isMuted => _isMuted;
 
-  double get initialWatchProgress =>  _initialWatchProgress;
+  Duration get videoPosition => _videoPosition;
+
+  Duration get videoDuration => Duration(
+    seconds: _apiDurationSeconds,
+  );
+
+  int get durationSeconds => _apiDurationSeconds;
+
+  double get initialWatchProgress => _initialWatchProgress;
 
   bool get hasInitializedVideo =>
       _videoPlayerController != null &&
-      _videoPlayerController!.value.isInitialized &&
-      _chewieController != null;
+          _videoPlayerController!.value.isInitialized &&
+          _chewieController != null;
+
+  // ========================================
+  // Current seconds
+  // ========================================
+
+  int get currentProgressSeconds {
+    final int current =
+    _videoPosition.inSeconds.clamp(
+      0,
+      _apiDurationSeconds > 0
+          ? _apiDurationSeconds
+          : 999999999,
+    );
+
+    final int saved =
+    (_initialWatchProgress *
+        _apiDurationSeconds)
+        .round();
+
+    return current > saved
+        ? current
+        : saved;
+  }
+
+  // ========================================
+  // Watch progress
+  // ========================================
+
+  double get watchProgress {
+    if (_apiDurationSeconds <= 0) {
+      return _initialWatchProgress
+          .clamp(0.0, 1.0)
+          .toDouble();
+    }
+
+    final double current =
+        _videoPosition.inMilliseconds /
+            (_apiDurationSeconds * 1000);
+
+    final double normalizedCurrent =
+    current
+        .clamp(0.0, 1.0)
+        .toDouble();
+
+    final double saved =
+    _initialWatchProgress
+        .clamp(0.0, 1.0)
+        .toDouble();
+
+    return normalizedCurrent > saved
+        ? normalizedCurrent
+        : saved;
+  }
+
+  bool get isCompleted {
+    if (_apiDurationSeconds <= 0) {
+      return false;
+    }
+
+    return watchProgress >= 0.995;
+  }
 
   VideoProgressSnapshot get progressSnapshot {
     return VideoProgressSnapshot(
-      progressSeconds: currentProgressSeconds,
-      durationSeconds: durationSeconds,
+      progressSeconds:
+      currentProgressSeconds,
+      durationSeconds:
+      _apiDurationSeconds,
       isCompleted: isCompleted,
     );
   }
 
-  Future<void> pauseAndSyncProgress() async {
-    final controller = _videoPlayerController;
+  // ========================================
+  // Initial saved progress
+  // ========================================
 
-    if (controller == null || !controller.value.isInitialized) {
-      return;
-    }
+  void setInitialWatchProgress(
+      double progress,
+      ) {
+    _initialWatchProgress =
+        progress
+            .clamp(0.0, 1.0)
+            .toDouble();
 
-    try {
-      if (controller.value.isPlaying) {
-        await controller.pause();
-      }
-
-      _videoPosition = controller.value.position;
-
-      _updateWatchProgress(notify: false);
-    } catch (error) {
-      debugPrint('Pause and sync progress error: $error');
-    }
+    notifyListeners();
   }
 
-
+  // ========================================
+  // Initialize
+  // ========================================
 
   Future<void> initializeVideo(
-    String? apiVideoUrl, {
-    required Object? durationSeconds,
-  }) async {
-    final String? cleanedApiUrl = apiVideoUrl?.trim();
+      String? apiVideoUrl, {
+        required Object? durationMinutes,
+      }) async {
+    final String? cleanedUrl =
+    apiVideoUrl?.trim();
 
-    _requestedApiVideoUrl = cleanedApiUrl;
+    _requestedApiVideoUrl =
+        cleanedUrl;
 
-    _requestedDurationSeconds = _parseDurationSeconds(durationSeconds);
+    // ----------------------------
+    // Duration من API فقط
+    // ----------------------------
 
-    _watchProgress = 0.0;
-    _videoPosition = Duration.zero;
+    _apiDurationMinutes =
+        _parseDurationMinutes(
+          durationMinutes,
+        );
 
-    _videoDuration = Duration(seconds: _requestedDurationSeconds ?? 0);
+    _apiDurationSeconds =
+        _minutesToSeconds(
+          _apiDurationMinutes,
+        );
+
+    debugPrint(
+      'API duration minutes: $_apiDurationMinutes',
+    );
+
+    debugPrint(
+      'API duration seconds: $_apiDurationSeconds',
+    );
+
+    // لو عنده progress قديم
+    final int initialSeconds =
+    (_initialWatchProgress *
+        _apiDurationSeconds)
+        .round();
+
+    _videoPosition = Duration(
+      seconds: initialSeconds,
+    );
+
+    _watchProgress =
+        _initialWatchProgress;
+
+    _isPlaying = false;
+    _isMuted = false;
 
     _isVideoLoading = true;
     _videoErrorMessage = null;
@@ -175,277 +239,527 @@ class VideoDetailsFunctionProvider with ChangeNotifier {
 
     notifyListeners();
 
-    final bool validApiUrl = isValidVideoUrl(cleanedApiUrl);
+    final bool validApiUrl =
+    isValidVideoUrl(
+      cleanedUrl,
+    );
 
     if (!validApiUrl) {
       _isUsingFallbackVideo = true;
 
-      final bool fallbackInitialized = await _initializeController(
+      final success =
+      await _initializeController(
         fallbackVideoUrl,
       );
 
-      if (!fallbackInitialized) {
-        _videoErrorMessage = 'تعذر تشغيل الفيديو';
+      if (!success) {
+        _videoErrorMessage =
+        'تعذر تشغيل الفيديو';
       }
 
       _isVideoLoading = false;
+
       notifyListeners();
 
       return;
     }
 
-    final bool apiVideoInitialized = await _initializeController(
-      cleanedApiUrl!,
+    final bool success =
+    await _initializeController(
+      cleanedUrl!,
     );
 
-    if (apiVideoInitialized) {
+    if (success) {
       _isUsingFallbackVideo = false;
       _isVideoLoading = false;
 
       notifyListeners();
+
       return;
     }
 
     _isUsingFallbackVideo = true;
 
-    final bool fallbackInitialized = await _initializeController(
+    final fallbackSuccess =
+    await _initializeController(
       fallbackVideoUrl,
     );
 
-    if (!fallbackInitialized) {
-      _videoErrorMessage = 'تعذر تشغيل فيديو السيرفر والفيديو الاحتياطي';
+    if (!fallbackSuccess) {
+      _videoErrorMessage =
+      'تعذر تشغيل فيديو السيرفر والفيديو الاحتياطي';
     }
 
     _isVideoLoading = false;
+
     notifyListeners();
   }
 
-  Future<bool> _initializeController(String videoUrl) async {
+  // ========================================
+  // Initialize player
+  //
+  // لا يوجد أي استخدام لـ:
+  // controller.value.duration
+  // ========================================
+
+  Future<bool> _initializeController(
+      String videoUrl,
+      ) async {
     VideoPlayerController? controller;
 
     try {
-      await releaseVideo(notify: false, resetProgress: true);
+      await _disposeControllers();
 
-      _videoPosition = Duration.zero;
-      _watchProgress = 0.0;
-
-      final Uri? uri = Uri.tryParse(videoUrl);
+      final Uri? uri =
+      Uri.tryParse(videoUrl);
 
       if (uri == null) {
         return false;
       }
 
-      controller = VideoPlayerController.networkUrl(
-        uri,
-        httpHeaders: const {'Accept': 'video/mp4,video/*;q=0.9,*/*;q=0.8'},
-        videoPlayerOptions: VideoPlayerOptions(mixWithOthers: false),
-      );
+      controller =
+          VideoPlayerController.networkUrl(
+            uri,
+            httpHeaders: const {
+              'Accept':
+              'video/mp4,video/*;q=0.9,*/*;q=0.8',
+            },
+            videoPlayerOptions:
+            VideoPlayerOptions(
+              mixWithOthers: false,
+            ),
+          );
 
       await controller.initialize();
 
-      if (!controller.value.isInitialized) {
+      if (!controller
+          .value.isInitialized) {
         await controller.dispose();
+
         return false;
       }
 
-      _videoPlayerController = controller;
+      _videoPlayerController =
+          controller;
 
-      _currentVideoUrl = videoUrl;
+      _currentVideoUrl =
+          videoUrl;
 
-      _videoPosition = controller.value.position;
+      // -------------------------------------
+      // إذا في progress محفوظ حاول ننقل
+      // الفيديو عليه.
+      // إذا timestamps الفيديو مضروبة
+      // وما زبط seek، ما بتأثر الواجهة.
+      // -------------------------------------
 
-      final Duration actualDuration =
-          controller.value.duration;
-
-      if (actualDuration.inMilliseconds > 0) {
-        _videoDuration = actualDuration;
-      }
-
-      _watchProgress = 0.0;
-
-      controller.addListener(() {
-        if (_videoPlayerController != controller) {
-          return;
-        }
-
-        final VideoPlayerValue value = controller!.value;
-
-        if (value.hasError || !value.isInitialized) {
-          return;
-        }
-
-        final Duration oldPosition = _videoPosition;
-
-        final double oldProgress = _watchProgress;
-
-        _videoPosition = value.position;
-
-        _updateWatchProgress(notify: false);
-
-        final bool positionChanged =
-            (oldPosition.inMilliseconds - _videoPosition.inMilliseconds)
-                .abs() >=
-            300;
-
-        final bool progressChanged =
-            (oldProgress - _watchProgress).abs() >= 0.001;
-
-        if (positionChanged || progressChanged) {
-          notifyListeners();
-        }
-      });
-
-      _chewieController = ChewieController(
-        videoPlayerController: controller,
-        autoPlay: false,
-        looping: false,
-        allowFullScreen: true,
-        allowMuting: true,
-        showControls: true,
-        autoInitialize: false,
-        materialProgressColors: ChewieProgressColors(
-          playedColor: const Color(0xffE9C46A),
-          handleColor: const Color(0xffE9C46A),
-          bufferedColor: Colors.grey,
-          backgroundColor: Colors.white24,
-        ),
-        placeholder: const ColoredBox(
-          color: Colors.black,
-          child: Center(
-            child: CircularProgressIndicator(color: Color(0xffE9C46A)),
-          ),
-        ),
-        errorBuilder: (
-            context,
-            errorMessage,
-            ) {
-          return const ColoredBox(
-            color: Colors.black,
-            child: Center(
-              child: Icon(
-                Icons.videocam_off_outlined,
-                color: Colors.white54,
-                size: 42,
-              ),
-            ),
-          );
-        },
-      );
-
-      notifyListeners();
-      return true;
-    } catch (error, stackTrace) {
-      debugPrint('VIDEO INITIALIZATION ERROR: $error');
-
-      debugPrint('VIDEO STACK TRACE: $stackTrace');
-
-      if (controller != null) {
+      if (_videoPosition >
+          Duration.zero) {
         try {
-          await controller.dispose();
+          await controller.seekTo(
+            _videoPosition,
+          );
         } catch (_) {}
       }
 
-      _videoPlayerController = null;
-      _chewieController = null;
-      _currentVideoUrl = null;
+      _chewieController =
+          ChewieController(
+            videoPlayerController:
+            controller,
 
-      _videoPosition = Duration.zero;
-      _watchProgress = 0.0;
+            autoPlay: false,
+            looping: false,
 
-      return false;
+            showControls: true,
+
+            allowFullScreen: true,
+            allowMuting: true,
+
+            autoInitialize: false,
+
+            // ===================================
+            // Controls الخاصة فينا
+            // ===================================
+            customControls:
+            const ApiVideoControls(),
+
+            placeholder:
+            const ColoredBox(
+              color: Colors.black,
+              child: Center(
+                child:
+                CircularProgressIndicator(
+                  color:
+                  Color(0xffE9C46A),
+                ),
+              ),
+            ),
+
+            errorBuilder: (
+                context,
+                errorMessage,
+                ) {
+              return const ColoredBox(
+                color: Colors.black,
+                child: Center(
+                  child: Icon(
+                    Icons
+                        .videocam_off_outlined,
+                    color:
+                    Colors.white54,
+                    size: 45,
+                  ),
+                ),
+              );
+            },
+          );
+
+      _startProgressTimer();
+
+      notifyListeners();
+
+      return true;
+    } catch (
+    error,
+    stackTrace
+    ) {
+    debugPrint(
+    'VIDEO INITIALIZATION ERROR: $error',
+    );
+
+    debugPrint(
+    'VIDEO STACK TRACE: $stackTrace',
+    );
+
+    if (controller != null) {
+    try {
+    await controller.dispose();
+    } catch (_) {}
+    }
+
+    _videoPlayerController = null;
+    _chewieController = null;
+
+    _currentVideoUrl = null;
+
+    _isPlaying = false;
+
+    return false;
     }
   }
 
-  void _updateWatchProgress({bool notify = true}) {
-    final int durationMilliseconds = _videoDuration.inMilliseconds;
+  // ========================================
+  // TIMER
+  //
+  // هذا هو مصدر الوقت الحالي الأساسي.
+  // ما عاد نعتمد position تبع الفيديو
+  // حتى يتحرك progress.
+  // ========================================
 
-    final int positionMilliseconds = _videoPosition.inMilliseconds;
+  void _startProgressTimer() {
+    _progressTimer?.cancel();
 
-    if (durationMilliseconds <= 0) {
-      _watchProgress = 0.0;
+    _progressTimer =
+        Timer.periodic(
+          const Duration(
+            milliseconds: 250,
+          ),
+              (_) {
+            if (!_isPlaying) {
+              return;
+            }
 
-      if (notify) {
-        notifyListeners();
-      }
+            final controller =
+                _videoPlayerController;
 
+            if (controller == null ||
+                !controller
+                    .value.isInitialized) {
+              return;
+            }
+
+            // لا نحسب buffering كوقت مشاهدة
+            if (controller
+                .value.isBuffering) {
+              return;
+            }
+
+            if (_apiDurationSeconds <= 0) {
+              return;
+            }
+
+            // ==================================
+            // نحن نزيد الوقت بأنفسنا
+            // ==================================
+
+            _videoPosition +=
+            const Duration(
+              milliseconds: 250,
+            );
+
+            final Duration maxDuration =
+            Duration(
+              seconds:
+              _apiDurationSeconds,
+            );
+
+            if (_videoPosition >=
+                maxDuration) {
+              _videoPosition =
+                  maxDuration;
+
+              _isPlaying = false;
+
+              unawaited(
+                controller.pause(),
+              );
+            }
+
+            _watchProgress =
+                watchProgress;
+
+            notifyListeners();
+          },
+        );
+  }
+
+  // ========================================
+  // PLAY
+  // ========================================
+
+  Future<void> play() async {
+    final controller =
+        _videoPlayerController;
+
+    if (controller == null ||
+        !controller
+            .value.isInitialized) {
       return;
     }
 
-    double newProgress = positionMilliseconds / durationMilliseconds;
-
-    newProgress = newProgress.clamp(0.0, 1.0).toDouble();
-
-    final bool reachedEnd =
-        durationMilliseconds > 1000 &&
-        positionMilliseconds >= durationMilliseconds - 1000;
-
-    if (reachedEnd) {
-      newProgress = 1.0;
+    if (_apiDurationSeconds > 0 &&
+        _videoPosition.inSeconds >=
+            _apiDurationSeconds) {
+      await seekToSeconds(0);
     }
 
-    _watchProgress = newProgress;
+    try {
+      await controller.play();
 
-    if (notify) {
+      _isPlaying = true;
+
       notifyListeners();
-    }
-  }
-
-  int? _parseDurationSeconds(Object? value) {
-    if (value == null) {
-      return null;
-    }
-
-    double? durationMinutes;
-
-    if (value is num) {
-      durationMinutes = value.toDouble();
-    } else {
-      durationMinutes = double.tryParse(
-        value.toString().trim(),
+    } catch (e) {
+      debugPrint(
+        'Play error: $e',
       );
     }
+  }
 
-    if (durationMinutes == null ||
-        durationMinutes <= 0) {
+  // ========================================
+  // PAUSE
+  // ========================================
+
+  Future<void> pause() async {
+    final controller =
+        _videoPlayerController;
+
+    if (controller == null) {
+      return;
+    }
+
+    try {
+      await controller.pause();
+    } catch (_) {}
+
+    _isPlaying = false;
+
+    notifyListeners();
+  }
+
+  // ========================================
+  // PLAY / PAUSE
+  // ========================================
+
+  Future<void>
+  togglePlayPause() async {
+    if (_isPlaying) {
+      await pause();
+    } else {
+      await play();
+    }
+  }
+
+  // ========================================
+  // SEEK
+  //
+  // الـUI يتغير فوراً بناء على API duration.
+  // نحاول أيضاً نحرك الفيديو الحقيقي.
+  // ========================================
+
+  Future<void> seekToSeconds(
+      int seconds,
+      ) async {
+    if (_apiDurationSeconds <= 0) {
+      return;
+    }
+
+    final int target =
+    seconds.clamp(
+      0,
+      _apiDurationSeconds,
+    );
+
+    _videoPosition =
+        Duration(
+          seconds: target,
+        );
+
+    _watchProgress =
+        watchProgress;
+
+    notifyListeners();
+
+    final controller =
+        _videoPlayerController;
+
+    if (controller == null ||
+        !controller
+            .value.isInitialized) {
+      return;
+    }
+
+    try {
+      await controller.seekTo(
+        Duration(
+          seconds: target,
+        ),
+      );
+    } catch (e) {
+      debugPrint(
+        'Seek error: $e',
+      );
+    }
+  }
+
+  Future<void> seekBySeconds(
+      int offset,
+      ) async {
+    final int target =
+        _videoPosition.inSeconds +
+            offset;
+
+    await seekToSeconds(
+      target,
+    );
+  }
+
+  // ========================================
+  // MUTE
+  // ========================================
+
+  Future<void> toggleMute() async {
+    final controller =
+        _videoPlayerController;
+
+    if (controller == null ||
+        !controller
+            .value.isInitialized) {
+      return;
+    }
+
+    _isMuted = !_isMuted;
+
+    try {
+      await controller.setVolume(
+        _isMuted ? 0 : 1,
+      );
+    } catch (_) {}
+
+    notifyListeners();
+  }
+
+  // ========================================
+  // Full screen
+  // ========================================
+
+  void enterFullScreen() {
+    _chewieController
+        ?.enterFullScreen();
+  }
+
+  // ========================================
+  // Pause and sync
+  // ========================================
+
+  Future<void>
+  pauseAndSyncProgress() async {
+    await pause();
+  }
+
+  // ========================================
+  // Duration parser
+  // ========================================
+
+  double? _parseDurationMinutes(
+      Object? value,
+      ) {
+    if (value == null) {
       return null;
     }
 
+    double? minutes;
+
+    if (value is num) {
+      minutes =
+          value.toDouble();
+    } else {
+      minutes =
+          double.tryParse(
+            value
+                .toString()
+                .trim(),
+          );
+    }
+
+    if (minutes == null ||
+        minutes <= 0) {
+      return null;
+    }
+
+    return minutes;
+  }
+
+  int _minutesToSeconds(
+      double? minutes,
+      ) {
+    if (minutes == null ||
+        minutes <= 0) {
+      return 0;
+    }
+
+    return (minutes * 60)
+        .round();
+  }
+
+  // ========================================
+  // Format duration
+  // ========================================
+
+  String formatDuration(
+      Duration duration,
+      ) {
+    final int totalSeconds =
+        duration.inSeconds;
+
+    final int hours =
+        totalSeconds ~/ 3600;
+
+    final int minutes =
+        (totalSeconds % 3600) ~/
+            60;
+
     final int seconds =
-    (durationMinutes * 60).round();
-
-    return seconds > 0 ? seconds : null;
-  }
-
-  bool isValidVideoUrl(String? value) {
-    if (value == null) {
-      return false;
-    }
-
-    final String cleanedValue = value.trim();
-
-    if (cleanedValue.isEmpty || cleanedValue.toLowerCase() == 'null') {
-      return false;
-    }
-
-    final Uri? uri = Uri.tryParse(cleanedValue);
-
-    if (uri == null) {
-      return false;
-    }
-
-    return uri.hasScheme &&
-        uri.hasAuthority &&
-        (uri.scheme == 'http' || uri.scheme == 'https');
-  }
-
-  String formatDuration(Duration duration) {
-    final int totalSeconds = duration.inSeconds;
-
-    final int hours = totalSeconds ~/ 3600;
-
-    final int minutes = (totalSeconds % 3600) ~/ 60;
-
-    final int seconds = totalSeconds % 60;
+        totalSeconds % 60;
 
     if (hours > 0) {
       return '${hours.toString().padLeft(2, '0')}:'
@@ -457,46 +771,110 @@ class VideoDetailsFunctionProvider with ChangeNotifier {
         '${seconds.toString().padLeft(2, '0')}';
   }
 
+  // ========================================
+  // URL
+  // ========================================
+
+  bool isValidVideoUrl(
+      String? value,
+      ) {
+    if (value == null) {
+      return false;
+    }
+
+    final String cleaned =
+    value.trim();
+
+    if (cleaned.isEmpty ||
+        cleaned.toLowerCase() ==
+            'null') {
+      return false;
+    }
+
+    final Uri? uri =
+    Uri.tryParse(cleaned);
+
+    if (uri == null) {
+      return false;
+    }
+
+    return uri.hasScheme &&
+        uri.hasAuthority &&
+        (uri.scheme == 'http' ||
+            uri.scheme ==
+                'https');
+  }
+
+  // ========================================
+  // AI features
+  // ========================================
+
   bool canAccessFeatures() {
     return isCompleted;
   }
 
-  Future<void> retryCurrentVideo(String? apiVideoUrl) async {
+  // ========================================
+  // Retry
+  // ========================================
+
+  Future<void> retryCurrentVideo(
+      String? apiVideoUrl,
+      ) async {
     await initializeVideo(
       apiVideoUrl,
-      durationSeconds: _requestedDurationSeconds,
+      durationMinutes:
+      _apiDurationMinutes,
     );
   }
 
-  Future<void> releaseVideo({
-    bool notify = true,
-    bool resetProgress = false,
-  }) async {
-    final ChewieController? oldChewieController = _chewieController;
+  // ========================================
+  // Dispose controllers فقط
+  // بدون تصفير API duration
+  // ========================================
 
-    final VideoPlayerController? oldVideoController = _videoPlayerController;
+  Future<void>
+  _disposeControllers() async {
+    _progressTimer?.cancel();
+    _progressTimer = null;
+
+    final oldChewie =
+        _chewieController;
+
+    final oldVideo =
+        _videoPlayerController;
 
     _chewieController = null;
     _videoPlayerController = null;
 
     try {
-      oldChewieController?.dispose();
-    } catch (error) {
-      debugPrint('Error disposing Chewie controller: $error');
+      oldChewie?.dispose();
+    } catch (_) {}
+
+    if (oldVideo != null) {
+      try {
+        await oldVideo.dispose();
+      } catch (_) {}
     }
 
-    if (oldVideoController != null) {
-      try {
-        await oldVideoController.dispose();
-      } catch (error) {
-        debugPrint('Error disposing video controller: $error');
-      }
-    }
+    _isPlaying = false;
+  }
+
+  // ========================================
+  // Release
+  // ========================================
+
+  Future<void> releaseVideo({
+    bool notify = true,
+    bool resetProgress = false,
+  }) async {
+    await _disposeControllers();
 
     _currentVideoUrl = null;
-    _videoPosition = Duration.zero;
 
     if (resetProgress) {
+      _videoPosition =
+          Duration.zero;
+
       _watchProgress = 0.0;
     }
 
@@ -505,38 +883,301 @@ class VideoDetailsFunctionProvider with ChangeNotifier {
     }
   }
 
+  // ========================================
+  // Reset
+  // ========================================
+
   Future<void> reset() async {
-    await releaseVideo(notify: false, resetProgress: true);
+    await releaseVideo(
+      notify: false,
+      resetProgress: true,
+    );
+
+    _apiDurationMinutes = null;
+    _apiDurationSeconds = 0;
+
+    _initialWatchProgress = 0.0;
+    _watchProgress = 0.0;
+
+    _videoPosition =
+        Duration.zero;
 
     _isVideoLoading = false;
     _isUsingFallbackVideo = false;
 
     _videoErrorMessage = null;
-    _currentVideoUrl = null;
     _requestedApiVideoUrl = null;
-    _requestedDurationSeconds = null;
+    _currentVideoUrl = null;
 
-    _videoDuration = Duration.zero;
-    _videoPosition = Duration.zero;
-    _watchProgress = 0.0;
-    _initialWatchProgress = 0.0;
+    _isPlaying = false;
+    _isMuted = false;
 
     notifyListeners();
   }
 
   @override
   void dispose() {
+    _progressTimer?.cancel();
+
     try {
-      _chewieController?.dispose();
+      _chewieController
+          ?.dispose();
     } catch (_) {}
 
     try {
-      _videoPlayerController?.dispose();
+      _videoPlayerController
+          ?.dispose();
     } catch (_) {}
-
-    _chewieController = null;
-    _videoPlayerController = null;
 
     super.dispose();
+  }
+}
+
+// ========================================================
+// CUSTOM VIDEO CONTROLS
+//
+// لا نستخدم مدة Chewie نهائياً.
+// ========================================================
+
+class ApiVideoControls
+    extends StatelessWidget {
+  const ApiVideoControls({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<
+        VideoDetailsFunctionProvider>(
+      builder: (
+          context,
+          provider,
+          child,
+          ) {
+        final int totalSeconds =
+            provider.durationSeconds;
+
+        final int currentSeconds =
+        provider
+            .videoPosition
+            .inSeconds
+            .clamp(
+          0,
+          totalSeconds > 0
+              ? totalSeconds
+              : 0,
+        );
+
+        final String current =
+        provider.formatDuration(
+          Duration(
+            seconds:
+            currentSeconds,
+          ),
+        );
+
+        final String total =
+        provider.formatDuration(
+          Duration(
+            seconds:
+            totalSeconds,
+          ),
+        );
+
+        return Material(
+          color: Colors.transparent,
+          child: Stack(
+            children: [
+              // =================================
+              // وسط الشاشة
+              // =================================
+
+              Center(
+                child: Row(
+                  mainAxisSize:
+                  MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        provider
+                            .seekBySeconds(
+                          -10,
+                        );
+                      },
+                      icon:
+                      const Icon(
+                        Icons
+                            .replay_10_rounded,
+                        color:
+                        Colors.white,
+                        size: 32,
+                      ),
+                    ),
+
+                    const SizedBox(
+                      width: 22,
+                    ),
+
+                    Container(
+                      width: 58,
+                      height: 58,
+                      decoration:
+                      BoxDecoration(
+                        color: Colors.black
+                            .withValues(
+                          alpha: 0.35,
+                        ),
+                        shape:
+                        BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          provider
+                              .togglePlayPause();
+                        },
+                        icon: Icon(
+                          provider.isPlaying
+                              ? Icons
+                              .pause_rounded
+                              : Icons
+                              .play_arrow_rounded,
+                          color:
+                          Colors.white,
+                          size: 40,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(
+                      width: 22,
+                    ),
+
+                    IconButton(
+                      onPressed: () {
+                        provider
+                            .seekBySeconds(
+                          10,
+                        );
+                      },
+                      icon:
+                      const Icon(
+                        Icons
+                            .forward_10_rounded,
+                        color:
+                        Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // =================================
+              // Bottom controls
+              // =================================
+
+              Positioned(
+                left: 14,
+                right: 14,
+                bottom: 0,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      height: 0,
+                      child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          trackHeight: 5,
+                          thumbShape: const RoundSliderThumbShape(
+                            enabledThumbRadius: 6,
+                          ),
+                          overlayShape: SliderComponentShape.noOverlay,
+                          trackShape: const RectangularSliderTrackShape(),
+                          tickMarkShape: SliderTickMarkShape.noTickMark,
+                        ),
+                        child: Slider(
+                          min: 0,
+                          max: totalSeconds > 0
+                              ? totalSeconds.toDouble()
+                              : 1,
+                          value: totalSeconds > 0
+                              ? currentSeconds.toDouble()
+                              : 0,
+                          activeColor: const Color(0xffE9C46A),
+                          inactiveColor: Colors.white38,
+                          onChanged: totalSeconds <= 0
+                              ? null
+                              : (value) {
+                            provider.seekToSeconds(
+                              value.round(),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          '$current / $total',
+                          style:
+                          const TextStyle(
+                            color:
+                            Colors.white,
+                            fontSize:
+                            13,
+                            fontFamily:
+                            'Tajawal',
+                            fontWeight:
+                            FontWeight
+                                .w600,
+                          ),
+                        ),
+
+                        const SizedBox(
+                          width: 8,
+                        ),
+
+                        IconButton(
+                          onPressed:
+                          provider
+                              .toggleMute,
+                          icon: Icon(
+                            provider
+                                .isMuted
+                                ? Icons
+                                .volume_off_rounded
+                                : Icons
+                                .volume_up_rounded,
+                            color:
+                            Colors.white,
+                            size: 25,
+                          ),
+                        ),
+
+                        const Spacer(),
+
+                        IconButton(
+                          onPressed:
+                          provider
+                              .enterFullScreen,
+                          icon:
+                          const Icon(
+                            Icons
+                                .fullscreen_rounded,
+                            color:
+                            Colors.white,
+                            size: 29,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
