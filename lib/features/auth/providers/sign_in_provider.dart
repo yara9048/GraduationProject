@@ -36,17 +36,27 @@ class SignInProvider with ChangeNotifier {
         password: password,
       );
 
-      final String token = user.access.trim();
+      final String accessToken = user.access.trim();
+      final String refreshToken = user.refresh.trim();
 
-      if (token.isEmpty) {
-        throw Exception('لم يتم إرجاع التوكن من السيرفر');
+      if (accessToken.isEmpty) {
+        throw Exception('لم يتم إرجاع access token من السيرفر');
+      }
+
+      if (refreshToken.isEmpty) {
+        throw Exception('لم يتم إرجاع refresh token من السيرفر');
       }
 
       final prefs = await SharedPreferences.getInstance();
 
-      final bool tokenSaved = await prefs.setString(
+      final bool accessSaved = await prefs.setString(
         'auth_token',
-        token,
+        accessToken,
+      );
+
+      final bool refreshSaved = await prefs.setString(
+        'refresh_token',
+        refreshToken,
       );
 
       final bool userIdSaved = await prefs.setInt(
@@ -54,25 +64,16 @@ class SignInProvider with ChangeNotifier {
         user.user.pk,
       );
 
-      if (!tokenSaved || !userIdSaved) {
+      if (!accessSaved || !refreshSaved || !userIdSaved) {
         throw Exception('فشل حفظ بيانات تسجيل الدخول');
       }
 
-      final savedToken = prefs.getString('auth_token');
-
-      if (savedToken == null || savedToken.trim().isEmpty) {
-        throw Exception('فشل حفظ التوكن');
-      }
-
-      print('Saved token: $savedToken');
+      print('Access Token saved');
+      print('Refresh Token saved');
 
       _isSuccess = true;
 
       await _authProvider.setLoggedIn();
-
-      print(
-        'AuthProvider isLoggedIn: ${_authProvider.isLoggedIn}',
-      );
 
       return true;
     } catch (e) {

@@ -29,11 +29,6 @@ class LogoutProvider extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
-
-      /*
-       * نحاول إرسال طلب Logout للسيرفر.
-       * حتى لو فشل السيرفر، نحذف التوكن محلياً.
-       */
       if (token != null && token.trim().isNotEmpty) {
         try {
           await _service.logout(token);
@@ -43,11 +38,12 @@ class LogoutProvider extends ChangeNotifier {
       }
 
       await prefs.remove('auth_token');
+      await prefs.remove('refresh_token');
       await prefs.remove('user_pk');
+
 
       _isSuccess = true;
 
-      // يغير AppRoot مباشرة إلى SignInPage
       _authProvider.setLoggedOut();
 
       return true;
