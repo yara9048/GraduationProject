@@ -14,64 +14,64 @@ import '../../providers/video_details_function_provider.dart';
 import '../../providers/video_details_provider.dart';
 import '../../providers/video_progress_provider.dart';
 import '../../providers/view_chat_provider.dart';
-import '../widgets/lock_dialog_template.dart';
 import '../widgets/option_cart_template.dart';
 import '../widgets/video_player_section.dart';
 import 'mcq_page.dart';
 
-class VideoDetailsPage
-    extends StatefulWidget {
+class VideoDetailsPage extends StatefulWidget {
   final int playlistId;
   final int videoId;
   final String videoName;
+  final double? startAtSeconds;
+  final double? endAtSeconds;
 
   const VideoDetailsPage({
     super.key,
     required this.videoId,
     required this.playlistId,
     required this.videoName,
+    this.startAtSeconds,
+    this.endAtSeconds,
   });
 
   @override
-  State<VideoDetailsPage>
-  createState() =>
+  State<VideoDetailsPage> createState() =>
       _VideoDetailsPageState();
 }
 
-class _VideoDetailsPageState
-    extends State<VideoDetailsPage> {
+class _VideoDetailsPageState extends State<VideoDetailsPage> {
   bool isFavorite = false;
   bool _videoInitialized = false;
   bool _isLeavingPage = false;
+  bool _segmentFinished = false;
+  Timer? _segmentTimer;
+  VideoDetailsFunctionProvider? _videoFunctionProvider;
+  bool get _openedFromTimestamp =>
+      widget.startAtSeconds != null;
 
-  VideoDetailsFunctionProvider?
-  _videoFunctionProvider;
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance
-        .addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
           (_) async {
         await _loadVideo();
       },
     );
   }
 
+
   Future<void> _loadVideo() async {
     if (!mounted) return;
 
     final detailsProvider =
-    context.read<
-        VideoDetailsProvider>();
+    context.read<VideoDetailsProvider>();
 
     final videoFunctionProvider =
-    context.read<
-        VideoDetailsFunctionProvider>();
+    context.read<VideoDetailsFunctionProvider>();
 
     final getProgressProvider =
-    context.read<
-        GetVideoProgressProvider>();
+    context.read<GetVideoProgressProvider>();
 
     await detailsProvider.getDetails(
       id: widget.videoId,
@@ -88,29 +88,30 @@ class _VideoDetailsPageState
     final Object? durationMinutes =
         details?.duration;
 
-    await getProgressProvider
-        .getProgress(
+    await getProgressProvider.getProgress(
       id: widget.videoId,
     );
 
     if (!mounted) return;
 
     final double initialProgress =
-    getProgressProvider
-        .initialProgressForVideo(
+    getProgressProvider.initialProgressForVideo(
       widget.videoId,
     );
 
-    videoFunctionProvider
-        .setInitialWatchProgress(
+    videoFunctionProvider.setInitialWatchProgress(
       initialProgress,
     );
 
-    await videoFunctionProvider
-        .initializeVideo(
+    await videoFunctionProvider.initializeVideo(
       videoUrl,
-      durationMinutes:
-      durationMinutes,
+      durationMinutes: durationMinutes,
+    );
+
+    if (!mounted) return;
+
+    await _applyRequestedVideoSegment(
+      videoFunctionProvider,
     );
 
     if (!mounted) return;
@@ -120,35 +121,159 @@ class _VideoDetailsPageState
     });
   }
 
+  Future<void> _applyRequestedVideoSegment(
+      VideoDetailsFunctionProvider provider,
+      ) async {
+    final double? requestedStart =
+        widget.startAtSeconds;
+
+    if (requestedStart == null) {
+      return;
+    }
+
+    final controller =
+        provider.videoPlayerController;
+
+    if (controller == null ||
+        !controller.value.isInitialized) {
+      return;
+    }
+
+    _segmentTimer?.cancel();
+    _segmentFinished = false;
+
+    int targetMilliseconds =
+    (requestedStart * 1000).round();
+
+    final int videoDurationMilliseconds =
+        controller.value.duration.inMilliseconds;
+
+    if (targetMilliseconds < 0) {
+      targetMilliseconds = 0;
+    }
+
+    if (videoDurationMilliseconds > 0 &&
+        targetMilliseconds >
+            videoDurationMilliseconds) {
+      targetMilliseconds =
+          videoDurationMilliseconds;
+    }
+
+    try {
+      await provider.seekToSeconds(
+        targetMilliseconds ~/ 1000,
+      );
+
+      await controller.seekTo(
+        Duration(
+          milliseconds: targetMilliseconds,
+        ),
+      );
+
+      if (!mounted) return;
+
+      await provider.play();
+
+      _startTimestampSegmentWatcher(
+        provider,
+      );
+    } catch (error) {
+      debugPrint(
+        'Failed to open timestamp segment: $error',
+      );
+    }
+  }
+
+  void _startTimestampSegmentWatcher(
+      VideoDetailsFunctionProvider provider,
+      ) {
+    final double? endSeconds =
+        widget.endAtSeconds;
+
+    if (endSeconds == null ||
+        endSeconds <= 0) {
+      return;
+    }
+
+    _segmentTimer?.cancel();
+
+    _segmentTimer = Timer.periodic(
+      const Duration(
+        milliseconds: 100,
+      ),
+          (_) {
+        if (_segmentFinished) {
+          return;
+        }
+
+        final controller =
+            provider.videoPlayerController;
+
+        if (controller == null ||
+            !controller.value.isInitialized) {
+          return;
+        }
+
+        final double currentSeconds =
+            controller
+                .value
+                .position
+                .inMilliseconds /
+                1000.0;
+
+        if (currentSeconds >= endSeconds) {
+          _segmentFinished = true;
+
+          _segmentTimer?.cancel();
+          _segmentTimer = null;
+
+          unawaited(
+            provider.pause(),
+          );
+        }
+      },
+    );
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     _videoFunctionProvider ??=
-        context.read<
-            VideoDetailsFunctionProvider>();
+        context.read<VideoDetailsFunctionProvider>();
   }
 
   @override
   void didUpdateWidget(
-      covariant VideoDetailsPage
-      oldWidget,
+      covariant VideoDetailsPage oldWidget,
       ) {
     super.didUpdateWidget(
       oldWidget,
     );
 
-    if (oldWidget.videoId !=
-        widget.videoId) {
+    final bool videoChanged =
+        oldWidget.videoId !=
+            widget.videoId;
+
+    final bool segmentChanged =
+        oldWidget.startAtSeconds !=
+            widget.startAtSeconds ||
+            oldWidget.endAtSeconds !=
+                widget.endAtSeconds;
+
+    if (videoChanged ||
+        segmentChanged) {
       _videoInitialized = false;
       _isLeavingPage = false;
+      _segmentFinished = false;
 
-      WidgetsBinding.instance
-          .addPostFrameCallback(
+      _segmentTimer?.cancel();
+      _segmentTimer = null;
+
+      WidgetsBinding.instance.addPostFrameCallback(
             (_) async {
           final provider =
-          context.read<
-              VideoDetailsFunctionProvider>();
+          context.read<VideoDetailsFunctionProvider>();
 
           await provider.releaseVideo(
             notify: false,
@@ -163,18 +288,12 @@ class _VideoDetailsPageState
     }
   }
 
-  // =====================================================
-  // Attachments
-  // =====================================================
-
   String _cleanAttachmentName(
       dynamic originalName,
       int index,
       ) {
     String name =
-        originalName
-            ?.toString()
-            .trim() ??
+        originalName?.toString().trim() ??
             '';
 
     if (name.isEmpty) {
@@ -189,11 +308,10 @@ class _VideoDetailsPageState
       '',
     );
 
-    name =
-        name.replaceAll(
-          '_',
-          ' ',
-        );
+    name = name.replaceAll(
+      '_',
+      ' ',
+    );
 
     name = name.replaceAll(
       RegExp(r'\s+'),
@@ -209,16 +327,12 @@ class _VideoDetailsPageState
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            PdfViewerPage(
-              pdfUrl:
-              attachment.file,
-              fileName:
-              attachment
-                  .originalName,
-              title:
-              widget.videoName,
-            ),
+        builder: (_) => PdfViewerPage(
+          pdfUrl: attachment.file,
+          fileName:
+          attachment.originalName,
+          title: widget.videoName,
+        ),
       ),
     );
   }
@@ -280,17 +394,14 @@ class _VideoDetailsPageState
                       0xffD9E7E5,
                     ),
                     borderRadius:
-                    BorderRadius
-                        .circular(
+                    BorderRadius.circular(
                       10,
                     ),
                   ),
                 ),
-
                 const SizedBox(
                   height: 18,
                 ),
-
                 Row(
                   children: [
                     Container(
@@ -302,12 +413,10 @@ class _VideoDetailsPageState
                         const Color(
                           0xff264653,
                         ).withValues(
-                          alpha:
-                          0.10,
+                          alpha: 0.10,
                         ),
                         borderRadius:
-                        BorderRadius
-                            .circular(
+                        BorderRadius.circular(
                           14,
                         ),
                       ),
@@ -322,11 +431,9 @@ class _VideoDetailsPageState
                         size: 25,
                       ),
                     ),
-
                     const SizedBox(
                       width: 12,
                     ),
-
                     Expanded(
                       child: Column(
                         crossAxisAlignment:
@@ -339,8 +446,7 @@ class _VideoDetailsPageState
                             TextStyle(
                               fontFamily:
                               'Tajawal',
-                              fontSize:
-                              18,
+                              fontSize: 18,
                               fontWeight:
                               FontWeight
                                   .bold,
@@ -359,8 +465,7 @@ class _VideoDetailsPageState
                             const TextStyle(
                               fontFamily:
                               'Tajawal',
-                              fontSize:
-                              12,
+                              fontSize: 12,
                               color:
                               Color(
                                 0xff7B8B8A,
@@ -372,11 +477,9 @@ class _VideoDetailsPageState
                     ),
                   ],
                 ),
-
                 const SizedBox(
                   height: 18,
                 ),
-
                 Flexible(
                   child:
                   ListView.separated(
@@ -479,15 +582,12 @@ class _VideoDetailsPageState
                                     Color(
                                       0xffE76F51,
                                     ),
-                                    size:
-                                    27,
+                                    size: 27,
                                   ),
                                 ),
-
                                 const SizedBox(
                                   width: 12,
                                 ),
-
                                 Expanded(
                                   child:
                                   Column(
@@ -517,12 +617,9 @@ class _VideoDetailsPageState
                                           ),
                                         ),
                                       ),
-
                                       const SizedBox(
-                                        height:
-                                        5,
+                                        height: 5,
                                       ),
-
                                       Text(
                                         'PDF • ملف ${index + 1}',
                                         style:
@@ -540,11 +637,9 @@ class _VideoDetailsPageState
                                     ],
                                   ),
                                 ),
-
                                 const SizedBox(
                                   width: 8,
                                 ),
-
                                 Container(
                                   width: 38,
                                   height: 38,
@@ -571,8 +666,7 @@ class _VideoDetailsPageState
                                     Color(
                                       0xff2A9D8F,
                                     ),
-                                    size:
-                                    20,
+                                    size: 20,
                                   ),
                                 ),
                               ],
@@ -591,10 +685,6 @@ class _VideoDetailsPageState
     );
   }
 
-  // =====================================================
-  // Exit
-  // =====================================================
-
   void _exitVideoPage() {
     if (_isLeavingPage) {
       return;
@@ -602,13 +692,14 @@ class _VideoDetailsPageState
 
     _isLeavingPage = true;
 
+    _segmentTimer?.cancel();
+    _segmentTimer = null;
+
     final videoFunctionProvider =
-    context.read<
-        VideoDetailsFunctionProvider>();
+    context.read<VideoDetailsFunctionProvider>();
 
     final progressProvider =
-    context.read<
-        VideoProgressProvider>();
+    context.read<VideoProgressProvider>();
 
     final VideoProgressSnapshot
     snapshot =
@@ -621,15 +712,22 @@ class _VideoDetailsPageState
     final int currentPlaylistId =
         widget.playlistId;
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            DisplayVideosPage(
-              id: currentPlaylistId,
-            ),
-      ),
-    );
+    if (_openedFromTimestamp &&
+        Navigator.of(context).canPop()) {
+      Navigator.pop(
+        context,
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              DisplayVideosPage(
+                id: currentPlaylistId,
+              ),
+        ),
+      );
+    }
 
     unawaited(
       progressProvider
@@ -649,12 +747,11 @@ class _VideoDetailsPageState
     );
   }
 
-  // =====================================================
-  // Dispose
-  // =====================================================
-
   @override
   void dispose() {
+    _segmentTimer?.cancel();
+    _segmentTimer = null;
+
     _videoFunctionProvider
         ?.releaseVideo(
       notify: false,
@@ -663,10 +760,6 @@ class _VideoDetailsPageState
 
     super.dispose();
   }
-
-  // =====================================================
-  // Build
-  // =====================================================
 
   @override
   Widget build(
@@ -681,11 +774,6 @@ class _VideoDetailsPageState
     detailsProvider =
     context.watch<
         VideoDetailsProvider>();
-
-    final VideoDetailsFunctionProvider
-    functionProvider =
-    context.watch<
-        VideoDetailsFunctionProvider>();
 
     final details =
         detailsProvider.videoDetails;
@@ -797,15 +885,13 @@ class _VideoDetailsPageState
             ),
           ),
 
-          icon:
-          favProvider.isLoading
+          icon: favProvider.isLoading
               ? const SizedBox(
             width: 22,
             height: 22,
             child:
             CircularProgressIndicator(
-              strokeWidth:
-              2,
+              strokeWidth: 2,
               color:
               Colors.white,
             ),
@@ -888,10 +974,6 @@ class _VideoDetailsPageState
 
                   const VideoWatchProgress(),
 
-                  // =============================
-                  // Attachments
-                  // =============================
-
                   if (details != null &&
                       details.attachments
                           .isNotEmpty)
@@ -952,10 +1034,6 @@ class _VideoDetailsPageState
                       ),
                     ),
 
-                  // =============================
-                  // Summary
-                  // =============================
-
                   OptionCart(
                     title:
                     'تلخيص الفيديو',
@@ -968,15 +1046,6 @@ class _VideoDetailsPageState
                       0xff2A9D8F,
                     ),
                     onPressed: () {
-                      //if (!functionProvider
-                      //   .canAccessFeatures()) {
-                      //LockedDialog.show(
-                      // context,
-                      //);
-
-                      //  return;
-                      //}
-
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -993,16 +1062,13 @@ class _VideoDetailsPageState
                         ),
                       );
                     },
-                    child: Image.asset(
+                    child:
+                    Image.asset(
                       'assets/Images/SVGRepo_iconCarrier.png',
                       width: 20,
                       height: 20,
                     ),
                   ),
-
-                  // =============================
-                  // MCQ
-                  // =============================
 
                   OptionCart(
                     title:
@@ -1016,14 +1082,6 @@ class _VideoDetailsPageState
                       0xffE76F51,
                     ),
                     onPressed: () {
-                      //if (!functionProvider
-                       //   .canAccessFeatures()) {
-                        //LockedDialog.show(
-                         // context,
-                        //);
-
-                      //  return;
-                      //}
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -1042,17 +1100,13 @@ class _VideoDetailsPageState
                         ),
                       );
                     },
-                    child: Image.asset(
+                    child:
+                    Image.asset(
                       'assets/Images/SVGRepo_iconCarrier (1).png',
                       width: 20,
                       height: 20,
                     ),
                   ),
-
-                  // =============================
-                  // Chat
-                  // =============================
-
                   OptionCart(
                     title:
                     'لديك أسئلة',
@@ -1064,7 +1118,8 @@ class _VideoDetailsPageState
                     const Color(
                       0xffE9C46A,
                     ),
-                    onPressed: () async {
+                    onPressed:
+                        () async {
                       debugPrint(
                         '========== ASK NOW ==========',
                       );
@@ -1074,20 +1129,30 @@ class _VideoDetailsPageState
                       );
 
                       final viewProvider =
-                      context.read<ViewChatProvider>();
+                      context.read<
+                          ViewChatProvider>();
 
-                      await viewProvider.getChat(
-                        videoId: widget.videoId,
+                      await viewProvider
+                          .getChat(
+                        videoId:
+                        widget.videoId,
                       );
 
-                      if (!context.mounted) return;
+                      if (!context
+                          .mounted) {
+                        return;
+                      }
 
-                      if (viewProvider.errorMessage != null) {
-                        ScaffoldMessenger.of(context)
+                      if (viewProvider
+                          .errorMessage !=
+                          null) {
+                        ScaffoldMessenger
+                            .of(context)
                             .showSnackBar(
                           SnackBar(
                             content: Text(
-                              viewProvider.errorMessage!,
+                              viewProvider
+                                  .errorMessage!,
                             ),
                           ),
                         );
@@ -1099,7 +1164,8 @@ class _VideoDetailsPageState
                           viewProvider.chat;
 
                       if (chat == null) {
-                        ScaffoldMessenger.of(context)
+                        ScaffoldMessenger
+                            .of(context)
                             .showSnackBar(
                           const SnackBar(
                             content: Text(
@@ -1125,23 +1191,27 @@ class _VideoDetailsPageState
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) {
+                          builder:
+                              (context) {
                             return ChatPage(
-                              id: widget.videoId,
-                              chatId: chatId,
-
-                              // مهم
-                              initialChat: chat,
-
-                              name: widget.videoName,
+                              id: widget
+                                  .videoId,
+                              chatId:
+                              chatId,
+                              initialChat:
+                              chat,
+                              name: widget
+                                  .videoName,
                               playlistId:
-                              widget.playlistId,
+                              widget
+                                  .playlistId,
                             );
                           },
                         ),
                       );
                     },
-                    child: Image.asset(
+                    child:
+                    Image.asset(
                       'assets/Images/SVGRepo_iconCarrier (2).png',
                       width: 20,
                       height: 20,
@@ -1154,10 +1224,6 @@ class _VideoDetailsPageState
                 ],
               ),
             ),
-
-            // =============================
-            // Back
-            // =============================
 
             Align(
               alignment:
@@ -1206,7 +1272,18 @@ class _VideoDetailsPageState
                     details == null
                         ? null
                         : () {
-                     Navigator.push(context, MaterialPageRoute(builder: (context){return VideoInfoPage(video: details,);}));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) {
+                            return VideoInfoPage(
+                              video:
+                              details,
+                            );
+                          },
+                        ),
+                      );
                     },
                     icon: Icon(
                       Icons

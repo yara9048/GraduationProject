@@ -32,9 +32,9 @@ class _HomePageState extends State<HomePage> {
       context.read<NowShowingPlaylistProvider>().getPlaylists();
       context.read<FilteredPlaylistProvider>().getFilteredPlaylists();
       context.read<DisplaySubjectsProvider>().getSubjects();
-
     });
   }
+
   Widget build(BuildContext context) {
     final filterProvider = context.watch<FilteredPlaylistProvider>();
     final filteredPlaylists = filterProvider.filtered_playlists;
@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage> {
     final List<Color> subjectColors = [
       Color(0xffE76F51),
       Color(0xff2A9D8F),
-      Color(0xffA67500)
+      Color(0xffA67500),
     ];
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -67,8 +67,15 @@ class _HomePageState extends State<HomePage> {
               top: 56,
               left: 8,
               child: IconButton(
-                onPressed: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context){return NotificationPage();}));
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return NotificationPage();
+                      },
+                    ),
+                  );
                 },
                 icon: Icon(
                   Icons.notifications_none_outlined,
@@ -108,7 +115,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                                 ],
+                  ],
                 ),
                 Expanded(
                   child: MediaQuery.removePadding(
@@ -117,40 +124,38 @@ class _HomePageState extends State<HomePage> {
                     child: ListView(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(right: 30,left: 30),
+                          padding: const EdgeInsets.only(right: 30, left: 30),
                           child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const SectionTitle(
-                                    title: "تتابعه الان  :",
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => DisplayPlaylistsPage(),
-                                        ),
-                                      );
-                                    },
-                                    child: Text(
-                                      "عرض الكل",
-                                      style: TextStyle(
-                                        color: Color(0xffE9C46A),
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: "Tajawal",
-                                        fontSize: 15,
-                                      ),
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const SectionTitle(title: "تتابعه الان  :"),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => DisplayPlaylistsPage(),
                                     ),
+                                  );
+                                },
+                                child: Text(
+                                  "عرض الكل",
+                                  style: TextStyle(
+                                    color: Color(0xffE9C46A),
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: "Tajawal",
+                                    fontSize: 15,
                                   ),
-                                ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
 
                         const SizedBox(height: 5),
 
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal:15),
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
                           child: SizedBox(
                             height: 245,
                             child: Builder(
@@ -170,7 +175,8 @@ class _HomePageState extends State<HomePage> {
                                 if (nowShowingProvider.errorMessage != null) {
                                   return Center(
                                     child: Text(
-                                      nowShowingProvider.errorMessage ?? "حدث خطأ غير معروف",
+                                      nowShowingProvider.errorMessage ??
+                                          "حدث خطأ غير معروف",
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         fontFamily: "Tajawal",
@@ -203,12 +209,17 @@ class _HomePageState extends State<HomePage> {
                                       child: CourseCardTemplate(
                                         playlistId: playlist.courseDetail!.id,
                                         imagePath:
-                                        'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
+                                            playlist.courseDetail.thumbnail ??
+                                            'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
                                         title: playlist.courseDetail!.name,
                                         durationText:
-                                        "${playlist.courseDetail?.totalDuration ?? 0} دقيقة",
-                                        progress: playlist.progressPercentage/100,
-                                        description: playlist.courseDetail!.description,
+                                            "${playlist.courseDetail?.totalDuration ?? 0} دقيقة",
+                                        progress:
+                                            playlist.progressPercentage / 100,
+                                        description: playlist
+                                            .courseDetail
+                                            .subjectDetail!
+                                            .name,
                                       ),
                                     );
                                   },
@@ -217,12 +228,9 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 10,),
+                        SizedBox(height: 10),
                         Padding(
-                          padding: const EdgeInsets.only(
-                            right: 30,
-                            left: 30,
-                          ),
+                          padding: const EdgeInsets.only(right: 30, left: 30),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -271,16 +279,19 @@ class _HomePageState extends State<HomePage> {
                                   child: SubjectsCard(
                                     id: sub.id,
                                     title: sub.name,
-                                    imagePath: subjectImages[
-                                    index % subjectImages.length],
-                                    textColor: subjectColors[
-                                    index % subjectColors.length],
+                                    imagePath:
+                                        subjectImages[index %
+                                            subjectImages.length],
+                                    textColor:
+                                        subjectColors[index %
+                                            subjectColors.length],
                                     width: 150,
                                   ),
                                 );
                               },
                             ),
-                          )),
+                          ),
+                        ),
                         Padding(
                           padding: const EdgeInsets.only(right: 30, top: 20),
                           child: const SectionTitle(title: "خصيصا لك :"),
@@ -316,41 +327,45 @@ class _HomePageState extends State<HomePage> {
                                   return const Center(
                                     child: Text(
                                       "لا توجد بيانات",
-                                      style: TextStyle(
-                                        fontFamily: "Tajawal",
-                                      ),
+                                      style: TextStyle(fontFamily: "Tajawal"),
                                     ),
                                   );
                                 }
 
                                 return ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: filteredPlaylists.length,
-                                    itemBuilder: (context, index) {
-                                      final playlist = filteredPlaylists[index];
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: filteredPlaylists.length,
+                                  itemBuilder: (context, index) {
+                                    final playlist = filteredPlaylists[index];
 
-                                      return Padding(
-                                        padding: const EdgeInsets.only(left: 16),
-                                        child: Align(
-                                          alignment: Alignment.topRight,
-                                          child: NewAddedCourseTemplate(
-                                            id: playlist.id,
-                                            imagePath:
-                                            'assets/Images/700ccaab9d6c5bae720cc6ee03954b805e4c490e.jpg',
-                                            title: playlist.name,
-                                            duration: playlist.totalDuration == null
-                                                ? "0"
-                                                : playlist.totalDuration!.toStringAsFixed(0),
-                                            color: const Color(0xffE76F51),
+                                    return Padding(
+                                      padding: const EdgeInsets.only(left: 16),
+                                      child: Align(
+                                        alignment: Alignment.topRight,
+                                        child: NewAddedCourseTemplate(
+                                          id: playlist.id,
+                                          imagePath: Image.network(playlist.thumbnail ?? 'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
+                                            height: 100,
+                                            width: double.infinity,
+                                            fit: BoxFit.cover,
+                                            alignment: const Alignment(0,0.3),
                                           ),
+                                          title: playlist.name,
+                                          duration:
+                                              playlist.totalDuration == null
+                                              ? "0"
+                                              : playlist.totalDuration!
+                                                    .toStringAsFixed(0),
+                                          color: const Color(0xffE76F51),
                                         ),
-                                      );
-                                    },
-                                  );
+                                      ),
+                                    );
+                                  },
+                                );
                               },
                             ),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),

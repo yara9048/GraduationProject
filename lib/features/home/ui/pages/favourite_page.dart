@@ -228,7 +228,7 @@ class _FavouritePageState
                                     ),
                                   );
                                 },
-                                imagePath:
+                                imagePath: video.thumbnail ??
                                 'assets/Images/photo_2026-07-23_00-20-19.jpg',
                                 title: video.title,
                                 description:
@@ -328,13 +328,11 @@ class _FavouritePageState
                               ),
                               playlistId:
                               playlist.id,
-                              imagePath:
+                              imagePath: playlist.thumbnail ??
                               'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
                               title:
                               playlist.name,
-                              description:
-                              playlist
-                                  .description,
+                              description: playlist.subjectDetail!.name,
                               durationText:
                               '${playlist.totalDuration ?? 0} دقيقة',
                               progress: progress,

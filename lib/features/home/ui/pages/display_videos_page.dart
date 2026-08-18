@@ -58,7 +58,21 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
       ),
     ]);
   }
+  String formatDuration(dynamic value) {
+    if (value == null) {
+      return 'غير محددة';
+    }
 
+    final duration = value is num
+        ? value.toDouble()
+        : double.tryParse(value.toString());
+
+    if (duration == null) {
+      return 'غير محددة';
+    }
+
+    return '${duration.toInt()} دقيقة';
+  }
   Future<void> _openPlaylistDetails() async {
     final detailsProvider =
     context.read<PlaylistDetailsProvider>();
@@ -130,36 +144,13 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
   Widget build(BuildContext context) {
     final DisplayVideosProvider videosProvider =
     context.watch<DisplayVideosProvider>();
+    final bool subscriptionRequired =
+        videosProvider.subscriptionRequired;
 
+    final String cleanedErrorMessage =
+        videosProvider.cleanedErrorMessage;
     final PlaylistDetailsProvider detailsProvider =
     context.watch<PlaylistDetailsProvider>();
-
-    final String errorMessage =
-        videosProvider.errorMessage ??
-            'حدث خطأ غير معروف';
-
-    final String normalizedError =
-    errorMessage.toLowerCase();
-
-    final String cleanedErrorMessage = errorMessage
-        .replaceFirst('Exception:', '')
-        .replaceFirst('DioException:', '')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
-
-    final bool subscriptionRequired =
-        videosProvider.statusCode == 403 ||
-            normalizedError.contains('subscription') ||
-            normalizedError.contains('subscribe') ||
-            normalizedError.contains(
-              'active subscription',
-            ) ||
-            normalizedError.contains(
-              'unlock this playlist',
-            ) ||
-            normalizedError.contains('اشتراك') ||
-            normalizedError.contains('مشترك');
-
     Widget pageContent;
     if (videosProvider.isLoading) {
       pageContent = const Center(
@@ -172,7 +163,7 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
           ),
         ),
       );
-    } else if (videosProvider.errorMessage != null) {
+    } else if (videosProvider.hasError) {
       pageContent = SizedBox.expand(
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -330,7 +321,7 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
           ),
         ),
       );
-    } else if (videosProvider.videos.isEmpty) {
+    } else if (videosProvider.hasVideos) {
       pageContent = RefreshIndicator(
         color: const Color(0xff2A9D8F),
         onRefresh: () async {
@@ -464,9 +455,7 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                 imagePath: video.thumbnail,
                 title: video.title,
                 description: video.description,
-                duration:
-                video.duration.toString() ?? '0',
-                views: video.views,
+                duration:formatDuration(video.duration.toString()),views: video.views,
                 status: video.status,
                 onTap: () {
                   Navigator.push(

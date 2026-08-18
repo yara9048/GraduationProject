@@ -168,12 +168,9 @@ class _EditNameDialogState
             children: [
               Expanded(
                 child: TextFormField(
+                  cursorColor: const Color(0xff2A9D8F),
                   controller:
                   _firstNameController,
-                  cursorColor:
-                  const Color(
-                    0xff2A9D8F,
-                  ),
                   textInputAction:
                   TextInputAction.next,
                   validator: (value) {

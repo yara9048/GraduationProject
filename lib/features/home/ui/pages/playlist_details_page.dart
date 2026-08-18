@@ -3,6 +3,7 @@ import 'package:graduationprojct/features/home/ui/pages/display_videos_page.dart
 import 'package:graduationprojct/features/home/ui/pages/main_navigation_page.dart';
 import 'package:provider/provider.dart';
 
+import '../../providers/functions_for_playlist_details_provider.dart';
 import '../../providers/playlist_details_provider.dart';
 import '../../providers/rating_playlist_provider.dart';
 import '../../providers/subscribe_provider.dart';
@@ -23,7 +24,6 @@ class PlaylistDetailsPage extends StatefulWidget {
 
 class _PlaylistDetailsPageState
     extends State<PlaylistDetailsPage> {
-  bool subscriptionChanged = false;
 
   @override
   void initState() {
@@ -32,9 +32,14 @@ class _PlaylistDetailsPageState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
-      context.read<PlaylistDetailsProvider>().getDetails(
+      final functionsProvider =
+      context.read<FunctionsForPlaylistDetailsProvider>();
+
+      functionsProvider.reset();
+
+      functionsProvider.loadDetails(
         id: widget.id,
-        forceRefresh: true,
+        detailsProvider: context.read<PlaylistDetailsProvider>(),
       );
     });
   }
@@ -49,9 +54,14 @@ class _PlaylistDetailsPageState
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
 
-        context.read<PlaylistDetailsProvider>().getDetails(
+        final functionsProvider =
+        context.read<FunctionsForPlaylistDetailsProvider>();
+
+        functionsProvider.reset();
+
+        functionsProvider.loadDetails(
           id: widget.id,
-          forceRefresh: true,
+          detailsProvider: context.read<PlaylistDetailsProvider>(),
         );
       });
     }
@@ -60,7 +70,9 @@ class _PlaylistDetailsPageState
   void _goBack() {
     Navigator.pop(
       context,
-      subscriptionChanged,
+      context
+          .read<FunctionsForPlaylistDetailsProvider>()
+          .subscriptionChanged,
     );
   }
 
@@ -86,34 +98,24 @@ class _PlaylistDetailsPageState
   }
 
   Future<void> _subscribe() async {
-    final subscribeProvider =
-    context.read<SubscribeProvider>();
+    final subscribeProvider = context.read<SubscribeProvider>();
+    final detailsProvider = context.read<PlaylistDetailsProvider>();
+    final functionsProvider =
+    context.read<FunctionsForPlaylistDetailsProvider>();
 
-    final detailsProvider =
-    context.read<PlaylistDetailsProvider>();
-
-    await subscribeProvider.subscribe(
+    final bool success = await functionsProvider.subscribe(
       id: widget.id,
+      subscribeProvider: subscribeProvider,
+      detailsProvider: detailsProvider,
     );
 
     if (!mounted) return;
 
-    if (subscribeProvider.isSuccess) {
-      detailsProvider.markAsSubscribed();
-
-      setState(() {
-        subscriptionChanged = true;
-      });
-
+    if (success) {
       _showMessage(
         message: 'تم الاشتراك في القائمة بنجاح',
         color: const Color(0xff2A9D8F),
       );
-
-      await detailsProvider.refreshDetails(
-        id: widget.id,
-      );
-
       return;
     }
 
@@ -129,40 +131,29 @@ class _PlaylistDetailsPageState
     required BuildContext bottomSheetContext,
     required int rating,
   }) async {
-    final ratingProvider =
-    context.read<RatingPlaylistProvider>();
+    final ratingProvider = context.read<RatingPlaylistProvider>();
+    final detailsProvider = context.read<PlaylistDetailsProvider>();
+    final functionsProvider =
+    context.read<FunctionsForPlaylistDetailsProvider>();
 
-    final detailsProvider =
-    context.read<PlaylistDetailsProvider>();
-
-    await ratingProvider.rate(
+    final bool success = await functionsProvider.submitRating(
       id: widget.id,
-      review: '',
       rating: rating,
+      ratingProvider: ratingProvider,
+      detailsProvider: detailsProvider,
     );
 
     if (!mounted) return;
 
-    if (ratingProvider.isSuccess) {
-      detailsProvider.setUserRating(
-        rating,
-      );
-
+    if (success) {
       if (Navigator.canPop(bottomSheetContext)) {
-        Navigator.pop(
-          bottomSheetContext,
-        );
+        Navigator.pop(bottomSheetContext);
       }
 
       _showMessage(
         message: 'تم إرسال تقييمك بنجاح',
         color: const Color(0xff2A9D8F),
       );
-
-      await detailsProvider.refreshDetails(
-        id: widget.id,
-      );
-
       return;
     }
 
@@ -178,23 +169,15 @@ class _PlaylistDetailsPageState
     final detailsProvider =
     context.read<PlaylistDetailsProvider>();
 
-    if (!detailsProvider.isSubscribed) {
+    final validationMessage = context
+        .read<FunctionsForPlaylistDetailsProvider>()
+        .ratingValidationMessage(detailsProvider);
+
+    if (validationMessage != null) {
       _showMessage(
-        message:
-        'يجب الاشتراك أولاً حتى تتمكن من التقييم',
+        message: validationMessage,
         color: Colors.orange,
       );
-
-      return;
-    }
-
-    if (detailsProvider.alreadyRated) {
-      _showMessage(
-        message:
-        'لقد قمت بتقييم قائمة التشغيل مسبقاً',
-        color: Colors.orange,
-      );
-
       return;
     }
 
@@ -1071,7 +1054,7 @@ class _PlaylistDetailsPageState
                                         value: detailsProvider.playListDetails!.userRating == null
                                             ? 'لم تقيّم بعد'
                                             : detailsProvider.playListDetails!.userRating.toString(),                                        iconColor:
-                                        Colors.amber,
+                                      Colors.amber,
                                       ),
 
                                       StatisticCard(

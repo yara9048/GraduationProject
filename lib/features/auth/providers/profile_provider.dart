@@ -1,6 +1,4 @@
-import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/models/profile_model.dart';
@@ -16,35 +14,89 @@ class ProfileProvider with ChangeNotifier {
   ProfileModel? _profile;
 
   bool get isLoading => _isLoading;
+
   String? get errorMessage => _errorMessage;
+
   bool get isSuccess => _isSuccess;
 
   ProfileModel? get profile => _profile;
 
+  bool get hasProfile => _profile != null;
+
+
   Future<void> getProfile() async {
-    _isLoading = true;
-    _errorMessage = null;
-    _isSuccess = false;
-    notifyListeners();
-
-    try {
-      final prefs = await SharedPreferences.getInstance();
-
-      final token = prefs.getString("auth_token");
-
-      if (token == null || token.isEmpty) {
-        throw Exception("Authentication token not found");
-      }
-
-      _profile = await _service.getProfile(token);
-
-      _isSuccess = true;
-    } catch (e) {
-      _errorMessage = e.toString();
+    if (_isLoading) {
+      return;
     }
 
-    _isLoading = false;
+    _setLoading(true);
+
+    try {
+      final prefs =
+      await SharedPreferences.getInstance();
+
+      final String? token =
+      prefs.getString(
+        'auth_token',
+      );
+
+      if (token == null ||
+          token.trim().isEmpty) {
+        throw Exception(
+          'Authentication token not found',
+        );
+      }
+
+      final ProfileModel result =
+      await _service.getProfile(
+        token,
+      );
+
+      _profile = result;
+
+      _isSuccess = true;
+      _errorMessage = null;
+    } catch (e) {
+      _isSuccess = false;
+
+      _errorMessage =
+          _cleanError(
+            e,
+          );
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+
+  Future<void> refreshProfile() async {
+    await getProfile();
+  }
+
+  void _setLoading(
+      bool value,
+      ) {
+    _isLoading = value;
+
+    if (value) {
+      _errorMessage = null;
+      _isSuccess = false;
+    }
+
     notifyListeners();
+  }
+
+
+  String _cleanError(
+      Object error,
+      ) {
+    return error
+        .toString()
+        .replaceFirst(
+      'Exception: ',
+      '',
+    )
+        .trim();
   }
 
 
@@ -53,6 +105,7 @@ class ProfileProvider with ChangeNotifier {
     _errorMessage = null;
     _isSuccess = false;
     _profile = null;
+
     notifyListeners();
   }
 }

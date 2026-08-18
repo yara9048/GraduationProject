@@ -60,6 +60,7 @@ class _TextFieldTemplateState extends State<TextFieldTemplate> {
         padding: const EdgeInsets.symmetric(horizontal:30),
 
         child: TextFormField(
+          cursorColor: const Color(0xff2A9D8F),
 
           focusNode: _focusNode,
 
@@ -70,16 +71,13 @@ class _TextFieldTemplateState extends State<TextFieldTemplate> {
           keyboardType: widget.keyboardType,
 
 
-          // أضف هذا
           onFieldSubmitted: widget.onSubmitted,
 
 
           textDirection: TextDirection.rtl,
 
           textAlign: TextAlign.right,
-
-          cursorColor: Color(0xff2A9D8F),
-
+          
 
           style: const TextStyle(
             color: Colors.black,

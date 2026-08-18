@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/models/send_web_search_model.dart';
 import '../data/models/view_chat_model.dart';
-
 import '../data/services/send_rag_message_service.dart';
 import '../data/services/send_web_search_message_service.dart';
 import '../data/services/view_chat_service.dart';
@@ -19,143 +18,94 @@ class ChatLogicMessage {
     required this.text,
   });
 
-  bool get isUser =>
-      type == 'user';
-
-  bool get isAi =>
-      !isUser;
+  bool get isUser => type == 'user';
+  bool get isAi => !isUser;
 }
 
-class ChatLogicProvider
-    extends ChangeNotifier {
-  final ViewChatService
-  _viewChatService =
-  ViewChatService();
+class VideoSegment {
+  final double startSeconds;
+  final double endSeconds;
+  final String startLabel;
+  final String endLabel;
 
-  final SendRagMessageService
-  _ragService =
-  SendRagMessageService();
+  const VideoSegment({
+    required this.startSeconds,
+    required this.endSeconds,
+    required this.startLabel,
+    required this.endLabel,
+  });
+}
 
-  final SendWebSearchMessageService
-  _webService =
+class ParsedAiMessage {
+  final String answer;
+  final List<VideoSegment> segments;
+
+  const ParsedAiMessage({
+    required this.answer,
+    required this.segments,
+  });
+}
+
+class ChatLogicProvider extends ChangeNotifier {
+  final ViewChatService _viewChatService = ViewChatService();
+  final SendRagMessageService _ragService = SendRagMessageService();
+  final SendWebSearchMessageService _webService =
   SendWebSearchMessageService();
 
-  // =============================================================
-  // Chat
-  // =============================================================
-
   ViewChatModel? _chat;
-
-  ViewChatModel? get chat =>
-      _chat;
+  ViewChatModel? get chat => _chat;
 
   int? _chatId;
-
-  int? get chatId =>
-      _chatId;
+  int? get chatId => _chatId;
 
   int? _videoId;
+  int? get videoId => _videoId;
 
-  int? get videoId =>
-      _videoId;
+  final List<ChatLogicMessage> _messages = [];
+  List<ChatLogicMessage> get messages =>
+      List.unmodifiable(_messages);
 
-  final List<ChatLogicMessage>
-  _messages = [];
-
-  List<ChatLogicMessage>
-  get messages =>
-      List.unmodifiable(
-        _messages,
-      );
-
-  bool get hasMessages =>
-      _messages.isNotEmpty;
-
-  // =============================================================
-  // States
-  // =============================================================
+  bool get hasMessages => _messages.isNotEmpty;
 
   bool _isSending = false;
-
-  bool get isSending =>
-      _isSending;
+  bool get isSending => _isSending;
 
   bool _isWaitingForAi = false;
-
-  bool get isWaitingForAi =>
-      _isWaitingForAi;
+  bool get isWaitingForAi => _isWaitingForAi;
 
   bool _isPolling = false;
-
-  bool get isPolling =>
-      _isPolling;
+  bool get isPolling => _isPolling;
 
   bool _isCheckingPoll = false;
 
-  // =============================================================
-  // Web
-  // =============================================================
+  bool get canSend =>
+      !_isSending && !_isWaitingForAi;
 
   bool _webSearch = false;
-
-  bool get webSearch =>
-      _webSearch;
-
-  // =============================================================
-  // Error
-  // =============================================================
+  bool get webSearch => _webSearch;
 
   String? _errorMessage;
-
-  String? get errorMessage =>
-      _errorMessage;
-
-  // =============================================================
-  // Polling
-  // =============================================================
+  String? get errorMessage => _errorMessage;
 
   Timer? _pollingTimer;
-
   int _aiMessagesBeforeSend = 0;
-
-  // =============================================================
-  // Token
-  // =============================================================
 
   Future<String> _getToken() async {
     final prefs =
-    await SharedPreferences
-        .getInstance();
+    await SharedPreferences.getInstance();
 
     final token =
-    prefs.getString(
-      "auth_token",
-    );
+    prefs.getString('auth_token');
 
     if (token == null ||
-        token.isEmpty) {
+        token.trim().isEmpty) {
       throw Exception(
-        "Authentication token not found",
+        'Authentication token not found',
       );
     }
 
     return token;
   }
-
-  // =============================================================
-  // Initialize
-  // =============================================================
-  //
-  // لا يعمل View.
-  // الـView صار معمول قبل فتح الصفحة.
-  //
-  // هنا فقط:
-  // videoId
-  // chatId
-  // initialChat
-  //
-  // وبنعرض الرسائل الموجودة مباشرة.
-  // =============================================================
 
   void initialize({
     required int videoId,
@@ -164,160 +114,82 @@ class ChatLogicProvider
   }) {
     stopPolling();
 
-    _videoId =
-        videoId;
-
-    _chatId =
-        chatId;
-
-    _chat =
-        initialChat;
+    _videoId = videoId;
+    _chatId = chatId;
+    _chat = initialChat;
 
     _messages.clear();
-
-    // قراءة التاريخ الموجود
-    _readChatMessages(
-      initialChat,
-    );
+    _readChatMessages(initialChat);
 
     _isSending = false;
-
     _isWaitingForAi = false;
-
     _isPolling = false;
-
     _isCheckingPoll = false;
-
     _errorMessage = null;
-
     _webSearch = false;
-
     _aiMessagesBeforeSend = 0;
 
-    debugPrint(
-      '========== CHAT INITIALIZED ==========',
-    );
-
-    debugPrint(
-      'videoId = $_videoId',
-    );
-
-    debugPrint(
-      'chatId = $_chatId',
-    );
-
-    debugPrint(
-      'messages count = ${_messages.length}',
-    );
-
-    debugPrint(
-      '======================================',
-    );
-
     notifyListeners();
   }
-
-  // =============================================================
-  // Web Search
-  // =============================================================
 
   void toggleWebSearch() {
-    if (_isSending ||
-        _isWaitingForAi) {
+    if (!canSend) {
       return;
     }
 
-    _webSearch =
-    !_webSearch;
-
+    _webSearch = !_webSearch;
     notifyListeners();
   }
 
-  void setWebSearch(
-      bool value,
-      ) {
-    if (_isSending ||
-        _isWaitingForAi) {
+  void setWebSearch(bool value) {
+    if (!canSend) {
       return;
     }
 
-    _webSearch =
-        value;
-
+    _webSearch = value;
     notifyListeners();
   }
-
-  // =============================================================
-  // Send
-  // =============================================================
 
   Future<void> sendMessage({
     required String text,
   }) async {
-    final cleanText =
-    text.trim();
+    final cleanText = text.trim();
 
-    if (cleanText.isEmpty) {
-      return;
-    }
-
-    if (_isSending ||
-        _isWaitingForAi) {
+    if (cleanText.isEmpty ||
+        !canSend) {
       return;
     }
 
     if (_chatId == null) {
-      _errorMessage =
-      'Chat ID غير موجود';
-
-      notifyListeners();
-
+      _setError('Chat ID غير موجود');
       return;
     }
 
     if (_videoId == null) {
-      _errorMessage =
-      'Video ID غير موجود';
-
-      notifyListeners();
-
+      _setError('Video ID غير موجود');
       return;
     }
 
     _errorMessage = null;
 
     if (_webSearch) {
-      await _sendWebMessage(
-        cleanText,
-      );
+      await _sendWebMessage(cleanText);
     } else {
-      await _sendRagMessage(
-        cleanText,
-      );
+      await _sendRagMessage(cleanText);
     }
   }
-
-  // =============================================================
-  // RAG
-  // =============================================================
 
   Future<void> _sendRagMessage(
       String text,
       ) async {
     _isSending = true;
-
     _errorMessage = null;
 
-    // عدد AI قبل إرسال السؤال
     _aiMessagesBeforeSend =
         _messages
-            .where(
-              (message) =>
-          message.isAi,
-        )
+            .where((message) => message.isAi)
             .length;
 
-    // نعرض المستخدم مباشرة
     _messages.add(
       ChatLogicMessage(
         type: 'user',
@@ -328,20 +200,7 @@ class ChatLogicProvider
     notifyListeners();
 
     try {
-      final token =
-      await _getToken();
-
-      debugPrint(
-        '========== SEND RAG ==========',
-      );
-
-      debugPrint(
-        'chatId = $_chatId',
-      );
-
-      debugPrint(
-        'text = $text',
-      );
+      final token = await _getToken();
 
       await _ragService.sendRag(
         token: token,
@@ -350,7 +209,6 @@ class ChatLogicProvider
       );
 
       _isSending = false;
-
       _isWaitingForAi = true;
 
       notifyListeners();
@@ -358,25 +216,15 @@ class ChatLogicProvider
       _startPolling();
     } catch (e) {
       _isSending = false;
-
       _isWaitingForAi = false;
-
-      _errorMessage =
-          e.toString();
-
-      notifyListeners();
+      _setError(e.toString());
     }
   }
-
-  // =============================================================
-  // WEB
-  // =============================================================
 
   Future<void> _sendWebMessage(
       String text,
       ) async {
     _isSending = true;
-
     _errorMessage = null;
 
     _messages.add(
@@ -389,23 +237,9 @@ class ChatLogicProvider
     notifyListeners();
 
     try {
-      final token =
-      await _getToken();
+      final token = await _getToken();
 
-      debugPrint(
-        '========== SEND WEB ==========',
-      );
-
-      debugPrint(
-        'chatId = $_chatId',
-      );
-
-      debugPrint(
-        'text = $text',
-      );
-
-      final SendWebSearchModel
-      response =
+      final SendWebSearchModel response =
       await _webService.sendWeb(
         token: token,
         text: text,
@@ -413,35 +247,119 @@ class ChatLogicProvider
       );
 
       final aiText =
-      _extractWebResponse(
-        response,
-      );
+      _extractWebResponse(response);
 
       if (aiText != null &&
-          aiText
-              .trim()
-              .isNotEmpty) {
+          aiText.trim().isNotEmpty) {
         _messages.add(
           ChatLogicMessage(
             type: 'ai',
-            text:
-            aiText.trim(),
+            text: aiText.trim(),
           ),
         );
       }
     } catch (e) {
-      _errorMessage =
-          e.toString();
+      _errorMessage = e.toString();
     } finally {
       _isSending = false;
-
       notifyListeners();
     }
   }
 
-  // =============================================================
-  // Polling
-  // =============================================================
+  ParsedAiMessage parseAiMessage(
+      String text,
+      ) {
+    final cleanText = text.trim();
+
+    if (!cleanText.contains('ANSWER:')) {
+      return ParsedAiMessage(
+        answer: cleanText,
+        segments: const [],
+      );
+    }
+
+    String answer = cleanText;
+
+    final answerRegex = RegExp(
+      r'ANSWER:\s*(.*?)(?=\s*QUESTION TYPE:|\s*PRECISE TIMESTAMPS:|\s*Context words:|$)',
+      dotAll: true,
+    );
+
+    final answerMatch =
+    answerRegex.firstMatch(cleanText);
+
+    if (answerMatch != null) {
+      answer =
+          answerMatch.group(1)?.trim() ??
+              cleanText;
+    }
+
+    final List<VideoSegment> segments = [];
+
+    final timestampRegex = RegExp(
+      r'\[(\d{1,3}):(\d{2}(?:\.\d+)?)\s*-->\s*(\d{1,3}):(\d{2}(?:\.\d+)?)\]',
+    );
+
+    for (final match
+    in timestampRegex.allMatches(cleanText)) {
+      final int startMinutes =
+          int.tryParse(match.group(1) ?? '0') ??
+              0;
+
+      final double startSecondsPart =
+          double.tryParse(match.group(2) ?? '0') ??
+              0;
+
+      final int endMinutes =
+          int.tryParse(match.group(3) ?? '0') ??
+              0;
+
+      final double endSecondsPart =
+          double.tryParse(match.group(4) ?? '0') ??
+              0;
+
+      final double startSeconds =
+          (startMinutes * 60) +
+              startSecondsPart;
+
+      final double endSeconds =
+          (endMinutes * 60) +
+              endSecondsPart;
+
+      segments.add(
+        VideoSegment(
+          startSeconds: startSeconds,
+          endSeconds: endSeconds,
+          startLabel:
+          _formatTimestampLabel(
+            startMinutes,
+            startSecondsPart,
+          ),
+          endLabel:
+          _formatTimestampLabel(
+            endMinutes,
+            endSecondsPart,
+          ),
+        ),
+      );
+    }
+
+    return ParsedAiMessage(
+      answer: answer,
+      segments: segments,
+    );
+  }
+
+  String _formatTimestampLabel(
+      int minutes,
+      double seconds,
+      ) {
+    final int secondValue =
+    seconds.floor();
+
+    return '${minutes.toString().padLeft(2, '0')}:'
+        '${secondValue.toString().padLeft(2, '0')}';
+  }
 
   void _startPolling() {
     stopPolling(
@@ -449,79 +367,43 @@ class ChatLogicProvider
     );
 
     _isPolling = true;
-
     _isWaitingForAi = true;
 
     notifyListeners();
 
-    debugPrint(
-      'RAG POLLING STARTED',
+    _pollingTimer = Timer.periodic(
+      const Duration(seconds: 3),
+          (_) async {
+        await _checkForNewAiMessage();
+      },
     );
-
-    _pollingTimer =
-        Timer.periodic(
-          const Duration(
-            seconds: 3,
-          ),
-              (_) async {
-            await _checkForNewAiMessage();
-          },
-        );
   }
 
-  // =============================================================
-  // Check New AI Message
-  // =============================================================
-
-  Future<void>
-  _checkForNewAiMessage() async {
-    if (!_isPolling) {
-      return;
-    }
-
-    if (_isCheckingPoll) {
+  Future<void> _checkForNewAiMessage() async {
+    if (!_isPolling ||
+        _isCheckingPoll) {
       return;
     }
 
     _isCheckingPoll = true;
 
     try {
-      debugPrint(
-        'POLLING => VIEW CHAT',
-      );
-
       await _loadChatFromView(
         notify: false,
       );
 
       final currentAiCount =
           _messages
-              .where(
-                (message) =>
-            message.isAi,
-          )
+              .where((message) => message.isAi)
               .length;
-
-      debugPrint(
-        'AI BEFORE = $_aiMessagesBeforeSend',
-      );
-
-      debugPrint(
-        'AI CURRENT = $currentAiCount',
-      );
 
       if (currentAiCount >
           _aiMessagesBeforeSend) {
-        debugPrint(
-          'NEW AI MESSAGE FOUND',
-        );
-
         stopPolling();
 
         _isWaitingForAi = false;
 
         notifyListeners();
-
         return;
       }
 
@@ -535,10 +417,6 @@ class ChatLogicProvider
     }
   }
 
-  // =============================================================
-  // Load View
-  // =============================================================
-
   Future<void> _loadChatFromView({
     bool notify = true,
   }) async {
@@ -548,40 +426,28 @@ class ChatLogicProvider
       );
     }
 
-    final token =
-    await _getToken();
+    final token = await _getToken();
 
     final result =
-    await _viewChatService
-        .getChat(
+    await _viewChatService.getChat(
       token: token,
       videoId: _videoId!,
     );
 
-    _chat =
-        result;
+    _chat = result;
 
-    _readChatMessages(
-      result,
-    );
+    _readChatMessages(result);
 
     if (notify) {
       notifyListeners();
     }
   }
 
-  // =============================================================
-  // Read Messages
-  // =============================================================
-
   void _readChatMessages(
       ViewChatModel model,
       ) {
     try {
-      final dynamic
-      dynamicModel =
-          model;
-
+      final dynamic dynamicModel = model;
       final dynamic json =
       dynamicModel.toJson();
 
@@ -590,9 +456,7 @@ class ChatLogicProvider
       }
 
       final rawMessages =
-      _findMessages(
-        json,
-      );
+      _findMessages(json);
 
       if (rawMessages == null) {
         return;
@@ -601,50 +465,34 @@ class ChatLogicProvider
       final List<ChatLogicMessage>
       newMessages = [];
 
-      for (final item
-      in rawMessages) {
+      for (final item in rawMessages) {
         if (item is! Map) {
           continue;
         }
 
         final text =
-        _findMessageText(
-          item,
-        );
+        _findMessageText(item);
 
         if (text == null ||
-            text
-                .trim()
-                .isEmpty) {
+            text.trim().isEmpty) {
           continue;
         }
 
         final sender =
-        _findSender(
-          item,
-        );
+        _findSender(item);
 
         newMessages.add(
           ChatLogicMessage(
             type:
-            _normalizeSender(
-              sender,
-            ),
-            text:
-            text.trim(),
+            _normalizeSender(sender),
+            text: text.trim(),
           ),
         );
       }
 
       _messages
         ..clear()
-        ..addAll(
-          newMessages,
-        );
-
-      debugPrint(
-        'MESSAGES LOADED = ${_messages.length}',
-      );
+        ..addAll(newMessages);
     } catch (e) {
       debugPrint(
         'READ CHAT ERROR = $e',
@@ -652,22 +500,16 @@ class ChatLogicProvider
     }
   }
 
-  // =============================================================
-  // Find Messages
-  // =============================================================
-
   List<dynamic>? _findMessages(
       Map<dynamic, dynamic> json,
       ) {
-    final messages =
-    json['messages'];
+    final messages = json['messages'];
 
     if (messages is List) {
       return messages;
     }
 
-    final chat =
-    json['chat'];
+    final chat = json['chat'];
 
     if (chat is Map) {
       final chatMessages =
@@ -678,21 +520,14 @@ class ChatLogicProvider
       }
     }
 
-    final data =
-    json['data'];
+    final data = json['data'];
 
     if (data is Map) {
-      return _findMessages(
-        data,
-      );
+      return _findMessages(data);
     }
 
     return null;
   }
-
-  // =============================================================
-  // Message Text
-  // =============================================================
 
   String? _findMessageText(
       Map<dynamic, dynamic> json,
@@ -704,10 +539,6 @@ class ChatLogicProvider
 
     return value?.toString();
   }
-
-  // =============================================================
-  // Sender
-  // =============================================================
 
   String? _findSender(
       Map<dynamic, dynamic> json,
@@ -730,17 +561,11 @@ class ChatLogicProvider
     return value?.toString();
   }
 
-  // =============================================================
-  // Normalize Sender
-  // =============================================================
-
   String _normalizeSender(
       String? sender,
       ) {
     final value =
-    sender
-        ?.toLowerCase()
-        .trim();
+    sender?.toLowerCase().trim();
 
     if (value == 'user' ||
         value == 'student' ||
@@ -751,16 +576,11 @@ class ChatLogicProvider
     return 'ai';
   }
 
-  // =============================================================
-  // Web response
-  // =============================================================
-
   String? _extractWebResponse(
       SendWebSearchModel response,
       ) {
     try {
-      final dynamic
-      dynamicResponse =
+      final dynamic dynamicResponse =
           response;
 
       final dynamic json =
@@ -770,9 +590,7 @@ class ChatLogicProvider
         return null;
       }
 
-      return _findWebAnswer(
-        json,
-      );
+      return _findWebAnswer(json);
     } catch (e) {
       debugPrint(
         'WEB RESPONSE ERROR = $e',
@@ -794,73 +612,59 @@ class ChatLogicProvider
             json['content'];
 
     if (direct is String &&
-        direct
-            .trim()
-            .isNotEmpty) {
+        direct.trim().isNotEmpty) {
       return direct;
     }
 
     if (direct is Map) {
       final nested =
-      _findWebAnswer(
-        direct,
-      );
+      _findWebAnswer(direct);
 
       if (nested != null) {
         return nested;
       }
     }
 
-    final data =
-    json['data'];
+    final data = json['data'];
 
     if (data is Map) {
       final nested =
-      _findWebAnswer(
-        data,
-      );
+      _findWebAnswer(data);
 
       if (nested != null) {
         return nested;
       }
     }
 
-    final text =
-    json['text'];
+    final text = json['text'];
 
     if (text is String &&
-        text
-            .trim()
-            .isNotEmpty) {
+        text.trim().isNotEmpty) {
       return text;
     }
 
     return null;
   }
 
-  // =============================================================
-  // Error
-  // =============================================================
-
-  void clearError() {
-    _errorMessage = null;
-
+  void _setError(
+      String message,
+      ) {
+    _errorMessage = message;
     notifyListeners();
   }
 
-  // =============================================================
-  // Stop Polling
-  // =============================================================
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
+  }
 
   void stopPolling({
     bool keepWaitingState = false,
   }) {
     _pollingTimer?.cancel();
-
     _pollingTimer = null;
 
     _isPolling = false;
-
     _isCheckingPoll = false;
 
     if (!keepWaitingState) {
@@ -868,33 +672,22 @@ class ChatLogicProvider
     }
   }
 
-  // =============================================================
-  // Reset
-  // =============================================================
-
   void reset() {
     stopPolling();
 
     _chat = null;
-
     _chatId = null;
-
     _videoId = null;
 
     _messages.clear();
 
     _isSending = false;
-
     _isWaitingForAi = false;
-
     _isPolling = false;
-
     _isCheckingPoll = false;
 
     _errorMessage = null;
-
     _webSearch = false;
-
     _aiMessagesBeforeSend = 0;
 
     notifyListeners();
@@ -903,7 +696,6 @@ class ChatLogicProvider
   @override
   void dispose() {
     stopPolling();
-
     super.dispose();
   }
 }

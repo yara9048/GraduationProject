@@ -33,7 +33,6 @@ class _PaymentPageState extends State<PaymentPage> {
   Widget build(BuildContext context) {
     final walletProvider = context.watch<WalletProvider>();
     final wallet = walletProvider.wallet;
-    final transactionsProvider = context.watch<WalletTransactionsProvider>();
     return Directionality(
       textDirection: TextDirection.rtl,
 

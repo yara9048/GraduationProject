@@ -175,6 +175,7 @@ class _FundingRequestBottomSheetState
                   const SizedBox(height: 8),
 
                   TextFormField(
+                    cursorColor: const Color(0xff2A9D8F),
                     controller: _amountController,
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.next,
@@ -224,6 +225,7 @@ class _FundingRequestBottomSheetState
                   const SizedBox(height: 8),
 
                   TextFormField(
+                    cursorColor: const Color(0xff2A9D8F),
                     controller: _noteController,
                     minLines: 3,
                     maxLines: 5,

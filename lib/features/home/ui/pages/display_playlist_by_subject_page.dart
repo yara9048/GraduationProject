@@ -195,12 +195,12 @@ class _DisplayPlaylistBySubjectPageState
                     padding: const EdgeInsets.only(bottom: 16),
                     child: CourseCardTemplate(
                       playlistId: playlist.id,
-                      imagePath:
+                      imagePath: playlist.thumbnail ??
                           'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
                       title: playlist.name,
                       durationText: "${playlist.totalDuration ?? 0} دقيقة",
                       progress: playlist.completionRate / 100,
-                      description: playlist.description,
+                      description: playlist.subjectDetail.name,
                     ),
                   );
                 },

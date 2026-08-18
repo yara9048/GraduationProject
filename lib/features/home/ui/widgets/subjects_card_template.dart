@@ -20,7 +20,7 @@ class SubjectsCard extends StatelessWidget {
     required this.id,
     this.fit = BoxFit.none,
     super.key,
-    this.top=35,
+    this.top=20,
     this.size=18,
     this.width2=160,
     required this.title,

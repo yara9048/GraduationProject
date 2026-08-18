@@ -237,7 +237,7 @@ class _CourseCardTemplateState extends State<CourseCardTemplate> {
                     widget.title,
                     textAlign: TextAlign.right,
                     style: const TextStyle(
-                      fontSize: 15,
+                      fontSize: 13,
                       color: Color(0xff264653),
                       fontFamily: "Tajawal",
                       fontWeight: FontWeight.bold,

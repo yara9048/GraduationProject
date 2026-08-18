@@ -50,6 +50,8 @@ import 'features/auth/providers/log_out_provider.dart';
 import 'features/auth/providers/send_otp_provider.dart';
 import 'features/auth/providers/sign_in_provider.dart';
 import 'features/auth/ui/pages/sign_up/splash_page.dart';
+import 'features/home/providers/mcq_quiz_provider.dart';
+import 'features/home/providers/pdf_viewer_provider.dart';
 import 'features/home/providers/refund_request_provider.dart';
 import 'features/home/providers/subscriptions_provider.dart';
 import 'features/home/providers/video_progress_provider.dart';
@@ -178,6 +180,14 @@ class MyApp extends StatelessWidget {
           create: (_) => SendWebSearchMessageProvider(),
         ),ChangeNotifierProvider(
           create: (_) => ChatLogicProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) =>
+              McqQuizProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) =>
+              PdfViewerProvider(),
         ),
     ChangeNotifierProvider(
     create: (_) => RegenerateMcqProvider(),

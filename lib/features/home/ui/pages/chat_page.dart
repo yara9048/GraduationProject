@@ -8,9 +8,7 @@ import 'video_details_page.dart';
 class ChatPage extends StatefulWidget {
   final int id;
   final int chatId;
-
   final ViewChatModel initialChat;
-
   final String name;
   final int playlistId;
 
@@ -30,17 +28,11 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState
     extends State<ChatPage> {
-  final TextEditingController
-  _controller =
+  final TextEditingController _controller =
   TextEditingController();
 
-  final ScrollController
-  _scrollController =
+  final ScrollController _scrollController =
   ScrollController();
-
-  // =============================================================
-  // Init
-  // =============================================================
 
   @override
   void initState() {
@@ -49,11 +41,12 @@ class _ChatPageState
     WidgetsBinding.instance
         .addPostFrameCallback(
           (_) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
 
         context
-            .read<
-            ChatLogicProvider>()
+            .read<ChatLogicProvider>()
             .initialize(
           videoId: widget.id,
           chatId: widget.chatId,
@@ -66,10 +59,7 @@ class _ChatPageState
     );
   }
 
-  // =============================================================
-  // Scroll
-  // =============================================================
-
+  // UI-specific because it depends on ScrollController.
   void _scrollToBottom() {
     WidgetsBinding.instance
         .addPostFrameCallback(
@@ -79,28 +69,22 @@ class _ChatPageState
           return;
         }
 
-        _scrollController
-            .animateTo(
+        _scrollController.animateTo(
           _scrollController
               .position
               .maxScrollExtent,
-          duration:
-          const Duration(
+          duration: const Duration(
             milliseconds: 300,
           ),
-          curve:
-          Curves.easeOut,
+          curve: Curves.easeOut,
         );
       },
     );
   }
 
-  // =============================================================
-  // Send
-  // =============================================================
-
-  Future<void>
-  _sendMessage() async {
+  // Business logic is inside ChatLogicProvider.
+  // This method only handles TextField, focus and scrolling.
+  Future<void> _sendMessage() async {
     final text =
     _controller.text.trim();
 
@@ -109,12 +93,9 @@ class _ChatPageState
     }
 
     final provider =
-    context.read<
-        ChatLogicProvider>();
+    context.read<ChatLogicProvider>();
 
-    if (provider.isSending ||
-        provider
-            .isWaitingForAi) {
+    if (!provider.canSend) {
       return;
     }
 
@@ -127,30 +108,51 @@ class _ChatPageState
       text: text,
     );
 
+    if (!mounted) {
+      return;
+    }
+
     _scrollToBottom();
   }
 
-  // =============================================================
-  // Dispose
-  // =============================================================
+  // Navigation belongs to the UI layer.
+  void _openVideoSegment({
+    required double startSeconds,
+    required double endSeconds,
+  }) {
+    context
+        .read<ChatLogicProvider>()
+        .stopPolling();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            VideoDetailsPage(
+              videoId: widget.id,
+              videoName: widget.name,
+              playlistId:
+              widget.playlistId,
+              startAtSeconds:
+              startSeconds,
+              endAtSeconds:
+              endSeconds,
+            ),
+      ),
+    );
+  }
 
   @override
   void dispose() {
     context
-        .read<
-        ChatLogicProvider>()
+        .read<ChatLogicProvider>()
         .stopPolling();
 
     _controller.dispose();
-
     _scrollController.dispose();
 
     super.dispose();
   }
-
-  // =============================================================
-  // Build
-  // =============================================================
 
   @override
   Widget build(
@@ -165,41 +167,29 @@ class _ChatPageState
           0xffF6F8F8,
         ),
 
-        // =====================================================
-        // AppBar
-        // =====================================================
-
         appBar: AppBar(
           automaticallyImplyLeading:
           false,
-
           toolbarHeight: 78,
-
           elevation: 0,
-
-          // مهم لمنع تغير اللون عند Scroll
           scrolledUnderElevation: 0,
           surfaceTintColor:
           Colors.transparent,
           shadowColor:
           Colors.transparent,
-
           centerTitle: true,
-
           backgroundColor:
           Colors.white,
 
-          title:
-          const Column(
+          title: const Column(
             mainAxisSize:
             MainAxisSize.min,
             children: [
               Text(
-                "المساعد الذكي",
-                style:
-                TextStyle(
+                'المساعد الذكي',
+                style: TextStyle(
                   fontFamily:
-                  "Tajawal",
+                  'Tajawal',
                   fontSize: 20,
                   fontWeight:
                   FontWeight.bold,
@@ -208,17 +198,12 @@ class _ChatPageState
                   ),
                 ),
               ),
-
-              SizedBox(
-                height: 4,
-              ),
-
+              SizedBox(height: 4),
               Text(
-                "جاهز لمساعدتك",
-                style:
-                TextStyle(
+                'جاهز لمساعدتك',
+                style: TextStyle(
                   fontFamily:
-                  "Tajawal",
+                  'Tajawal',
                   fontSize: 12,
                   color: Color(
                     0xff777777,
@@ -230,8 +215,7 @@ class _ChatPageState
 
           leading: Padding(
             padding:
-            const EdgeInsets
-                .all(
+            const EdgeInsets.all(
               12,
             ),
             child: Container(
@@ -256,8 +240,7 @@ class _ChatPageState
             IconButton(
               onPressed: () {
                 context
-                    .read<
-                    ChatLogicProvider>()
+                    .read<ChatLogicProvider>()
                     .stopPolling();
 
                 Navigator
@@ -277,8 +260,7 @@ class _ChatPageState
                   ),
                 );
               },
-              icon:
-              const Icon(
+              icon: const Icon(
                 Icons
                     .arrow_forward_ios_rounded,
                 color: Color(
@@ -291,9 +273,7 @@ class _ChatPageState
           bottom:
           const PreferredSize(
             preferredSize:
-            Size.fromHeight(
-              1,
-            ),
+            Size.fromHeight(1),
             child: Divider(
               height: 1,
               color: Color(
@@ -303,12 +283,8 @@ class _ChatPageState
           ),
         ),
 
-        // =====================================================
-        // Body
-        // =====================================================
-
-        body: Consumer<
-            ChatLogicProvider>(
+        body:
+        Consumer<ChatLogicProvider>(
           builder: (
               context,
               provider,
@@ -316,11 +292,78 @@ class _ChatPageState
               ) {
             if (provider.chatId ==
                 null) {
-              return _buildError(
-                provider
-                    .errorMessage ??
-                    "تعذر تحميل المحادثة",
-                provider,
+              return Center(
+                child: Padding(
+                  padding:
+                  const EdgeInsets.all(
+                    24,
+                  ),
+                  child: Column(
+                    mainAxisSize:
+                    MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons
+                            .error_outline_rounded,
+                        color:
+                        Colors.red,
+                        size: 44,
+                      ),
+                      const SizedBox(
+                        height: 12,
+                      ),
+                      Text(
+                        provider
+                            .errorMessage ??
+                            'تعذر تحميل المحادثة',
+                        textAlign:
+                        TextAlign.center,
+                        style:
+                        const TextStyle(
+                          fontFamily:
+                          'Tajawal',
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          provider
+                              .initialize(
+                            videoId:
+                            widget.id,
+                            chatId:
+                            widget
+                                .chatId,
+                            initialChat:
+                            widget
+                                .initialChat,
+                          );
+                        },
+                        style:
+                        ElevatedButton
+                            .styleFrom(
+                          backgroundColor:
+                          const Color(
+                            0xff2A9D8F,
+                          ),
+                          foregroundColor:
+                          Colors.white,
+                        ),
+                        child:
+                        const Text(
+                          'إعادة المحاولة',
+                          style:
+                          TextStyle(
+                            fontFamily:
+                            'Tajawal',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               );
             }
 
@@ -335,31 +378,97 @@ class _ChatPageState
 
             return Column(
               children: [
-                // =================================================
-                // Messages
-                // =================================================
-
                 Expanded(
-                  child: provider
-                      .messages
-                      .isEmpty
-                      ? _emptyChat()
-                      : ListView
-                      .builder(
+                  child:
+                  provider.messages.isEmpty
+                      ? Center(
+                    child:
+                    Padding(
+                      padding:
+                      const EdgeInsets.all(
+                        30,
+                      ),
+                      child:
+                      Column(
+                        mainAxisSize:
+                        MainAxisSize.min,
+                        children: [
+                          Container(
+                            height:
+                            70,
+                            width:
+                            70,
+                            decoration:
+                            BoxDecoration(
+                              color:
+                              const Color(
+                                0xff2A9D8F,
+                              ).withOpacity(
+                                0.1,
+                              ),
+                              shape:
+                              BoxShape.circle,
+                            ),
+                            child:
+                            const Icon(
+                              Icons
+                                  .smart_toy_rounded,
+                              size:
+                              34,
+                              color:
+                              Color(
+                                0xff2A9D8F,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height:
+                            16,
+                          ),
+                          const Text(
+                            'كيف يمكنني مساعدتك؟',
+                            style:
+                            TextStyle(
+                              fontFamily:
+                              'Tajawal',
+                              fontWeight:
+                              FontWeight.bold,
+                              fontSize:
+                              18,
+                            ),
+                          ),
+                          const SizedBox(
+                            height:
+                            6,
+                          ),
+                          const Text(
+                            'اسألني عن محتوى المحاضرة',
+                            style:
+                            TextStyle(
+                              fontFamily:
+                              'Tajawal',
+                              color:
+                              Color(
+                                0xff777777,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                      : ListView.builder(
                     controller:
                     _scrollController,
                     padding:
-                    const EdgeInsets
-                        .fromLTRB(
+                    const EdgeInsets.fromLTRB(
                       14,
                       18,
                       14,
                       18,
                     ),
                     itemCount:
-                    provider
-                        .messages
-                        .length +
+                    provider.messages.length +
                         (provider
                             .isWaitingForAi
                             ? 1
@@ -369,687 +478,634 @@ class _ChatPageState
                         context,
                         index,
                         ) {
+                      // AI typing indicator
                       if (index ==
                           provider
                               .messages
                               .length) {
-                        return _buildAiTyping();
+                        return Align(
+                          alignment:
+                          Alignment.centerLeft,
+                          child:
+                          Container(
+                            margin:
+                            const EdgeInsets.only(
+                              bottom:
+                              12,
+                            ),
+                            padding:
+                            const EdgeInsets.symmetric(
+                              horizontal:
+                              16,
+                              vertical:
+                              12,
+                            ),
+                            decoration:
+                            BoxDecoration(
+                              color:
+                              Colors.white,
+                              borderRadius:
+                              BorderRadius.circular(
+                                18,
+                              ),
+                              border:
+                              Border.all(
+                                color:
+                                const Color(
+                                  0xffE9E9E9,
+                                ),
+                              ),
+                            ),
+                            child:
+                            const Row(
+                              mainAxisSize:
+                              MainAxisSize.min,
+                              children: [
+                                SizedBox(
+                                  width:
+                                  16,
+                                  height:
+                                  16,
+                                  child:
+                                  CircularProgressIndicator(
+                                    strokeWidth:
+                                    2,
+                                    color:
+                                    Color(
+                                      0xff2A9D8F,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width:
+                                  10,
+                                ),
+                                Text(
+                                  'جاري تجهيز الإجابة...',
+                                  style:
+                                  TextStyle(
+                                    fontFamily:
+                                    'Tajawal',
+                                    fontSize:
+                                    13,
+                                    color:
+                                    Color(
+                                      0xff777777,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
                       }
 
                       final message =
                       provider
                           .messages[
-                      index];
+                      index
+                      ];
 
+                      // User message
                       if (message
                           .isUser) {
-                        return _buildUserMessage(
-                          message
-                              .text,
-                        );
+                      return Align(
+                      alignment:
+                      Alignment.centerRight,
+                      child:
+                      Container(
+                      constraints:
+                      BoxConstraints(
+                      maxWidth:
+                      MediaQuery.of(
+                      context,
+                      ).size.width *
+                      0.78,
+                      ),
+                      margin:
+                      const EdgeInsets.only(
+                      bottom:
+                      12,
+                      ),
+                      padding:
+                      const EdgeInsets.symmetric(
+                      horizontal:
+                      16,
+                      vertical:
+                      12,
+                      ),
+                      decoration:
+                      const BoxDecoration(
+                      color:
+                      Color(
+                      0xff2A9D8F,
+                      ),
+                      borderRadius:
+                      BorderRadius.only(
+                      topLeft:
+                      Radius.circular(
+                      18,
+                      ),
+                      topRight:
+                      Radius.circular(
+                      18,
+                      ),
+                      bottomLeft:
+                      Radius.circular(
+                      18,
+                      ),
+                      bottomRight:
+                      Radius.circular(
+                      4,
+                      ),
+                      ),
+                      ),
+                      child:
+                      Text(
+                      message
+                          .text,
+                      style:
+                      const TextStyle(
+                      fontFamily:
+                      'Tajawal',
+                      color:
+                      Colors.white,
+                      fontSize:
+                      15,
+                      height:
+                      1.5,
+                      ),
+                      ),
+                      ),
+                      );
                       }
 
-                      return _buildBotMessage(
-                        message
-                            .text,
+                      // AI message
+                      final parsed =
+                      provider
+                          .parseAiMessage(
+                      message
+                          .text,
+                      );
+
+                      return Align(
+                      alignment:
+                      Alignment.centerLeft,
+                      child:
+                      Container(
+                      constraints:
+                      BoxConstraints(
+                      maxWidth:
+                      MediaQuery.of(
+                      context,
+                      ).size.width *
+                      0.82,
+                      ),
+                      margin:
+                      const EdgeInsets.only(
+                      bottom:
+                      12,
+                      ),
+                      padding:
+                      const EdgeInsets.symmetric(
+                      horizontal:
+                      16,
+                      vertical:
+                      12,
+                      ),
+                      decoration:
+                      BoxDecoration(
+                      color:
+                      Colors.white,
+                      borderRadius:
+                      const BorderRadius.only(
+                      topLeft:
+                      Radius.circular(
+                      18,
+                      ),
+                      topRight:
+                      Radius.circular(
+                      18,
+                      ),
+                      bottomRight:
+                      Radius.circular(
+                      18,
+                      ),
+                      bottomLeft:
+                      Radius.circular(
+                      4,
+                      ),
+                      ),
+                      border:
+                      Border.all(
+                      color:
+                      const Color(
+                      0xffE9E9E9,
+                      ),
+                      ),
+                      ),
+                      child:
+                      Column(
+                      crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                      children: [
+                      Text(
+                      parsed
+                          .answer,
+                      style:
+                      const TextStyle(
+                      fontFamily:
+                      'Tajawal',
+                      color:
+                      Color(
+                      0xff181C1F,
+                      ),
+                      fontSize:
+                      15,
+                      height:
+                      1.6,
+                      ),
+                      ),
+                      if (parsed
+                          .segments
+                          .isNotEmpty) ...[
+                      const SizedBox(
+                      height:
+                      14,
+                      ),
+                      const Divider(
+                      height:
+                      1,
+                      color:
+                      Color(
+                      0xffEEEEEE,
+                      ),
+                      ),
+                      const SizedBox(
+                      height:
+                      10,
+                      ),
+                      const Row(
+                      children: [
+                      Icon(
+                      Icons
+                          .play_circle_outline_rounded,
+                      size:
+                      19,
+                      color:
+                      Color(
+                      0xff2A9D8F,
+                      ),
+                      ),
+                      SizedBox(
+                      width:
+                      6,
+                      ),
+                      Text(
+                      'من الفيديو',
+                      style:
+                      TextStyle(
+                      fontFamily:
+                      'Tajawal',
+                      fontWeight:
+                      FontWeight.bold,
+                      fontSize:
+                      13,
+                      color:
+                      Color(
+                      0xff2A9D8F,
+                      ),
+                      ),
+                      ),
+                      ],
+                      ),
+                      const SizedBox(
+                      height:
+                      8,
+                      ),
+                      ...parsed
+                          .segments
+                          .map(
+                      (
+                      segment,
+                      ) {
+                      return Container(
+                      width:
+                      double.infinity,
+                      margin:
+                      const EdgeInsets.only(
+                      bottom:
+                      7,
+                      ),
+                      child:
+                      OutlinedButton.icon(
+                      onPressed:
+                      () {
+                      _openVideoSegment(
+                      startSeconds:
+                      segment.startSeconds,
+                      endSeconds:
+                      segment.endSeconds,
+                      );
+                      },
+                      style:
+                      OutlinedButton.styleFrom(
+                      foregroundColor:
+                      const Color(
+                      0xff2A9D8F,
+                      ),
+                      side:
+                      const BorderSide(
+                      color:
+                      Color(
+                      0xff2A9D8F,
+                      ),
+                      ),
+                      padding:
+                      const EdgeInsets.symmetric(
+                      horizontal:
+                      12,
+                      vertical:
+                      9,
+                      ),
+                      shape:
+                      RoundedRectangleBorder(
+                      borderRadius:
+                      BorderRadius.circular(
+                      12,
+                      ),
+                      ),
+                      ),
+                      icon:
+                      const Icon(
+                      Icons
+                          .play_arrow_rounded,
+                      size:
+                      20,
+                      ),
+                      label:
+                      Text(
+                      'مشاهدة الجزء '
+                      '${segment.startLabel} - '
+                      '${segment.endLabel}',
+                      style:
+                      const TextStyle(
+                      fontFamily:
+                      'Tajawal',
+                      fontSize:
+                      13,
+                      fontWeight:
+                      FontWeight.bold,
+                      ),
+                      ),
+                      ),
+                      );
+                      },
+                      ),
+                      ],
+                      ],
+                      ),
+                      ),
                       );
                     },
                   ),
                 ),
 
-                // =================================================
-                // Error
-                // =================================================
-
                 if (provider
                     .errorMessage !=
                     null)
-                  _buildInlineError(
-                    provider
-                        .errorMessage!,
+                  Container(
+                    width:
+                    double.infinity,
+                    margin:
+                    const EdgeInsets.symmetric(
+                      horizontal:
+                      14,
+                    ),
+                    padding:
+                    const EdgeInsets.all(
+                      10,
+                    ),
+                    decoration:
+                    BoxDecoration(
+                      color:
+                      Colors.red.shade50,
+                      borderRadius:
+                      BorderRadius.circular(
+                        10,
+                      ),
+                    ),
+                    child: Text(
+                      provider
+                          .errorMessage!,
+                      textAlign:
+                      TextAlign.center,
+                      style:
+                      TextStyle(
+                        fontFamily:
+                        'Tajawal',
+                        color:
+                        Colors.red.shade700,
+                        fontSize:
+                        12,
+                      ),
+                    ),
                   ),
 
-                // =================================================
-                // Input
-                // =================================================
+                Container(
+                  padding:
+                  const EdgeInsets.fromLTRB(
+                    12,
+                    10,
+                    12,
+                    14,
+                  ),
+                  decoration:
+                  const BoxDecoration(
+                    color:
+                    Colors.white,
+                    border:
+                    Border(
+                      top:
+                      BorderSide(
+                        color:
+                        Color(
+                          0xffEEEEEE,
+                        ),
+                      ),
+                    ),
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    child: Row(
+                      crossAxisAlignment:
+                      CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child:
+                          Container(
+                            decoration:
+                            BoxDecoration(
+                              color:
+                              const Color(
+                                0xffF6F8F8,
+                              ),
+                              borderRadius:
+                              BorderRadius.circular(
+                                24,
+                              ),
+                              border:
+                              Border.all(
+                                color:
+                                const Color(
+                                  0xffE5E5E5,
+                                ),
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  onPressed:
+                                  provider.canSend
+                                      ? provider
+                                      .toggleWebSearch
+                                      : null,
+                                  tooltip:
+                                  provider.webSearch
+                                      ? 'إيقاف بحث الويب'
+                                      : 'تفعيل بحث الويب',
+                                  icon:
+                                  Icon(
+                                    provider.webSearch
+                                        ? Icons
+                                        .language_rounded
+                                        : Icons
+                                        .language_outlined,
+                                    color:
+                                    provider.webSearch
+                                        ? const Color(
+                                      0xff2A9D8F,
+                                    )
+                                        : const Color(
+                                      0xff777777,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child:
+                                  TextField(
+                                    cursorColor:
+                                    const Color(
+                                      0xff2A9D8F,
+                                    ),
+                                    controller:
+                                    _controller,
+                                    enabled:
+                                    provider.canSend,
+                                    minLines:
+                                    1,
+                                    maxLines:
+                                    5,
+                                    textInputAction:
+                                    TextInputAction.newline,
+                                    style:
+                                    const TextStyle(
+                                      fontFamily:
+                                      'Tajawal',
+                                      fontSize:
+                                      15,
+                                    ),
+                                    decoration:
+                                    const InputDecoration(
+                                      hintText:
+                                      'اكتب سؤالك...',
+                                      hintStyle:
+                                      TextStyle(
+                                        fontFamily:
+                                        'Tajawal',
+                                        color:
+                                        Color(
+                                          0xff999999,
+                                        ),
+                                      ),
+                                      border:
+                                      InputBorder.none,
+                                      contentPadding:
+                                      EdgeInsets.symmetric(
+                                        horizontal:
+                                        8,
+                                        vertical:
+                                        13,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
 
-                _buildMessageInput(
-                  provider,
+                        const SizedBox(
+                          width: 8,
+                        ),
+
+                        GestureDetector(
+                          onTap:
+                          provider.canSend
+                              ? _sendMessage
+                              : null,
+                          child:
+                          AnimatedContainer(
+                            duration:
+                            const Duration(
+                              milliseconds:
+                              200,
+                            ),
+                            width: 48,
+                            height: 48,
+                            decoration:
+                            BoxDecoration(
+                              color:
+                              provider.canSend
+                                  ? const Color(
+                                0xff2A9D8F,
+                              )
+                                  : Colors.grey,
+                              shape:
+                              BoxShape.circle,
+                            ),
+                            child:
+                            provider.isSending
+                                ? const Padding(
+                              padding:
+                              EdgeInsets.all(
+                                14,
+                              ),
+                              child:
+                              CircularProgressIndicator(
+                                strokeWidth:
+                                2,
+                                color:
+                                Colors.white,
+                              ),
+                            )
+                                : const Icon(
+                              Icons
+                                  .send_rounded,
+                              color:
+                              Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             );
           },
-        ),
-      ),
-    );
-  }
-
-  // =============================================================
-  // Empty Chat
-  // =============================================================
-
-  Widget _emptyChat() {
-    return Center(
-      child: Padding(
-        padding:
-        const EdgeInsets.all(
-          30,
-        ),
-        child: Column(
-          mainAxisSize:
-          MainAxisSize.min,
-          children: [
-            Container(
-              height: 70,
-              width: 70,
-              decoration:
-              BoxDecoration(
-                color:
-                const Color(
-                  0xff2A9D8F,
-                ).withOpacity(
-                  0.1,
-                ),
-                shape:
-                BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons
-                    .smart_toy_rounded,
-                size: 34,
-                color: Color(
-                  0xff2A9D8F,
-                ),
-              ),
-            ),
-
-            const SizedBox(
-              height: 16,
-            ),
-
-            const Text(
-              "كيف يمكنني مساعدتك؟",
-              style: TextStyle(
-                fontFamily:
-                "Tajawal",
-                fontWeight:
-                FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-
-            const SizedBox(
-              height: 6,
-            ),
-
-            const Text(
-              "اسألني عن محتوى المحاضرة",
-              style: TextStyle(
-                fontFamily:
-                "Tajawal",
-                color: Color(
-                  0xff777777,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // =============================================================
-  // Input
-  // =============================================================
-
-  Widget _buildMessageInput(
-      ChatLogicProvider provider,
-      ) {
-    final bool disabled =
-        provider.isSending ||
-            provider
-                .isWaitingForAi;
-
-    return Container(
-      padding:
-      const EdgeInsets
-          .fromLTRB(
-        12,
-        10,
-        12,
-        14,
-      ),
-      decoration:
-      const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(
-            color:
-            Color(
-              0xffEEEEEE,
-            ),
-          ),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          crossAxisAlignment:
-          CrossAxisAlignment
-              .end,
-          children: [
-            Expanded(
-              child: Container(
-                decoration:
-                BoxDecoration(
-                  color:
-                  const Color(
-                    0xffF6F8F8,
-                  ),
-                  borderRadius:
-                  BorderRadius
-                      .circular(
-                    24,
-                  ),
-                  border:
-                  Border.all(
-                    color:
-                    const Color(
-                      0xffE5E5E5,
-                    ),
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment:
-                  CrossAxisAlignment
-                      .end,
-                  children: [
-                    IconButton(
-                      onPressed:
-                      disabled
-                          ? null
-                          : provider
-                          .toggleWebSearch,
-                      tooltip: provider
-                          .webSearch
-                          ? "إيقاف بحث الويب"
-                          : "تفعيل بحث الويب",
-                      icon: Icon(
-                        provider
-                            .webSearch
-                            ? Icons
-                            .language_rounded
-                            : Icons
-                            .language_outlined,
-                        color: provider
-                            .webSearch
-                            ? const Color(
-                          0xff2A9D8F,
-                        )
-                            : const Color(
-                          0xff777777,
-                        ),
-                      ),
-                    ),
-
-                    Expanded(
-                      child:
-                      TextField(
-                        controller:
-                        _controller,
-                        enabled:
-                        !disabled,
-                        minLines: 1,
-                        maxLines: 5,
-                        textInputAction:
-                        TextInputAction
-                            .newline,
-                        style:
-                        const TextStyle(
-                          fontFamily:
-                          "Tajawal",
-                          fontSize: 15,
-                        ),
-                        decoration:
-                        const InputDecoration(
-                          hintText:
-                          "اكتب سؤالك...",
-                          hintStyle:
-                          TextStyle(
-                            fontFamily:
-                            "Tajawal",
-                            color:
-                            Color(
-                              0xff999999,
-                            ),
-                          ),
-                          border:
-                          InputBorder
-                              .none,
-                          contentPadding:
-                          EdgeInsets
-                              .symmetric(
-                            horizontal:
-                            8,
-                            vertical:
-                            13,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(
-              width: 8,
-            ),
-
-            GestureDetector(
-              onTap:
-              disabled
-                  ? null
-                  : _sendMessage,
-              child:
-              AnimatedContainer(
-                duration:
-                const Duration(
-                  milliseconds:
-                  200,
-                ),
-                width: 48,
-                height: 48,
-                decoration:
-                BoxDecoration(
-                  color: disabled
-                      ? Colors.grey
-                      : const Color(
-                    0xff2A9D8F,
-                  ),
-                  shape:
-                  BoxShape.circle,
-                ),
-                child:
-                provider.isSending
-                    ? const Padding(
-                  padding:
-                  EdgeInsets
-                      .all(
-                    14,
-                  ),
-                  child:
-                  CircularProgressIndicator(
-                    strokeWidth:
-                    2,
-                    color:
-                    Colors.white,
-                  ),
-                )
-                    : const Icon(
-                  Icons
-                      .send_rounded,
-                  color:
-                  Colors.white,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // =============================================================
-  // User Message
-  // =============================================================
-
-  Widget _buildUserMessage(
-      String text,
-      ) {
-    return Align(
-      alignment:
-      Alignment.centerRight,
-      child: Container(
-        constraints:
-        BoxConstraints(
-          maxWidth:
-          MediaQuery.of(
-            context,
-          ).size.width *
-              0.78,
-        ),
-        margin:
-        const EdgeInsets.only(
-          bottom: 12,
-        ),
-        padding:
-        const EdgeInsets
-            .symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-        decoration:
-        const BoxDecoration(
-          color:
-          Color(
-            0xff2A9D8F,
-          ),
-          borderRadius:
-          BorderRadius.only(
-            topLeft:
-            Radius.circular(
-              18,
-            ),
-            topRight:
-            Radius.circular(
-              18,
-            ),
-            bottomLeft:
-            Radius.circular(
-              18,
-            ),
-            bottomRight:
-            Radius.circular(
-              4,
-            ),
-          ),
-        ),
-        child: Text(
-          text,
-          style:
-          const TextStyle(
-            fontFamily:
-            "Tajawal",
-            color:
-            Colors.white,
-            fontSize: 15,
-            height: 1.5,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // =============================================================
-  // Bot Message
-  // =============================================================
-
-  Widget _buildBotMessage(
-      String text,
-      ) {
-    return Align(
-      alignment:
-      Alignment.centerLeft,
-      child: Container(
-        constraints:
-        BoxConstraints(
-          maxWidth:
-          MediaQuery.of(
-            context,
-          ).size.width *
-              0.82,
-        ),
-        margin:
-        const EdgeInsets.only(
-          bottom: 12,
-        ),
-        padding:
-        const EdgeInsets
-            .symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-        decoration:
-        BoxDecoration(
-          color:
-          Colors.white,
-          borderRadius:
-          const BorderRadius
-              .only(
-            topLeft:
-            Radius.circular(
-              18,
-            ),
-            topRight:
-            Radius.circular(
-              18,
-            ),
-            bottomRight:
-            Radius.circular(
-              18,
-            ),
-            bottomLeft:
-            Radius.circular(
-              4,
-            ),
-          ),
-          border:
-          Border.all(
-            color:
-            const Color(
-              0xffE9E9E9,
-            ),
-          ),
-        ),
-        child: Text(
-          text,
-          style:
-          const TextStyle(
-            fontFamily:
-            "Tajawal",
-            color:
-            Color(
-              0xff181C1F,
-            ),
-            fontSize: 15,
-            height: 1.6,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // =============================================================
-  // AI typing
-  // =============================================================
-
-  Widget _buildAiTyping() {
-    return Align(
-      alignment:
-      Alignment.centerLeft,
-      child: Container(
-        margin:
-        const EdgeInsets.only(
-          bottom: 12,
-        ),
-        padding:
-        const EdgeInsets
-            .symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-        decoration:
-        BoxDecoration(
-          color:
-          Colors.white,
-          borderRadius:
-          BorderRadius
-              .circular(
-            18,
-          ),
-          border:
-          Border.all(
-            color:
-            const Color(
-              0xffE9E9E9,
-            ),
-          ),
-        ),
-        child:
-        const Row(
-          mainAxisSize:
-          MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 16,
-              height: 16,
-              child:
-              CircularProgressIndicator(
-                strokeWidth: 2,
-                color:
-                Color(
-                  0xff2A9D8F,
-                ),
-              ),
-            ),
-
-            SizedBox(
-              width: 10,
-            ),
-
-            Text(
-              "جاري تجهيز الإجابة...",
-              style:
-              TextStyle(
-                fontFamily:
-                "Tajawal",
-                fontSize: 13,
-                color:
-                Color(
-                  0xff777777,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // =============================================================
-  // Inline Error
-  // =============================================================
-
-  Widget _buildInlineError(
-      String error,
-      ) {
-    return Container(
-      width:
-      double.infinity,
-      margin:
-      const EdgeInsets
-          .symmetric(
-        horizontal: 14,
-      ),
-      padding:
-      const EdgeInsets.all(
-        10,
-      ),
-      decoration:
-      BoxDecoration(
-        color:
-        Colors.red.shade50,
-        borderRadius:
-        BorderRadius
-            .circular(
-          10,
-        ),
-      ),
-      child: Text(
-        error,
-        textAlign:
-        TextAlign.center,
-        style:
-        TextStyle(
-          fontFamily:
-          "Tajawal",
-          color:
-          Colors.red.shade700,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-
-  // =============================================================
-  // Error
-  // =============================================================
-
-  Widget _buildError(
-      String error,
-      ChatLogicProvider provider,
-      ) {
-    return Center(
-      child: Padding(
-        padding:
-        const EdgeInsets.all(
-          24,
-        ),
-        child: Column(
-          mainAxisSize:
-          MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons
-                  .error_outline_rounded,
-              color:
-              Colors.red,
-              size: 44,
-            ),
-
-            const SizedBox(
-              height: 12,
-            ),
-
-            Text(
-              error,
-              textAlign:
-              TextAlign.center,
-              style:
-              const TextStyle(
-                fontFamily:
-                "Tajawal",
-              ),
-            ),
-
-            const SizedBox(
-              height: 16,
-            ),
-
-            ElevatedButton(
-              onPressed: () {
-                provider
-                    .initialize(
-                  videoId:
-                  widget.id,
-                  chatId:
-                  widget.chatId,
-                  initialChat:
-                  widget.initialChat,
-                );
-              },
-              style:
-              ElevatedButton
-                  .styleFrom(
-                backgroundColor:
-                const Color(
-                  0xff2A9D8F,
-                ),
-                foregroundColor:
-                Colors.white,
-              ),
-              child:
-              const Text(
-                "إعادة المحاولة",
-                style:
-                TextStyle(
-                  fontFamily:
-                  "Tajawal",
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

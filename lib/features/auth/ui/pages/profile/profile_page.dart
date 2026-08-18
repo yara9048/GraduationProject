@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:graduationprojct/features/auth/providers/edit_profile_provider.dart';
 import 'package:graduationprojct/features/auth/ui/pages/sign_in/sign_in_page.dart';
-import 'package:graduationprojct/features/home/ui/pages/favourite_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/watching_history_page.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/log_out_provider.dart';
 import '../../../providers/profile_provider.dart';
-import '../../widgets/button_template.dart';
 import '../../widgets/edit_major_dialog.dart';
 import '../../widgets/edit_name_dialog.dart';
+import '../../widgets/profile_dialogs.dart';
 import '../../widgets/profile_image_picker.dart';
 import '../../widgets/profile_item.dart';
 import '../../widgets/snack_bar.dart';
@@ -27,98 +25,60 @@ class ProfilePage extends StatefulWidget {
   });
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<ProfilePage> createState() =>
+      _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-  String? selectedMajor;
-  final TextEditingController firstNameController =
-  TextEditingController();
-
-  final TextEditingController secondNameController =
-  TextEditingController();
-
-  final TextEditingController majorController =
-  TextEditingController();
-
-  final GlobalKey<FormState> nameFormKey =
-  GlobalKey<FormState>();
-
-  final GlobalKey<FormState> majorFormKey =
-  GlobalKey<FormState>();
-
+class _ProfilePageState
+    extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+    WidgetsBinding.instance
+        .addPostFrameCallback(
+          (_) {
+        if (!mounted) {
+          return;
+        }
 
-      context.read<ProfileProvider>().getProfile();
-    });
-
-  }
-
-  @override
-  void dispose() {
-    firstNameController.dispose();
-    secondNameController.dispose();
-    majorController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _refreshProfile() async {
-    await context.read<ProfileProvider>().getProfile();
-  }
-
-  Future<void> _showEditMajorDialog() async {
-    final profile =
-        context.read<ProfileProvider>().profile;
-
-    if (profile == null) return;
-
-    await showDialog<void>(
-      context: context,
-      builder: (_) => EditMajorDialog(
-        currentMajor: profile.major,
-        onUpdated: _refreshProfile,
-      ),
-    );
-  }
-  Future<void> _showEditNameDialog() async {
-    final profile =
-        context.read<ProfileProvider>().profile;
-
-    if (profile == null) return;
-
-    await showDialog<void>(
-      context: context,
-      builder: (_) => EditNameDialog(
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        onUpdated: _refreshProfile,
-      ),
+        context
+            .read<ProfileProvider>()
+            .getProfile();
+      },
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    final profileProvider =
-    context.watch<ProfileProvider>();
+  Widget build(
+      BuildContext context,
+      ) {
+    final ProfileProvider
+    profileProvider =
+    context.watch<
+        ProfileProvider>();
 
-    final logoutProvider =
-    context.watch<LogoutProvider>();
+    final LogoutProvider
+    logoutProvider =
+    context.watch<
+        LogoutProvider>();
 
-    final profile = profileProvider.profile;
-
-    if (profileProvider.isLoading && profile == null) {
+    final profile =
+        profileProvider.profile;
+    if (profileProvider.isLoading &&
+        profile == null) {
       return const Directionality(
-        textDirection: TextDirection.rtl,
+        textDirection:
+        TextDirection.rtl,
         child: Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor:
+          Colors.white,
           body: Center(
-            child: CircularProgressIndicator(
-              color: Color(0xff2A9D8F),
+            child:
+            CircularProgressIndicator(
+              color: Color(
+                0xff2A9D8F,
+              ),
             ),
           ),
         ),
@@ -127,9 +87,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (profile == null) {
       return Directionality(
-        textDirection: TextDirection.rtl,
+        textDirection:
+        TextDirection.rtl,
         child: Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor:
+          Colors.white,
           body: Stack(
             children: [
               Positioned(
@@ -139,6 +101,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   'assets/Images/Ellipse 4.png',
                 ),
               ),
+
               Positioned(
                 bottom: 0,
                 right: 0,
@@ -148,65 +111,114 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
+                  padding:
+                  const EdgeInsets
+                      .symmetric(
                     horizontal: 24,
                   ),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisSize:
+                    MainAxisSize.min,
                     children: [
                       const Icon(
-                        Icons.person_off_outlined,
-                        color: Color(0xffE76F51),
+                        Icons
+                            .person_off_outlined,
+                        color:
+                        Color(
+                          0xffE76F51,
+                        ),
                         size: 55,
                       ),
-                      const SizedBox(height: 15),
+
+                      const SizedBox(
+                        height: 15,
+                      ),
+
                       Text(
-                        profileProvider.errorMessage ??
+                        profileProvider
+                            .errorMessage ??
                             'تعذر تحميل بيانات الحساب',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontFamily: 'Tajawal',
+                        textAlign:
+                        TextAlign.center,
+                        style:
+                        const TextStyle(
+                          fontFamily:
+                          'Tajawal',
                           fontSize: 17,
-                          color: Color(0xff264653),
+                          color:
+                          Color(
+                            0xff264653,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+
+                      const SizedBox(
+                        height: 20,
+                      ),
+
                       ElevatedButton.icon(
-                        onPressed: profileProvider.isLoading
+                        onPressed:
+                        profileProvider
+                            .isLoading
                             ? null
-                            : _refreshProfile,
-                        style: ElevatedButton.styleFrom(
+                            : () {
+                          profileProvider
+                              .refreshProfile();
+                        },
+                        style:
+                        ElevatedButton
+                            .styleFrom(
                           backgroundColor:
-                          const Color(0xff2A9D8F),
-                          foregroundColor: Colors.white,
+                          const Color(
+                            0xff2A9D8F,
+                          ),
+                          foregroundColor:
+                          Colors.white,
                           padding:
-                          const EdgeInsets.symmetric(
-                            horizontal: 24,
+                          const EdgeInsets
+                              .symmetric(
+                            horizontal:
+                            24,
                             vertical: 12,
                           ),
-                          shape: RoundedRectangleBorder(
+                          shape:
+                          RoundedRectangleBorder(
                             borderRadius:
-                            BorderRadius.circular(12),
+                            BorderRadius
+                                .circular(
+                              12,
+                            ),
                           ),
                         ),
-                        icon: profileProvider.isLoading
+                        icon:
+                        profileProvider
+                            .isLoading
                             ? const SizedBox(
                           width: 18,
-                          height: 18,
+                          height:
+                          18,
                           child:
                           CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+                            strokeWidth:
+                            2,
+                            color:
+                            Colors.white,
                           ),
                         )
                             : const Icon(
-                          Icons.refresh_rounded,
+                          Icons
+                              .refresh_rounded,
                         ),
-                        label: const Text(
+                        label:
+                        const Text(
                           'إعادة المحاولة',
-                          style: TextStyle(
-                            fontFamily: 'Tajawal',
-                            fontWeight: FontWeight.bold,
+                          style:
+                          TextStyle(
+                            fontFamily:
+                            'Tajawal',
+                            fontWeight:
+                            FontWeight
+                                .bold,
                           ),
                         ),
                       ),
@@ -219,14 +231,25 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       );
     }
-
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection:
+      TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor:
+        Colors.white,
+
         body: RefreshIndicator(
-          color: const Color(0xff2A9D8F),
-          onRefresh: _refreshProfile,
+          color: const Color(
+            0xff2A9D8F,
+          ),
+
+          onRefresh: () {
+            return context
+                .read<
+                ProfileProvider>()
+                .refreshProfile();
+          },
+
           child: Stack(
             children: [
               Positioned(
@@ -236,6 +259,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   'assets/Images/Ellipse 4.png',
                 ),
               ),
+
               Positioned(
                 bottom: 0,
                 right: 0,
@@ -244,10 +268,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
               SafeArea(
-                child: SingleChildScrollView(
+                child:
+                SingleChildScrollView(
                   physics:
                   const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(
+                  padding:
+                  const EdgeInsets
+                      .fromLTRB(
                     20,
                     70,
                     20,
@@ -256,36 +283,72 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Column(
                     children: [
                       ProfileImagePicker(
-                        serverImageUrl: profile.image,
+                        serverImageUrl:
+                        profile.image,
                       ),
-                      const SizedBox(height: 20),
+
+                      const SizedBox(
+                        height: 20,
+                      ),
+
                       Row(
                         mainAxisAlignment:
-                        MainAxisAlignment.center,
+                        MainAxisAlignment
+                            .center,
                         children: [
                           Flexible(
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 50.0),
+                            child:
+                            Padding(
+                              padding:
+                              const EdgeInsets
+                                  .only(
+                                right:
+                                50.0,
+                              ),
                               child: Text(
                                 '${profile.firstName} '
                                     '${profile.lastName}',
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Tajawal',
-                                  fontSize: 25,
-                                  color: Color(0xff264653),
+                                textAlign:
+                                TextAlign
+                                    .center,
+                                overflow:
+                                TextOverflow
+                                    .ellipsis,
+                                style:
+                                const TextStyle(
+                                  fontWeight:
+                                  FontWeight
+                                      .bold,
+                                  fontFamily:
+                                  'Tajawal',
+                                  fontSize:
+                                  25,
+                                  color:
+                                  Color(
+                                    0xff264653,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 5),
+
+                          const SizedBox(
+                            width: 5,
+                          ),
+
                           IconButton(
-                            onPressed: _showEditNameDialog,
-                            icon: const Icon(
+                            onPressed: () {
+                              ProfileDialogs.showEditName(
+                                context,
+                              );
+                            },
+                            icon:
+                            const Icon(
                               Icons.edit,
-                              color: Color(0xff2A9D8F),
+                              color:
+                              Color(
+                                0xff2A9D8F,
+                              ),
                               size: 20,
                             ),
                           ),
@@ -293,30 +356,59 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       Text(
                         profile.major,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        textAlign:
+                        TextAlign.center,
+                        style:
+                        const TextStyle(
                           fontSize: 20,
-                          color: Color(0xff264653),
-                          fontFamily: 'Tajawal',
+                          color: Color(
+                            0xff264653,
+                          ),
+                          fontFamily:
+                          'Tajawal',
                         ),
                       ),
-                      const SizedBox(height: 10),
+
+                      const SizedBox(
+                        height: 10,
+                      ),
                       Container(
-                        width: double.infinity,
+                        width:
+                        double.infinity,
                         margin:
-                        const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
+                        const EdgeInsets
+                            .only(
+                          bottom: 12,
+                        ),
+                        padding:
+                        const EdgeInsets
+                            .all(
+                          18,
+                        ),
+                        decoration:
+                        BoxDecoration(
+                          color:
+                          Colors.white,
                           borderRadius:
-                          BorderRadius.circular(18),
+                          BorderRadius
+                              .circular(
+                            18,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(
-                                alpha: 0.12,
+                              color: Colors
+                                  .black
+                                  .withValues(
+                                alpha:
+                                0.12,
                               ),
-                              offset: const Offset(0, 6),
-                              blurRadius: 12,
+                              offset:
+                              const Offset(
+                                0,
+                                6,
+                              ),
+                              blurRadius:
+                              12,
                             ),
                           ],
                         ),
@@ -325,54 +417,89 @@ class _ProfilePageState extends State<ProfilePage> {
                             Row(
                               children: [
                                 const Icon(
-                                  Icons.email_outlined,
-                                  color: Color(0xff2A9D8F),
+                                  Icons
+                                      .email_outlined,
+                                  color:
+                                  Color(
+                                    0xff2A9D8F,
+                                  ),
                                   size: 20,
                                 ),
-                                const SizedBox(width: 12),
+
+                                const SizedBox(
+                                  width: 12,
+                                ),
+
                                 Expanded(
                                   child: Text(
-                                    profile.email,
+                                    profile
+                                        .email,
                                     overflow:
-                                    TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontFamily: 'Tajawal',
+                                    TextOverflow
+                                        .ellipsis,
+                                    style:
+                                    const TextStyle(
+                                      fontSize:
+                                      16,
+                                      fontFamily:
+                                      'Tajawal',
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            const Divider(height: 30),
+
+                            const Divider(
+                              height: 30,
+                            ),
+
                             Row(
                               children: [
                                 const Icon(
-                                  Icons.badge_outlined,
-                                  color: Color(0xff2A9D8F),
+                                  Icons
+                                      .badge_outlined,
+                                  color:
+                                  Color(
+                                    0xff2A9D8F,
+                                  ),
                                   size: 20,
                                 ),
-                                const SizedBox(width: 12),
+
+                                const SizedBox(
+                                  width: 12,
+                                ),
+
                                 Expanded(
                                   child: Text(
                                     '${profile.role} / '
                                         '${profile.major}',
                                     overflow:
-                                    TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontFamily: 'Tajawal',
+                                    TextOverflow
+                                        .ellipsis,
+                                    style:
+                                    const TextStyle(
+                                      fontSize:
+                                      16,
+                                      fontFamily:
+                                      'Tajawal',
                                     ),
                                   ),
                                 ),
+
                                 IconButton(
-                                  onPressed:
-                                  _showEditMajorDialog,
-                                  icon: const Icon(
+                                  onPressed: () {
+                                    ProfileDialogs.showEditMajor(
+                                      context,
+                                    );
+                                  },
+                                  icon:
+                                  const Icon(
                                     Icons.edit,
                                     color:
-                                    Color(0xff2A9D8F),
+                                    Color(
+                                      0xff2A9D8F,
+                                    ),
                                     size: 20,
-
                                   ),
                                 ),
                               ],
@@ -380,11 +507,16 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                         ),
                       ),
+
                       profileItem(
-                        Icons.school_outlined,
+                        Icons
+                            .school_outlined,
                         'الدورات المسجلة',
                         onTap: () {
-                          widget.onCoursesPressed?.call();
+                          widget
+                              .onCoursesPressed
+                              ?.call();
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -394,18 +526,26 @@ class _ProfilePageState extends State<ProfilePage> {
                           );
                         },
                       ),
-                      const SizedBox(height: 5),
+
+                      const SizedBox(
+                        height: 5,
+                      ),
                       SizedBox(
                         width: 240,
                         height: 52,
-                        child: ElevatedButton(
-                          onPressed: logoutProvider.isLoading
+                        child:
+                        ElevatedButton(
+                          onPressed:
+                          logoutProvider
+                              .isLoading
                               ? null
                               : () async {
                             await logoutProvider
                                 .logout();
 
-                            if (!mounted) return;
+                            if (!mounted) {
+                              return;
+                            }
 
                             if (logoutProvider
                                 .isSuccess) {
@@ -416,58 +556,94 @@ class _ProfilePageState extends State<ProfilePage> {
                                   builder: (_) =>
                                   const SignInPage(),
                                 ),
-                                    (route) => false,
+                                    (
+                                    route,
+                                    ) =>
+                                false,
                               );
-                            } else if (logoutProvider
+
+                              return;
+                            }
+
+                            if (logoutProvider
                                 .errorMessage !=
                                 null) {
-                              MySnackBar.show(
+                              MySnackBar
+                                  .show(
                                 context,
-                                message: logoutProvider
+                                message:
+                                logoutProvider
                                     .errorMessage!,
                               );
                             }
                           },
-                          style: ElevatedButton.styleFrom(
+                          style:
+                          ElevatedButton
+                              .styleFrom(
                             backgroundColor:
-                            const Color(0xff2A9D8F),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
+                            const Color(
+                              0xff2A9D8F,
+                            ),
+                            foregroundColor:
+                            Colors.white,
+                            shape:
+                            RoundedRectangleBorder(
                               borderRadius:
-                              BorderRadius.circular(12),
+                              BorderRadius
+                                  .circular(
+                                12,
+                              ),
                             ),
                           ),
-                          child: logoutProvider.isLoading
+                          child:
+                          logoutProvider
+                              .isLoading
                               ? const SizedBox(
                             width: 22,
-                            height: 22,
+                            height:
+                            22,
                             child:
                             CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
+                              strokeWidth:
+                              2,
+                              color:
+                              Colors.white,
                             ),
                           )
                               : const Row(
                             mainAxisAlignment:
-                            MainAxisAlignment.center,
+                            MainAxisAlignment
+                                .center,
                             children: [
-                              Icon(Icons.logout),
-                              SizedBox(width: 8),
+                              Icon(
+                                Icons
+                                    .logout,
+                              ),
+                              SizedBox(
+                                width:
+                                8,
+                              ),
                               Text(
                                 'تسجيل الخروج',
-                                style: TextStyle(
+                                style:
+                                TextStyle(
                                   fontFamily:
                                   'Tajawal',
                                   fontWeight:
-                                  FontWeight.bold,
-                                  fontSize: 16,
+                                  FontWeight
+                                      .bold,
+                                  fontSize:
+                                  16,
                                 ),
                               ),
                             ],
                           ),
                         ),
                       ),
-                      const SizedBox(height: 95),
+
+                      const SizedBox(
+                        height: 95,
+                      ),
                     ],
                   ),
                 ),

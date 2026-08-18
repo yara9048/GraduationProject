@@ -295,7 +295,7 @@ class _PlaylistSearchPageState
                                     CourseCardTemplate(
                                       playlistId:
                                       playlist.id,
-                                      imagePath:
+                                      imagePath:playlist.thumbnail ??
                                       'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
                                       title:
                                       playlist.name,
@@ -310,7 +310,7 @@ class _PlaylistSearchPageState
                                       ),
                                       description:
                                       playlist
-                                          .description,
+                                          .subjectDetail!.name,
                                     ),
                                   ),
                                 );

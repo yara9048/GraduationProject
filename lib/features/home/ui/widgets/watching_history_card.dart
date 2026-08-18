@@ -16,31 +16,18 @@ class WatchingHistoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final video = history.videoDetail;
     final course = history.courseDetail;
-
-    // =========================================
-    // مدة الفيديو من API بالدقائق
-    // =========================================
     final double durationMinutes =
     _parseDouble(video.duration);
-
-    // نحول مدة الفيديو لثواني
     final double durationSeconds =
         durationMinutes * 60;
-
-    // الوقت الذي شاهده المستخدم بالثواني
     final double watchedSeconds =
         history.progressSeconds;
-
-    // =========================================
-    // Progress الصحيح بين 0 و 1
-    // =========================================
     final double progress =
     durationSeconds > 0
         ? (watchedSeconds / durationSeconds)
         .clamp(0.0, 1.0)
         .toDouble()
         : 0.0;
-
     final int progressPercentage =
     (progress * 100)
         .round()
@@ -78,9 +65,73 @@ class WatchingHistoryCard extends StatelessWidget {
           crossAxisAlignment:
           CrossAxisAlignment.start,
           children: [
-            _buildThumbnail(
-              video.thumbnail,
+        ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: SizedBox(
+          width: 105,
+          height: 105,
+          child: video.thumbnail != null &&
+              video.thumbnail!.isNotEmpty
+              ? Image.network(
+            'http://144.91.84.194:8459${video.thumbnail}',
+            fit: BoxFit.cover,
+
+            loadingBuilder: (
+                context,
+                child,
+                loadingProgress,
+                ) {
+              if (loadingProgress == null) {
+                return child;
+              }
+
+              return Container(
+                color: const Color(0xffE9F5F3),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xff2A9D8F),
+                  ),
+                ),
+              );
+            },
+
+            errorBuilder: (
+                context,
+                error,
+                stackTrace,
+                ) {
+              debugPrint(
+                'IMAGE ERROR: $error',
+              );
+
+              debugPrint(
+                'IMAGE URL: http://144.91.84.194:8459${video.thumbnail}',
+              );
+
+              return Container(
+                color: const Color(0xffE9F5F3),
+                child: const Center(
+                  child: Icon(
+                    Icons.play_circle_outline_rounded,
+                    size: 42,
+                    color: Color(0xff2A9D8F),
+                  ),
+                ),
+              );
+            },
+          )
+              : Container(
+            color: const Color(0xffE9F5F3),
+            child: const Center(
+              child: Icon(
+                Icons.play_circle_outline_rounded,
+                size: 42,
+                color: Color(0xff2A9D8F),
+              ),
             ),
+          ),
+        ),
+      ),
 
             const SizedBox(
               width: 12,
@@ -91,10 +142,6 @@ class WatchingHistoryCard extends StatelessWidget {
                 crossAxisAlignment:
                 CrossAxisAlignment.start,
                 children: [
-                  // =================================
-                  // Title + Status
-                  // =================================
-
                   Row(
                     crossAxisAlignment:
                     CrossAxisAlignment.start,
@@ -181,10 +228,6 @@ class WatchingHistoryCard extends StatelessWidget {
                     height: 5,
                   ),
 
-                  // =================================
-                  // Course
-                  // =================================
-
                   Row(
                     children: [
                       const Icon(
@@ -225,11 +268,6 @@ class WatchingHistoryCard extends StatelessWidget {
                   const SizedBox(
                     height: 11,
                   ),
-
-                  // =================================
-                  // Progress
-                  // =================================
-
                   Row(
                     children: [
                       Expanded(
@@ -285,10 +323,6 @@ class WatchingHistoryCard extends StatelessWidget {
                     height: 10,
                   ),
 
-                  // =================================
-                  // Duration
-                  // =================================
-
                   Directionality(
                     textDirection:
                     TextDirection.rtl,
@@ -341,66 +375,6 @@ class WatchingHistoryCard extends StatelessWidget {
     );
   }
 
-  // =========================================
-  // Thumbnail
-  // =========================================
-
-  Widget _buildThumbnail(
-      dynamic thumbnail,
-      ) {
-    final bool hasThumbnail =
-        thumbnail != null &&
-            thumbnail
-                .toString()
-                .trim()
-                .isNotEmpty;
-
-    return ClipRRect(
-      borderRadius:
-      BorderRadius.circular(14),
-      child: SizedBox(
-        width: 105,
-        height: 105,
-        child: hasThumbnail
-            ? Image.network(
-          thumbnail.toString(),
-          fit: BoxFit.cover,
-          errorBuilder: (
-              context,
-              error,
-              stackTrace,
-              ) {
-            return _thumbnailFallback();
-          },
-        )
-            : _thumbnailFallback(),
-      ),
-    );
-  }
-
-  Widget _thumbnailFallback() {
-    return Container(
-      color:
-      const Color(0xffE9F5F3),
-      child: const Center(
-        child: Icon(
-          Icons
-              .play_circle_outline_rounded,
-          size: 42,
-          color:
-          Color(0xff2A9D8F),
-        ),
-      ),
-    );
-  }
-
-  // =========================================
-  // Duration
-  //
-  // API:
-  // 15.5 = 15.5 دقيقة
-  // 90 = ساعة و30 دقيقة
-  // =========================================
 
   String _formatDuration(
       double totalMinutes,
@@ -430,10 +404,6 @@ class WatchingHistoryCard extends StatelessWidget {
     return '$minutes دقيقة';
   }
 
-  // =========================================
-  // Safe number parser
-  // =========================================
-
   double _parseDouble(
       dynamic value,
       ) {
@@ -451,50 +421,5 @@ class WatchingHistoryCard extends StatelessWidget {
           .trim(),
     ) ??
         0.0;
-  }
-
-  // =========================================
-  // Date
-  // =========================================
-
-  String _formatDate(
-      DateTime date,
-      ) {
-    final localDate =
-    date.toLocal();
-
-    final day =
-    localDate.day
-        .toString()
-        .padLeft(
-      2,
-      '0',
-    );
-
-    final month =
-    localDate.month
-        .toString()
-        .padLeft(
-      2,
-      '0',
-    );
-
-    final hour =
-    localDate.hour
-        .toString()
-        .padLeft(
-      2,
-      '0',
-    );
-
-    final minute =
-    localDate.minute
-        .toString()
-        .padLeft(
-      2,
-      '0',
-    );
-
-    return '$day/$month/${localDate.year} - $hour:$minute';
   }
 }

@@ -19,10 +19,6 @@ class VideoInfoPage extends StatelessWidget {
         backgroundColor: Colors.white,
         body: Stack(
           children: [
-            // ============================================
-            // Background decorations
-            // ============================================
-
             Positioned(
               top: 0,
               left: 0,
@@ -42,10 +38,6 @@ class VideoInfoPage extends StatelessWidget {
             SafeArea(
               child: Column(
                 children: [
-                  // ======================================
-                  // App Header
-                  // ======================================
-
                   SizedBox(
                     height: 70,
                     child: Padding(
@@ -89,10 +81,6 @@ class VideoInfoPage extends StatelessWidget {
                     ),
                   ),
 
-                  // ======================================
-                  // Content
-                  // ======================================
-
                   Expanded(
                     child:
                     SingleChildScrollView(
@@ -107,9 +95,6 @@ class VideoInfoPage extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          // =================================
-                          // Main Header Card
-                          // =================================
 
                           Container(
                             width:
@@ -264,10 +249,6 @@ class VideoInfoPage extends StatelessWidget {
                             height: 18,
                           ),
 
-                          // =================================
-                          // Description
-                          // =================================
-
                           Container(
                             width:
                             double.infinity,
@@ -362,10 +343,6 @@ class VideoInfoPage extends StatelessWidget {
                             height: 18,
                           ),
 
-                          // =================================
-                          // Statistics
-                          // =================================
-
                           GridView.count(
                             crossAxisCount: 2,
                             crossAxisSpacing: 12,
@@ -425,10 +402,6 @@ class VideoInfoPage extends StatelessWidget {
                           const SizedBox(
                             height: 22,
                           ),
-
-                          // =================================
-                          // Status Box
-                          // =================================
 
                           Container(
                             width:
@@ -575,10 +548,6 @@ class VideoInfoPage extends StatelessWidget {
                           const SizedBox(
                             height: 20,
                           ),
-
-                          // =================================
-                          // Back button
-                          // =================================
 
                           SizedBox(
                             width:

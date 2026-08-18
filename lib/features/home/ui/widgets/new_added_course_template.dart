@@ -5,7 +5,7 @@ import '../pages/video_details_page.dart';
 
 class NewAddedCourseTemplate extends StatelessWidget {
   final int id;
-  final String imagePath;
+  final Image imagePath;
   final String title;
   final String duration;
   final Color color;
@@ -47,13 +47,7 @@ class NewAddedCourseTemplate extends StatelessWidget {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(22),
                   ),
-                  child: Image.asset(
-                    imagePath,
-                    height: 100,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    alignment: const Alignment(0,0.3),
-                  ),
+                  child: imagePath
                 ),
 
                 Positioned(
@@ -96,7 +90,7 @@ class NewAddedCourseTemplate extends StatelessWidget {
                   textAlign: TextAlign.right,
                   style: const TextStyle(
                     fontFamily: "Tajawal",
-                    fontSize: 16,
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: Color(0xff264653),
                   ),
@@ -146,7 +140,7 @@ class NewAddedCourseTemplate extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: "Tajawal",
                           fontWeight: FontWeight.bold,
-                          fontSize: 13
+                          fontSize: 10
                         ),
                       ),
                     ),

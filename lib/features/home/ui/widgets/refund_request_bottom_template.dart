@@ -325,10 +325,7 @@ class _RefundRequestBottomTemplateState
 
                           items: subscriptions.map((subscription) {
                             return DropdownMenuItem<int>(
-                              // هذا هو ID الاشتراك الذي سيرسل للـAPI
                               value: subscription.id,
-
-                              // هذا فقط النص الذي سيظهر للمستخدم
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: Text(
@@ -377,6 +374,7 @@ class _RefundRequestBottomTemplateState
                   const SizedBox(height: 8),
 
                   TextFormField(
+                    cursorColor: const Color(0xff2A9D8F),
                     controller: _reasonController,
                     minLines: 3,
                     maxLines: 5,
