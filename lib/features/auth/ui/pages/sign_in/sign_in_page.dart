@@ -19,14 +19,14 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
-  final GlobalKey<FormState> _formKey =
-  GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final TextEditingController emailController =
-  TextEditingController();
+  final TextEditingController emailController = TextEditingController();
 
-  final TextEditingController passwordController =
-  TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  bool _obscurePassword = true;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void dispose() {
@@ -34,9 +34,20 @@ class _SignInPageState extends State<SignInPage> {
     passwordController.dispose();
     super.dispose();
   }
+  @override
+  void initState() {
+    super.initState();
+
+    _focusNode.addListener(() {
+      setState(() {});
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
+    final bool isFocused = _focusNode.hasFocus;
+
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
@@ -52,9 +63,7 @@ class _SignInPageState extends State<SignInPage> {
                 keyboardDismissBehavior:
                 ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: EdgeInsets.only(
-                  bottom:
-                  MediaQuery.of(context).viewInsets.bottom +
-                      20,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 20,
                 ),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
@@ -65,29 +74,29 @@ class _SignInPageState extends State<SignInPage> {
                       key: _formKey,
                       child: Column(
                         children: [
-                          const SizedBox(height: 200),
-
+                          const SizedBox(
+                            height: 200,
+                          ),
                           const Padding(
-                            padding:
-                            EdgeInsets.only(right: 20),
+                            padding: EdgeInsets.only(
+                              right: 20,
+                            ),
                             child: Align(
-                              alignment:
-                              Alignment.centerRight,
+                              alignment: Alignment.centerRight,
                               child: Text(
                                 'البريد الالكتروني',
                                 style: TextStyle(
                                   color: Color(0xff1A2429),
                                   fontSize: 17,
                                   fontFamily: 'Tajawal',
-                                  fontWeight:
-                                  FontWeight.w600,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
                           ),
-
-                          const SizedBox(height: 12),
-
+                          const SizedBox(
+                            height: 12,
+                          ),
                           TextFieldTemplate(
                             controller: emailController,
                             size2: 17,
@@ -109,59 +118,130 @@ class _SignInPageState extends State<SignInPage> {
                               return null;
                             },
                           ),
-
-                          const SizedBox(height: 20),
-
+                          const SizedBox(
+                            height: 20,
+                          ),
                           const Padding(
-                            padding:
-                            EdgeInsets.only(right: 20),
+                            padding: EdgeInsets.only(
+                              right: 20,
+                            ),
                             child: Align(
-                              alignment:
-                              Alignment.centerRight,
+                              alignment: Alignment.centerRight,
                               child: Text(
                                 'كلمة المرور',
                                 style: TextStyle(
                                   color: Color(0xff1A2429),
                                   fontSize: 17,
-                                  fontWeight:
-                                  FontWeight.w600,
+                                  fontWeight: FontWeight.w600,
                                   fontFamily: 'Tajawal',
                                 ),
                               ),
                             ),
                           ),
-
-                          const SizedBox(height: 12),
-
-                          TextFieldTemplate(
-                            controller: passwordController,
-                            size: 16,
-                            size2: 17,
-                            hint: 'كلمة المرور',
-                            icon: Icons.remove_red_eye,
-                            validator: (value) {
-                              if (value == null ||
-                                  value.isEmpty) {
-                                return 'الحقل فارغ';
-                              }
-
-                              if (value.length < 6) {
-                                return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
-                              }
-
-                              return null;
-                            },
+                          const SizedBox(
+                            height: 12,
                           ),
+                          SizedBox(
+                            width: 300,
+                            child: TextFormField(
+                              cursorColor: Color(0xff2A9D8F),
+                              controller: passwordController,
+                              obscureText: _obscurePassword,
+                              textDirection: TextDirection.rtl,
+                              textAlign: TextAlign.right,
+                              style: const TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 16,
+                                color: Color(0xff1A2429),
+                              ),
+                              decoration:InputDecoration(
+                                hintText: 'كلمة المرور',
+                                hintTextDirection: TextDirection.rtl,
+                                hintStyle: const TextStyle(
+                                  color: Color(0xffD1D9D9),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  fontFamily: 'Tajawal',
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 16,
+                                ),
+                                suffixIcon: Icon(
+                                  Icons.lock,
+                                  color: isFocused
+                                      ? const Color(0xff2A9D8F)
+                                      : Colors.black26,
+                                  size:16,
+                                ),
+                                prefixIcon: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscurePassword = !_obscurePassword;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    color: const Color(0xff2A9D8F),
+                                  ),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(22),
+                                  borderSide: const BorderSide(
+                                    color: Colors.black26,
+                                    width: 2,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(22),
+                                  borderSide: const BorderSide(
+                                    color: Colors.black26,
+                                    width: 2,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(22),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xff2A9D8F),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(22),
+                                  borderSide: const BorderSide(
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                focusedErrorBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(22),
+                                  borderSide: const BorderSide(
+                                    color: Colors.red,
+                                    width: 1.5,
+                                  ),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'الحقل فارغ';
+                                }
 
+                                if (value.length < 6) {
+                                  return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+                                }
+
+                                return null;
+                              },
+                            ),
+                          ),
                           Padding(
-                            padding:
-                            const EdgeInsets.only(
+                            padding: const EdgeInsets.only(
                               right: 20,
                               top: 10,
                             ),
                             child: Align(
-                              alignment:
-                              Alignment.centerRight,
+                              alignment: Alignment.centerRight,
                               child: GestureDetector(
                                 onTap: () {
                                   Navigator.push(
@@ -175,20 +255,18 @@ class _SignInPageState extends State<SignInPage> {
                                 child: const Text(
                                   'هل نسيت كلمة المرور؟',
                                   style: TextStyle(
-                                    color:
-                                    Color(0xff2A9D8F),
+                                    color: Color(0xff2A9D8F),
                                     fontSize: 13,
-                                    fontWeight:
-                                    FontWeight.w600,
+                                    fontWeight: FontWeight.w600,
                                     fontFamily: 'Tajawal',
                                   ),
                                 ),
                               ),
                             ),
                           ),
-
-                          const SizedBox(height: 70),
-
+                          const SizedBox(
+                            height: 70,
+                          ),
                           Consumer<SignInProvider>(
                             builder: (
                                 context,
@@ -197,8 +275,7 @@ class _SignInPageState extends State<SignInPage> {
                                 ) {
                               if (authProvider.isLoading) {
                                 return const CircularProgressIndicator(
-                                  color:
-                                  Color(0xff2A9D8F),
+                                  color: Color(0xff2A9D8F),
                                 );
                               }
 
@@ -211,7 +288,8 @@ class _SignInPageState extends State<SignInPage> {
                                     return;
                                   }
 
-                                  final bool success = await authProvider.login(
+                                  final bool success =
+                                  await authProvider.login(
                                     emailController.text.trim(),
                                     passwordController.text,
                                   );
@@ -221,25 +299,29 @@ class _SignInPageState extends State<SignInPage> {
                                   }
 
                                   if (success) {
-                                    Navigator.of(context).pushAndRemoveUntil(
+                                    Navigator.of(context)
+                                        .pushAndRemoveUntil(
                                       MaterialPageRoute(
-                                        builder: (_) => const MainNavigationPage(),
+                                        builder: (_) =>
+                                        const MainNavigationPage(),
                                       ),
                                           (route) => false,
                                     );
-                                  } else if (authProvider.errorMessage != null) {
+                                  } else if (authProvider.errorMessage !=
+                                      null) {
                                     MySnackBar.show(
                                       context,
-                                      message: authProvider.errorMessage!,
+                                      message:
+                                      authProvider.errorMessage!,
                                     );
                                   }
                                 },
                               );
                             },
                           ),
-
-                          const SizedBox(height: 10),
-
+                          const SizedBox(
+                            height: 10,
+                          ),
                           RichText(
                             textAlign: TextAlign.center,
                             text: TextSpan(
@@ -249,8 +331,7 @@ class _SignInPageState extends State<SignInPage> {
                               ),
                               children: [
                                 const TextSpan(
-                                  text:
-                                  'ليس لديك حساب؟ ',
+                                  text: 'ليس لديك حساب؟ ',
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontFamily: 'Tajawal',
@@ -258,18 +339,14 @@ class _SignInPageState extends State<SignInPage> {
                                   ),
                                 ),
                                 TextSpan(
-                                  text:
-                                  'انشاء حساب جديد',
+                                  text: 'انشاء حساب جديد',
                                   style: const TextStyle(
-                                    color:
-                                    Color(0xffE9C46A),
+                                    color: Color(0xffE9C46A),
                                     fontFamily: 'Tajawal',
                                     fontSize: 13,
-                                    fontWeight:
-                                    FontWeight.bold,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  recognizer:
-                                  TapGestureRecognizer()
+                                  recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       Navigator.push(
                                         context,
@@ -283,8 +360,9 @@ class _SignInPageState extends State<SignInPage> {
                               ],
                             ),
                           ),
-
-                          const SizedBox(height: 30),
+                          const SizedBox(
+                            height: 30,
+                          ),
                         ],
                       ),
                     ),

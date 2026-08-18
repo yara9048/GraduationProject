@@ -18,36 +18,50 @@ class SignUpPage extends StatefulWidget {
   });
 
   @override
-  State<SignUpPage> createState() => _SignUpPageState();
+  State<SignUpPage> createState() =>
+      _SignUpPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _SignUpPageState
+    extends State<SignUpPage> {
   String? selectedMajor;
+  final FocusNode _focusNode = FocusNode();
+
   final GlobalKey<FormState> _formKey =
   GlobalKey<FormState>();
 
   final TextEditingController emailController =
   TextEditingController();
 
-  final TextEditingController firstNameController =
+  final TextEditingController
+  firstNameController =
   TextEditingController();
 
-  final TextEditingController secondNameController =
+  final TextEditingController
+  secondNameController =
   TextEditingController();
 
-  final TextEditingController passwordController =
+  final TextEditingController
+  passwordController =
   TextEditingController();
 
-  final TextEditingController passwordVerifyingController =
+  final TextEditingController
+  passwordVerifyingController =
   TextEditingController();
 
   bool isValidationActive = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void initState() {
     super.initState();
+      _focusNode.addListener(() {
+        setState(() {});
+      });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) {
       if (!mounted) return;
 
       context
@@ -68,20 +82,31 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isFocused = _focusNode.hasFocus;
+
     return Scaffold(
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: true,
       body: AuthPagesTemplate(
-        text1: '!أهلاً بك ',
+        text1: 'أهلاً بك! ',
         size1: 13,
         size2: 13,
         text2:
-        '.قم بإنشاء حسابك الآن لتبدأ رحلتك التعليمية معنا',
+        'قم بإنشاء حسابك الآن لتبدأ رحلتك التعليمية معنا',
         child: SafeArea(
           child: SingleChildScrollView(
             keyboardDismissBehavior:
-            ScrollViewKeyboardDismissBehavior.onDrag,
+            ScrollViewKeyboardDismissBehavior
+                .onDrag,
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context)
+                  .viewInsets
+                  .bottom +
+                  30,
+            ),
             child: Padding(
-              padding: const EdgeInsets.only(
+              padding:
+              const EdgeInsets.only(
                 right: 20,
                 left: 0,
                 top: 140,
@@ -91,199 +116,303 @@ class _SignUpPageState extends State<SignUpPage> {
                 key: _formKey,
                 child: Column(
                   children: [
-                  Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          const Text(
-                            'الكنية',
-                            style: TextStyle(
-                              color: Color(0xff1A2429),
-                              fontSize: 13,
-                              fontFamily: 'Tajawal',
-                              fontWeight: FontWeight.w600,
-                            ),
+                    Row(
+                      mainAxisAlignment:
+                      MainAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment:
+                            CrossAxisAlignment
+                                .end,
+                            children: [
+                              const Text(
+                                'الكنية',
+                                style:
+                                TextStyle(
+                                  color: Color(
+                                    0xff1A2429,
+                                  ),
+                                  fontSize:
+                                  13,
+                                  fontFamily:
+                                  'Tajawal',
+                                  fontWeight:
+                                  FontWeight
+                                      .w600,
+                                ),
+                              ),
+                              SizedBox(
+                                height:
+                                isValidationActive
+                                    ? 0
+                                    : 5,
+                              ),
+                              TextFieldTemplate(
+                                controller:
+                                secondNameController,
+                                size2: 13,
+                                size: 13,
+                                hint:
+                                'كنيتك',
+                                icon: Icons
+                                    .person_outline,
+                                validator:
+                                    (value) {
+                                  if (!isValidationActive) {
+                                    return null;
+                                  }
+
+                                  if (value ==
+                                      null ||
+                                      value
+                                          .trim()
+                                          .isEmpty) {
+                                    return 'الحقل فارغ';
+                                  }
+
+                                  return null;
+                                },
+                              ),
+                            ],
                           ),
-                          SizedBox(
-                            height: isValidationActive ? 0 : 5,
-                          ),
-                          TextFieldTemplate(
-                            controller: secondNameController,
-                            size2: 13,
-                            size: 13,
-                            hint: 'كنيتك',
-                            icon: Icons.person_outline,
-                            validator: (value) {
-                              if (!isValidationActive) {
-                                return null;
-                              }
-
-                              if (value == null ||
-                                  value.trim().isEmpty) {
-                                return 'الحقل فارغ';
-                              }
-
-                              return null;
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          const Text(
-                            'الاسم',
-                            style: TextStyle(
-                              color: Color(0xff1A2429),
-                              fontSize: 13,
-                              fontFamily: 'Tajawal',
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          SizedBox(
-                            height: isValidationActive ? 0 : 5,
-                          ),
-                          TextFieldTemplate(
-                            controller: firstNameController,
-                            size2: 13,
-                            size: 13,
-                            hint: 'اسمك',
-                            icon: Icons.person,
-                            validator: (value) {
-                              if (!isValidationActive) {
-                                return null;
-                              }
-
-                              if (value == null ||
-                                  value.trim().isEmpty) {
-                                return 'الحقل فارغ';
-                              }
-
-                              return null;
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                    SizedBox(
-                      height: isValidationActive ? 10 : 15,
-                    ),
-                   Padding(
-                     padding: const EdgeInsets.only(left: 250.0),
-                     child: Text(
-                            'البريد الالكتروني',
-                            style: TextStyle(
-                              color: Color(0xff1A2429),
-                              fontSize: 13,
-                              fontFamily: 'Tajawal',
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                   ),
-                        const SizedBox(height: 5),
-                        TextFieldTemplate(
-                          controller: emailController,
-                          size2: 17,
-                          size: 16,
-                          hint: 'بريدك الالكتروني',
-                          icon: Icons.email_outlined,
-                          validator: (value) {
-                            if (!isValidationActive) {
-                              return null;
-                            }
-
-                            if (value == null || value.trim().isEmpty) {
-                              return 'الحقل فارغ';
-                            }
-
-                            final RegExp emailRegex = RegExp(
-                              r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
-                            );
-
-                            if (!emailRegex.hasMatch(value.trim())) {
-                              return 'ادخل بريد الكتروني صالح';
-                            }
-
-                            return null;
-                          },
                         ),
-                    SizedBox(
-                      height: isValidationActive ? 10 : 15,
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment:
+                            CrossAxisAlignment
+                                .end,
+                            children: [
+                              const Text(
+                                'الاسم',
+                                style:
+                                TextStyle(
+                                  color: Color(
+                                    0xff1A2429,
+                                  ),
+                                  fontSize:
+                                  13,
+                                  fontFamily:
+                                  'Tajawal',
+                                  fontWeight:
+                                  FontWeight
+                                      .w600,
+                                ),
+                              ),
+                              SizedBox(
+                                height:
+                                isValidationActive
+                                    ? 0
+                                    : 5,
+                              ),
+                              TextFieldTemplate(
+                                controller:
+                                firstNameController,
+                                size2: 13,
+                                size: 13,
+                                hint:
+                                'اسمك',
+                                icon: Icons
+                                    .person,
+                                validator:
+                                    (value) {
+                                  if (!isValidationActive) {
+                                    return null;
+                                  }
+
+                                  if (value ==
+                                      null ||
+                                      value
+                                          .trim()
+                                          .isEmpty) {
+                                    return 'الحقل فارغ';
+                                  }
+
+                                  return null;
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 275.0),
+                    SizedBox(
+                      height:
+                      isValidationActive
+                          ? 10
+                          : 15,
+                    ),
+                    const Padding(
+                      padding:
+                      EdgeInsets.only(
+                        left: 250,
+                      ),
+                      child: Text(
+                        'البريد الالكتروني',
+                        style: TextStyle(
+                          color:
+                          Color(0xff1A2429),
+                          fontSize: 13,
+                          fontFamily:
+                          'Tajawal',
+                          fontWeight:
+                          FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    TextFieldTemplate(
+                      controller:
+                      emailController,
+                      size2: 17,
+                      size: 16,
+                      hint:
+                      'بريدك الالكتروني',
+                      icon:
+                      Icons.email_outlined,
+                      validator: (value) {
+                        if (!isValidationActive) {
+                          return null;
+                        }
+
+                        if (value == null ||
+                            value
+                                .trim()
+                                .isEmpty) {
+                          return 'الحقل فارغ';
+                        }
+
+                        final RegExp
+                        emailRegex =
+                        RegExp(
+                          r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                        );
+
+                        if (!emailRegex
+                            .hasMatch(
+                          value.trim(),
+                        )) {
+                          return 'ادخل بريد الكتروني صالح';
+                        }
+
+                        return null;
+                      },
+                    ),
+                    SizedBox(
+                      height:
+                      isValidationActive
+                          ? 10
+                          : 15,
+                    ),
+                    const Padding(
+                      padding:
+                      EdgeInsets.only(
+                        left: 275,
+                      ),
                       child: Text(
                         'الاختصاص',
                         style: TextStyle(
-                          color: Color(0xff1A2429),
+                          color:
+                          Color(0xff1A2429),
                           fontSize: 13,
-                          fontFamily: 'Tajawal',
-                          fontWeight: FontWeight.w600
+                          fontFamily:
+                          'Tajawal',
+                          fontWeight:
+                          FontWeight.w600,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 5),
-                    Consumer<DisplaySubjectsProvider>(
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Consumer<
+                        DisplaySubjectsProvider>(
                       builder: (
                           context,
                           subjectsProvider,
                           child,
                           ) {
                         final subjects =
-                            subjectsProvider.subjects;
+                            subjectsProvider
+                                .subjects;
 
-                        if (subjectsProvider.isLoading) {
+                        if (subjectsProvider
+                            .isLoading) {
                           return const SizedBox(
                             width: 280,
                             height: 60,
                             child: Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3,
-                                color: Color(0xff2A9D8F),
+                              child:
+                              CircularProgressIndicator(
+                                strokeWidth:
+                                3,
+                                color: Color(
+                                  0xff2A9D8F,
+                                ),
                               ),
                             ),
                           );
                         }
 
-                        if (subjectsProvider.errorMessage != null) {
+                        if (subjectsProvider
+                            .errorMessage !=
+                            null) {
                           return SizedBox(
                             width: 280,
                             child: Column(
                               children: [
                                 Text(
-                                  subjectsProvider.errorMessage ??
+                                  subjectsProvider
+                                      .errorMessage ??
                                       'تعذر تحميل الاختصاصات',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Colors.red,
-                                    fontFamily: 'Tajawal',
-                                    fontSize: 13,
+                                  textAlign:
+                                  TextAlign
+                                      .center,
+                                  style:
+                                  const TextStyle(
+                                    color: Colors
+                                        .red,
+                                    fontFamily:
+                                    'Tajawal',
+                                    fontSize:
+                                    13,
                                   ),
                                 ),
-                                const SizedBox(height: 5),
-                                TextButton.icon(
-                                  onPressed: () {
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                TextButton
+                                    .icon(
+                                  onPressed:
+                                      () {
                                     context
-                                        .read<DisplaySubjectsProvider>()
+                                        .read<
+                                        DisplaySubjectsProvider>()
                                         .getSubjects();
                                   },
-                                  icon: const Icon(
-                                    Icons.refresh_rounded,
-                                    color: Color(0xff2A9D8F),
+                                  icon:
+                                  const Icon(
+                                    Icons
+                                        .refresh_rounded,
+                                    color: Color(
+                                      0xff2A9D8F,
+                                    ),
                                   ),
-                                  label: const Text(
+                                  label:
+                                  const Text(
                                     'إعادة المحاولة',
-                                    style: TextStyle(
-                                      color: Color(0xff2A9D8F),
-                                      fontFamily: 'Tajawal',
+                                    style:
+                                    TextStyle(
+                                      color: Color(
+                                        0xff2A9D8F,
+                                      ),
+                                      fontFamily:
+                                      'Tajawal',
                                     ),
                                   ),
                                 ),
@@ -292,107 +421,191 @@ class _SignUpPageState extends State<SignUpPage> {
                           );
                         }
 
+                        final uniqueCategories = {
+                          for (final subject
+                          in subjects)
+                            subject
+                                .categoryDetail
+                                .slug
+                                .trim(): subject
+                                .categoryDetail,
+                        }.values.toList();
+
                         return SizedBox(
                           width: 280,
-                          child: DropdownButtonFormField<String>(
-                            value: selectedMajor,
-                            dropdownColor: Colors.white,
+                          child:
+                          DropdownButtonFormField<
+                              String>(
+                            value:
+                            selectedMajor,
+                            dropdownColor:
+                            Colors.white,
                             alignment:
-                            AlignmentDirectional.centerEnd,
+                            AlignmentDirectional
+                                .centerEnd,
                             isExpanded: true,
-                            decoration: InputDecoration(
-                              hintText: 'تخصصك الأكاديمي',
-                              hintStyle: const TextStyle(
-                                color: Color(0xffD1D9D9),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                                fontFamily: 'Tajawal',
+                            decoration:
+                            InputDecoration(
+                              hintText:
+                              'تخصصك الأكاديمي',
+                              hintStyle:
+                              const TextStyle(
+                                color: Color(
+                                  0xffD1D9D9,
+                                ),
+                                fontWeight:
+                                FontWeight
+                                    .bold,
+                                fontSize:
+                                13,
+                                fontFamily:
+                                'Tajawal',
                               ),
                               contentPadding:
-                              const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 16,
+                              const EdgeInsets
+                                  .symmetric(
+                                horizontal:
+                                18,
+                                vertical:
+                                16,
                               ),
-                              border: OutlineInputBorder(
+                              border:
+                              OutlineInputBorder(
                                 borderRadius:
-                                BorderRadius.circular(22),
-                                borderSide: const BorderSide(
-                                  color: Colors.black26,
+                                BorderRadius
+                                    .circular(
+                                  22,
+                                ),
+                                borderSide:
+                                const BorderSide(
+                                  color: Colors
+                                      .black26,
                                   width: 2,
                                 ),
                               ),
-                              enabledBorder: OutlineInputBorder(
+                              enabledBorder:
+                              OutlineInputBorder(
                                 borderRadius:
-                                BorderRadius.circular(22),
-                                borderSide: const BorderSide(
-                                  color: Colors.black26,
+                                BorderRadius
+                                    .circular(
+                                  22,
+                                ),
+                                borderSide:
+                                const BorderSide(
+                                  color: Colors
+                                      .black26,
                                   width: 2,
                                 ),
                               ),
-                              focusedBorder: OutlineInputBorder(
+                              focusedBorder:
+                              OutlineInputBorder(
                                 borderRadius:
-                                BorderRadius.circular(22),
-                                borderSide: const BorderSide(
-                                  color: Color(0xff2A9D8F),
-                                  width: 1.5,
+                                BorderRadius
+                                    .circular(
+                                  22,
+                                ),
+                                borderSide:
+                                const BorderSide(
+                                  color: Color(
+                                    0xff2A9D8F,
+                                  ),
+                                  width:
+                                  1.5,
                                 ),
                               ),
-                              errorBorder: OutlineInputBorder(
+                              errorBorder:
+                              OutlineInputBorder(
                                 borderRadius:
-                                BorderRadius.circular(22),
-                                borderSide: const BorderSide(
-                                  color: Colors.red,
+                                BorderRadius
+                                    .circular(
+                                  22,
+                                ),
+                                borderSide:
+                                const BorderSide(
+                                  color:
+                                  Colors.red,
                                 ),
                               ),
                               focusedErrorBorder:
                               OutlineInputBorder(
                                 borderRadius:
-                                BorderRadius.circular(22),
-                                borderSide: const BorderSide(
-                                  color: Colors.red,
-                                  width: 1.5,
+                                BorderRadius
+                                    .circular(
+                                  22,
+                                ),
+                                borderSide:
+                                const BorderSide(
+                                  color:
+                                  Colors.red,
+                                  width:
+                                  1.5,
                                 ),
                               ),
                             ),
-                            icon: const Icon(
-                              Icons.keyboard_arrow_down_rounded,
+                            icon:
+                            const Icon(
+                              Icons
+                                  .keyboard_arrow_down_rounded,
                               size: 22,
-                              color: Colors.black26,
+                              color: Colors
+                                  .black26,
                             ),
-                            style: const TextStyle(
-                              color: Color(0xff1A2429),
+                            style:
+                            const TextStyle(
+                              color: Color(
+                                0xff1A2429,
+                              ),
                               fontSize: 15,
-                              fontFamily: 'Tajawal',
+                              fontFamily:
+                              'Tajawal',
                             ),
-                            items: subjects.map((subject) {
-                              return DropdownMenuItem<String>(
-                                value: subject.categoryDetail.slug,
-                                child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Text(
-                                    subject.categoryDetail.name,
-                                    textDirection: TextDirection.ltr,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: 'Tajawal',
+                            items:
+                            uniqueCategories
+                                .map(
+                                  (category) {
+                                return DropdownMenuItem<
+                                    String>(
+                                  value: category
+                                      .slug
+                                      .trim(),
+                                  child: Align(
+                                    alignment:
+                                    Alignment
+                                        .centerRight,
+                                    child:
+                                    Text(
+                                      category
+                                          .name,
+                                      overflow:
+                                      TextOverflow
+                                          .ellipsis,
+                                      style:
+                                      const TextStyle(
+                                        fontFamily:
+                                        'Tajawal',
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            }).toList(),
-
-                            onChanged: (value) {
+                                );
+                              },
+                            ).toList(),
+                            onChanged:
+                                (value) {
                               setState(() {
-                                selectedMajor = value;
+                                selectedMajor =
+                                    value;
                               });
                             },
-                            validator: (value) {
+                            validator:
+                                (value) {
                               if (!isValidationActive) {
                                 return null;
                               }
 
-                              if (value == null ||
-                                  value.isEmpty) {
+                              if (value ==
+                                  null ||
+                                  value
+                                      .isEmpty) {
                                 return 'يرجى اختيار الاختصاص';
                               }
 
@@ -403,198 +616,448 @@ class _SignUpPageState extends State<SignUpPage> {
                       },
                     ),
                     SizedBox(
-                      height: isValidationActive ? 10 : 15,
+                      height:
+                      isValidationActive
+                          ? 10
+                          : 15,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 239),
-                      child: const Text(
+                    const Padding(
+                      padding:
+                      EdgeInsets.only(
+                        left: 239,
+                      ),
+                      child: Text(
                         'الصورة الشخصية',
-                        textAlign: TextAlign.right,
+                        textAlign:
+                        TextAlign.right,
                         style: TextStyle(
-                          color: Color(0xff1A2429),
+                          color:
+                          Color(0xff1A2429),
                           fontSize: 13,
-                          fontFamily: 'Tajawal',
-                          fontWeight: FontWeight.w600,
+                          fontFamily:
+                          'Tajawal',
+                          fontWeight:
+                          FontWeight.w600,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(
+                      height: 5,
+                    ),
                     const SignUpImagePicker(),
                     SizedBox(
-                      height: isValidationActive ? 10 : 15,
+                      height:
+                      isValidationActive
+                          ? 10
+                          : 15,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 275.0),
+                    const Padding(
+                      padding:
+                      EdgeInsets.only(
+                        left: 275,
+                      ),
                       child: Text(
-                            'كلمة المرور',
-                            style: TextStyle(
-                              color: Color(0xff1A2429),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Tajawal',
-                            ),
-                          ),
-                    ),
-                        const SizedBox(height: 5),
-                        TextFieldTemplate(
-                          controller: passwordController,
-                          size2: 17,
-                          size: 16,
-                          hint: 'كلمة المرور',
-                          icon: Icons.remove_red_eye,
-                          validator: (value) {
-                            if (!isValidationActive) {
-                              return null;
-                            }
-
-                            if (value == null || value.isEmpty) {
-                              return 'الحقل فارغ';
-                            }
-
-                            if (value.length < 6) {
-                              return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
-                            }
-
-                            return null;
-                          },
-                    ),
-                    SizedBox(
-                      height: isValidationActive ? 10 : 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 240.0),
-                      child: Text(
-                            'تأكيد كلمة المرور',
-                            style: TextStyle(
-                              color: Color(0xff1A2429),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Tajawal',
-                            ),
-                          ),
-                    ),
-                        const SizedBox(height: 5),
-                        TextFieldTemplate(
-                          controller: passwordVerifyingController,
-                          size2: 17,
-                          size: 16,
-                          hint: 'تأكيد كلمة المرور',
-                          icon: Icons.remove_red_eye,
-                          validator: (value) {
-                            if (!isValidationActive) {
-                              return null;
-                            }
-
-                            if (value == null || value.isEmpty) {
-                              return 'الحقل فارغ';
-                            }
-
-                            if (value != passwordController.text) {
-                              return 'كلمات المرور غير متطابقة';
-                            }
-
-                            return null;
-                          },
+                        'كلمة المرور',
+                        style: TextStyle(
+                          color:
+                          Color(0xff1A2429),
+                          fontSize: 13,
+                          fontWeight:
+                          FontWeight.w600,
+                          fontFamily:
+                          'Tajawal',
                         ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
                     SizedBox(
-                      height: isValidationActive ? 10 : 20,
+                      width: 280,
+                      child: TextFormField(
+                        cursorColor:  Color(0xff2A9D8F),
+                        controller:
+                        passwordController,
+                        obscureText:
+                        _obscurePassword,
+                        style:
+                        const TextStyle(
+                          color: Color(
+                            0xff1A2429,
+                          ),
+                          fontSize: 16,
+                          fontFamily:
+                          'Tajawal',
+                        ),
+                        decoration:
+                        InputDecoration(
+                          hintText: 'كلمة المرور',
+                          hintTextDirection: TextDirection.rtl,
+                          hintStyle: const TextStyle(
+                            color: Color(0xffD1D9D9),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            fontFamily: 'Tajawal',
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 16,
+                          ),
+                          suffixIcon: Icon(
+                            Icons.lock,
+                            color: isFocused
+                                ? const Color(0xff2A9D8F)
+                                : Colors.black26,
+                            size:16,
+                          ),
+                          prefixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: const Color(0xff2A9D8F),
+                            ),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(22),
+                            borderSide: const BorderSide(
+                              color: Colors.black26,
+                              width: 2,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(22),
+                            borderSide: const BorderSide(
+                              color: Colors.black26,
+                              width: 2,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(22),
+                            borderSide: const BorderSide(
+                              color: Color(0xff2A9D8F),
+                              width: 1.5,
+                            ),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(22),
+                            borderSide: const BorderSide(
+                              color: Colors.red,
+                            ),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(22),
+                            borderSide: const BorderSide(
+                              color: Colors.red,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height:
+                      isValidationActive
+                          ? 10
+                          : 15,
+                    ),
+                    const Padding(
+                      padding:
+                      EdgeInsets.only(
+                        left: 240,
+                      ),
+                      child: Text(
+                        'تأكيد كلمة المرور',
+                        style: TextStyle(
+                          color:
+                          Color(0xff1A2429),
+                          fontSize: 13,
+                          fontWeight:
+                          FontWeight.w600,
+                          fontFamily:
+                          'Tajawal',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    SizedBox(
+                      width: 280,
+                      child: TextFormField(
+                        cursorColor:  Color(0xff2A9D8F),
+                        controller:
+                        passwordVerifyingController,
+                        obscureText:
+                        _obscureConfirmPassword,
+                        style:
+                        const TextStyle(
+                          color: Color(
+                            0xff1A2429,
+                          ),
+                          fontSize: 16,
+                          fontFamily:
+                          'Tajawal',
+                        ),
+                        decoration:
+                        InputDecoration(
+                          hintText: 'تأكيد كلمة المرور',
+                          hintTextDirection: TextDirection.rtl,
+                          hintStyle: const TextStyle(
+                            color: Color(0xffD1D9D9),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            fontFamily: 'Tajawal',
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 16,
+                          ),
+                          suffixIcon: Icon(
+                            Icons.lock,
+                            color: isFocused
+                                ? const Color(0xff2A9D8F)
+                                : Colors.black26,
+                            size:16,
+                          ),
+                          prefixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _obscureConfirmPassword = !_obscureConfirmPassword;
+                              });
+                            },
+                            icon: Icon(
+                              _obscureConfirmPassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: const Color(0xff2A9D8F),
+                            ),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(22),
+                            borderSide: const BorderSide(
+                              color: Colors.black26,
+                              width: 2,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(22),
+                            borderSide: const BorderSide(
+                              color: Colors.black26,
+                              width: 2,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(22),
+                            borderSide: const BorderSide(
+                              color: Color(0xff2A9D8F),
+                              width: 1.5,
+                            ),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(22),
+                            borderSide: const BorderSide(
+                              color: Colors.red,
+                            ),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(22),
+                            borderSide: const BorderSide(
+                              color: Colors.red,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (!isValidationActive) {
+                            return null;
+                          }
+
+                          if (value == null ||
+                              value.isEmpty) {
+                            return 'الحقل فارغ';
+                          }
+
+                          if (value !=
+                              passwordController
+                                  .text) {
+                            return 'كلمات المرور غير متطابقة';
+                          }
+
+                          return null;
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height:
+                      isValidationActive
+                          ? 10
+                          : 20,
                     ),
                     Consumer<SignUpProvider>(
-                      builder: (context, authProvider, child) {
-                        if (authProvider.isLoading) {
+                      builder: (
+                          context,
+                          authProvider,
+                          child,
+                          ) {
+                        if (authProvider
+                            .isLoading) {
                           return const CircularProgressIndicator(
-                            color: Color(0xff2A9D8F),
+                            color: Color(
+                              0xff2A9D8F,
+                            ),
                           );
                         }
 
                         return ButtonTemplate(
-                          text: 'انشاء حساب',
-                          onPressed: () async {
-                            FocusScope.of(context).unfocus();
+                          text:
+                          'انشاء حساب',
+                          onPressed:
+                              () async {
+                            FocusScope.of(
+                              context,
+                            ).unfocus();
 
                             setState(() {
-                              isValidationActive = true;
+                              isValidationActive =
+                              true;
                             });
 
-                            final bool isFormValid =
-                                _formKey.currentState?.validate() ?? false;
+                            final bool
+                            isFormValid =
+                                _formKey
+                                    .currentState
+                                    ?.validate() ??
+                                    false;
 
                             if (!isFormValid) {
                               return;
                             }
 
-                            if (authProvider.selectedImage == null) {
+                            if (authProvider
+                                .selectedImage ==
+                                null) {
                               MySnackBar.show(
                                 context,
-                                message: 'يرجى اختيار صورة شخصية',
+                                message:
+                                'يرجى اختيار صورة شخصية',
                               );
                               return;
                             }
 
-                            await authProvider.register(
-                              email: emailController.text,
-                              password1: passwordController.text,
+                            await authProvider
+                                .register(
+                              email:
+                              emailController
+                                  .text,
+                              password1:
+                              passwordController
+                                  .text,
                               password2:
-                              passwordVerifyingController.text,
-                              firstName: firstNameController.text,
-                              lastName: secondNameController.text,
-                              major: selectedMajor!,
+                              passwordVerifyingController
+                                  .text,
+                              firstName:
+                              firstNameController
+                                  .text,
+                              lastName:
+                              secondNameController
+                                  .text,
+                              major:
+                              selectedMajor!,
                             );
 
                             if (!mounted) {
                               return;
                             }
 
-                            if (authProvider.isSuccess) {
-                              Navigator.pushReplacement(
+                            if (authProvider
+                                .isSuccess) {
+                              Navigator
+                                  .pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => VerifyEmailPage(
-                                    email: emailController.text.trim(),
-                                  ),
+                                  builder: (_) =>
+                                      VerifyEmailPage(
+                                        email:
+                                        emailController
+                                            .text
+                                            .trim(),
+                                      ),
                                 ),
                               );
-                            } else if (authProvider.errorMessage != null) {
-                              MySnackBar.show(
+                            } else if (authProvider
+                                .errorMessage !=
+                                null) {
+                              MySnackBar
+                                  .show(
                                 context,
-                                message: authProvider.errorMessage!,
+                                message:
+                                authProvider
+                                    .errorMessage!,
                               );
                             }
                           },
                         );
                       },
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(
+                      height: 10,
+                    ),
                     RichText(
-                      textAlign: TextAlign.center,
+                      textAlign:
+                      TextAlign.center,
                       text: TextSpan(
-                        style: const TextStyle(
+                        style:
+                        const TextStyle(
                           fontSize: 13,
-                          fontFamily: 'Tajawal',
+                          fontFamily:
+                          'Tajawal',
                         ),
                         children: [
                           const TextSpan(
-                            text: 'لديك حساب مسبقاً؟ ',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'Tajawal',
-                              fontSize: 13,
+                            text:
+                            'لديك حساب مسبقاً؟ ',
+                            style:
+                            TextStyle(
+                              color:
+                              Colors.black,
+                              fontFamily:
+                              'Tajawal',
+                              fontSize:
+                              13,
                             ),
                           ),
                           TextSpan(
-                            text: 'تسجيل الدخول',
-                            style: const TextStyle(
-                              color: Color(0xffE9C46A),
-                              fontFamily: 'Tajawal',
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
+                            text:
+                            'تسجيل الدخول',
+                            style:
+                            const TextStyle(
+                              color: Color(
+                                0xffE9C46A,
+                              ),
+                              fontFamily:
+                              'Tajawal',
+                              fontSize:
+                              13,
+                              fontWeight:
+                              FontWeight
+                                  .bold,
                             ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                Navigator.push(
+                            recognizer:
+                            TapGestureRecognizer()
+                              ..onTap =
+                                  () {
+                                Navigator
+                                    .push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => const SignInPage(),
+                                    builder: (_) =>
+                                    const SignInPage(),
                                   ),
                                 );
                               },
@@ -602,7 +1065,9 @@ class _SignUpPageState extends State<SignUpPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(
+                      height: 30,
+                    ),
                   ],
                 ),
               ),
@@ -612,8 +1077,4 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
-
-
-
-
 }

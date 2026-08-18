@@ -77,7 +77,7 @@ class _TextFieldTemplateState extends State<TextFieldTemplate> {
           textDirection: TextDirection.rtl,
 
           textAlign: TextAlign.right,
-          
+
 
           style: const TextStyle(
             color: Colors.black,
@@ -110,7 +110,7 @@ class _TextFieldTemplateState extends State<TextFieldTemplate> {
             hintStyle:const TextStyle(
               color:Color(0xffD1D9D9),
               fontWeight:FontWeight.bold,
-              fontSize:13,
+              fontSize:12,
               fontFamily:"Tajawal",
             ),
 

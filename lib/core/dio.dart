@@ -18,8 +18,6 @@ class DioHelper {
       ),
     );
 
-    // Dio منفصل للـ refresh
-    // مهم حتى ما ندخل بدائرة infinite loop
     _refreshDio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
@@ -113,14 +111,11 @@ class DioHelper {
               );
             }
 
-            // حفظ access الجديد
             await prefs.setString(
               'auth_token',
               newAccessToken.trim(),
             );
 
-            // بعض السيرفرات تعمل rotation للـ refresh
-            // إذا رجع refresh جديد نحفظه أيضًا
             final String? newRefreshToken =
             data['refresh']?.toString();
 
@@ -134,11 +129,9 @@ class DioHelper {
 
             print('Access token refreshed successfully');
 
-            // وضع الـ access الجديد على الطلب القديم
             requestOptions.headers['Authorization'] =
             'Bearer ${newAccessToken.trim()}';
 
-            // إعادة تنفيذ نفس الطلب الذي فشل
             final Response response =
             await _dio.fetch(requestOptions);
 
