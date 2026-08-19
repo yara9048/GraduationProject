@@ -50,6 +50,7 @@ import 'features/auth/providers/log_out_provider.dart';
 import 'features/auth/providers/send_otp_provider.dart';
 import 'features/auth/providers/sign_in_provider.dart';
 import 'features/auth/ui/pages/sign_up/splash_page.dart';
+import 'features/home/providers/functions_for_playlist_details_provider.dart';
 import 'features/home/providers/mcq_quiz_provider.dart';
 import 'features/home/providers/pdf_viewer_provider.dart';
 import 'features/home/providers/refund_request_provider.dart';
@@ -339,6 +340,9 @@ class MyApp extends StatelessWidget {
 
         ChangeNotifierProvider(
           create: (_) => SubscriptionsProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => FunctionsForPlaylistDetailsProvider(),
         ),
       ],
       child: const AppRoot(),

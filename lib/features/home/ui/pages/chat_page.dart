@@ -22,12 +22,10 @@ class ChatPage extends StatefulWidget {
   });
 
   @override
-  State<ChatPage> createState() =>
-      _ChatPageState();
+  State<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState
-    extends State<ChatPage> {
+class _ChatPageState extends State<ChatPage> {
   final TextEditingController _controller =
   TextEditingController();
 
@@ -38,20 +36,16 @@ class _ChatPageState
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance
-        .addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
           (_) {
         if (!mounted) {
           return;
         }
 
-        context
-            .read<ChatLogicProvider>()
-            .initialize(
+        context.read<ChatLogicProvider>().initialize(
           videoId: widget.id,
           chatId: widget.chatId,
-          initialChat:
-          widget.initialChat,
+          initialChat: widget.initialChat,
         );
 
         _scrollToBottom();
@@ -59,20 +53,15 @@ class _ChatPageState
     );
   }
 
-  // UI-specific because it depends on ScrollController.
   void _scrollToBottom() {
-    WidgetsBinding.instance
-        .addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
           (_) {
-        if (!_scrollController
-            .hasClients) {
+        if (!_scrollController.hasClients) {
           return;
         }
 
         _scrollController.animateTo(
-          _scrollController
-              .position
-              .maxScrollExtent,
+          _scrollController.position.maxScrollExtent,
           duration: const Duration(
             milliseconds: 300,
           ),
@@ -82,11 +71,8 @@ class _ChatPageState
     );
   }
 
-  // Business logic is inside ChatLogicProvider.
-  // This method only handles TextField, focus and scrolling.
   Future<void> _sendMessage() async {
-    final text =
-    _controller.text.trim();
+    final text = _controller.text.trim();
 
     if (text.isEmpty) {
       return;
@@ -101,8 +87,7 @@ class _ChatPageState
 
     _controller.clear();
 
-    FocusScope.of(context)
-        .unfocus();
+    FocusScope.of(context).unfocus();
 
     await provider.sendMessage(
       text: text,
@@ -115,7 +100,6 @@ class _ChatPageState
     _scrollToBottom();
   }
 
-  // Navigation belongs to the UI layer.
   void _openVideoSegment({
     required double startSeconds,
     required double endSeconds,
@@ -127,17 +111,13 @@ class _ChatPageState
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            VideoDetailsPage(
-              videoId: widget.id,
-              videoName: widget.name,
-              playlistId:
-              widget.playlistId,
-              startAtSeconds:
-              startSeconds,
-              endAtSeconds:
-              endSeconds,
-            ),
+        builder: (_) => VideoDetailsPage(
+          videoId: widget.id,
+          videoName: widget.name,
+          playlistId: widget.playlistId,
+          startAtSeconds: startSeconds,
+          endAtSeconds: endSeconds,
+        ),
       ),
     );
   }
@@ -155,44 +135,31 @@ class _ChatPageState
   }
 
   @override
-  Widget build(
-      BuildContext context,
-      ) {
+  Widget build(BuildContext context) {
     return Directionality(
-      textDirection:
-      TextDirection.rtl,
+      textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor:
-        const Color(
+        backgroundColor: const Color(
           0xffF6F8F8,
         ),
-
         appBar: AppBar(
-          automaticallyImplyLeading:
-          false,
+          automaticallyImplyLeading: false,
           toolbarHeight: 78,
           elevation: 0,
           scrolledUnderElevation: 0,
-          surfaceTintColor:
-          Colors.transparent,
-          shadowColor:
-          Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          shadowColor: Colors.transparent,
           centerTitle: true,
-          backgroundColor:
-          Colors.white,
-
+          backgroundColor: Colors.white,
           title: const Column(
-            mainAxisSize:
-            MainAxisSize.min,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 'المساعد الذكي',
                 style: TextStyle(
-                  fontFamily:
-                  'Tajawal',
+                  fontFamily: 'Tajawal',
                   fontSize: 20,
-                  fontWeight:
-                  FontWeight.bold,
+                  fontWeight: FontWeight.bold,
                   color: Color(
                     0xff181C1F,
                   ),
@@ -202,8 +169,7 @@ class _ChatPageState
               Text(
                 'جاهز لمساعدتك',
                 style: TextStyle(
-                  fontFamily:
-                  'Tajawal',
+                  fontFamily: 'Tajawal',
                   fontSize: 12,
                   color: Color(
                     0xff777777,
@@ -212,30 +178,23 @@ class _ChatPageState
               ),
             ],
           ),
-
           leading: Padding(
-            padding:
-            const EdgeInsets.all(
+            padding: const EdgeInsets.all(
               12,
             ),
             child: Container(
-              decoration:
-              const BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Color(
                   0xff2A9D8F,
                 ),
-                shape:
-                BoxShape.circle,
+                shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons
-                    .smart_toy_rounded,
-                color:
-                Colors.white,
+                Icons.smart_toy_rounded,
+                color: Colors.white,
               ),
             ),
           ),
-
           actions: [
             IconButton(
               onPressed: () {
@@ -243,19 +202,15 @@ class _ChatPageState
                     .read<ChatLogicProvider>()
                     .stopPolling();
 
-                Navigator
-                    .pushReplacement(
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                     builder: (_) =>
                         VideoDetailsPage(
-                          videoId:
-                          widget.id,
-                          videoName:
-                          widget.name,
+                          videoId: widget.id,
+                          videoName: widget.name,
                           playlistId:
-                          widget
-                              .playlistId,
+                          widget.playlistId,
                         ),
                   ),
                 );
@@ -269,9 +224,7 @@ class _ChatPageState
               ),
             ),
           ],
-
-          bottom:
-          const PreferredSize(
+          bottom: const PreferredSize(
             preferredSize:
             Size.fromHeight(1),
             child: Divider(
@@ -282,16 +235,13 @@ class _ChatPageState
             ),
           ),
         ),
-
-        body:
-        Consumer<ChatLogicProvider>(
+        body: Consumer<ChatLogicProvider>(
           builder: (
               context,
               provider,
               child,
               ) {
-            if (provider.chatId ==
-                null) {
+            if (provider.chatId == null) {
               return Center(
                 child: Padding(
                   padding:
@@ -305,16 +255,14 @@ class _ChatPageState
                       const Icon(
                         Icons
                             .error_outline_rounded,
-                        color:
-                        Colors.red,
+                        color: Colors.red,
                         size: 44,
                       ),
                       const SizedBox(
                         height: 12,
                       ),
                       Text(
-                        provider
-                            .errorMessage ??
+                        provider.errorMessage ??
                             'تعذر تحميل المحادثة',
                         textAlign:
                         TextAlign.center,
@@ -329,13 +277,11 @@ class _ChatPageState
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          provider
-                              .initialize(
+                          provider.initialize(
                             videoId:
                             widget.id,
                             chatId:
-                            widget
-                                .chatId,
+                            widget.chatId,
                             initialChat:
                             widget
                                 .initialChat,
@@ -351,11 +297,9 @@ class _ChatPageState
                           foregroundColor:
                           Colors.white,
                         ),
-                        child:
-                        const Text(
+                        child: const Text(
                           'إعادة المحاولة',
-                          style:
-                          TextStyle(
+                          style: TextStyle(
                             fontFamily:
                             'Tajawal',
                           ),
@@ -385,13 +329,15 @@ class _ChatPageState
                     child:
                     Padding(
                       padding:
-                      const EdgeInsets.all(
+                      const EdgeInsets
+                          .all(
                         30,
                       ),
                       child:
                       Column(
                         mainAxisSize:
-                        MainAxisSize.min,
+                        MainAxisSize
+                            .min,
                         children: [
                           Container(
                             height:
@@ -400,8 +346,7 @@ class _ChatPageState
                             70,
                             decoration:
                             BoxDecoration(
-                              color:
-                              const Color(
+                              color: const Color(
                                 0xff2A9D8F,
                               ).withOpacity(
                                 0.1,
@@ -461,14 +406,17 @@ class _ChatPageState
                     controller:
                     _scrollController,
                     padding:
-                    const EdgeInsets.fromLTRB(
+                    const EdgeInsets
+                        .fromLTRB(
                       14,
                       18,
                       14,
                       18,
                     ),
                     itemCount:
-                    provider.messages.length +
+                    provider
+                        .messages
+                        .length +
                         (provider
                             .isWaitingForAi
                             ? 1
@@ -478,23 +426,25 @@ class _ChatPageState
                         context,
                         index,
                         ) {
-                      // AI typing indicator
                       if (index ==
                           provider
                               .messages
                               .length) {
                         return Align(
                           alignment:
-                          Alignment.centerLeft,
+                          Alignment
+                              .centerLeft,
                           child:
                           Container(
                             margin:
-                            const EdgeInsets.only(
+                            const EdgeInsets
+                                .only(
                               bottom:
                               12,
                             ),
                             padding:
-                            const EdgeInsets.symmetric(
+                            const EdgeInsets
+                                .symmetric(
                               horizontal:
                               16,
                               vertical:
@@ -566,313 +516,317 @@ class _ChatPageState
                       index
                       ];
 
-                      // User message
                       if (message
                           .isUser) {
-                      return Align(
-                      alignment:
-                      Alignment.centerRight,
-                      child:
-                      Container(
-                      constraints:
-                      BoxConstraints(
-                      maxWidth:
-                      MediaQuery.of(
-                      context,
-                      ).size.width *
-                      0.78,
-                      ),
-                      margin:
-                      const EdgeInsets.only(
-                      bottom:
-                      12,
-                      ),
-                      padding:
-                      const EdgeInsets.symmetric(
-                      horizontal:
-                      16,
-                      vertical:
-                      12,
-                      ),
-                      decoration:
-                      const BoxDecoration(
-                      color:
-                      Color(
-                      0xff2A9D8F,
-                      ),
-                      borderRadius:
-                      BorderRadius.only(
-                      topLeft:
-                      Radius.circular(
-                      18,
-                      ),
-                      topRight:
-                      Radius.circular(
-                      18,
-                      ),
-                      bottomLeft:
-                      Radius.circular(
-                      18,
-                      ),
-                      bottomRight:
-                      Radius.circular(
-                      4,
-                      ),
-                      ),
-                      ),
-                      child:
-                      Text(
-                      message
-                          .text,
-                      style:
-                      const TextStyle(
-                      fontFamily:
-                      'Tajawal',
-                      color:
-                      Colors.white,
-                      fontSize:
-                      15,
-                      height:
-                      1.5,
-                      ),
-                      ),
-                      ),
-                      );
+                        return Align(
+                          alignment:
+                          Alignment
+                              .centerRight,
+                          child:
+                          Container(
+                            constraints:
+                            BoxConstraints(
+                              maxWidth:
+                              MediaQuery.of(
+                                context,
+                              ).size.width *
+                                  0.78,
+                            ),
+                            margin:
+                            const EdgeInsets
+                                .only(
+                              bottom:
+                              12,
+                            ),
+                            padding:
+                            const EdgeInsets
+                                .symmetric(
+                              horizontal:
+                              16,
+                              vertical:
+                              12,
+                            ),
+                            decoration:
+                            const BoxDecoration(
+                              color:
+                              Color(
+                                0xff2A9D8F,
+                              ),
+                              borderRadius:
+                              BorderRadius
+                                  .only(
+                                topLeft:
+                                Radius.circular(
+                                  18,
+                                ),
+                                topRight:
+                                Radius.circular(
+                                  18,
+                                ),
+                                bottomLeft:
+                                Radius.circular(
+                                  18,
+                                ),
+                                bottomRight:
+                                Radius.circular(
+                                  4,
+                                ),
+                              ),
+                            ),
+                            child:
+                            Text(
+                              message
+                                  .text,
+                              style:
+                              const TextStyle(
+                                fontFamily:
+                                'Tajawal',
+                                color:
+                                Colors.white,
+                                fontSize:
+                                15,
+                                height:
+                                1.5,
+                              ),
+                            ),
+                          ),
+                        );
                       }
 
-                      // AI message
                       final parsed =
                       provider
                           .parseAiMessage(
-                      message
-                          .text,
+                        message
+                            .text,
                       );
 
                       return Align(
-                      alignment:
-                      Alignment.centerLeft,
-                      child:
-                      Container(
-                      constraints:
-                      BoxConstraints(
-                      maxWidth:
-                      MediaQuery.of(
-                      context,
-                      ).size.width *
-                      0.82,
-                      ),
-                      margin:
-                      const EdgeInsets.only(
-                      bottom:
-                      12,
-                      ),
-                      padding:
-                      const EdgeInsets.symmetric(
-                      horizontal:
-                      16,
-                      vertical:
-                      12,
-                      ),
-                      decoration:
-                      BoxDecoration(
-                      color:
-                      Colors.white,
-                      borderRadius:
-                      const BorderRadius.only(
-                      topLeft:
-                      Radius.circular(
-                      18,
-                      ),
-                      topRight:
-                      Radius.circular(
-                      18,
-                      ),
-                      bottomRight:
-                      Radius.circular(
-                      18,
-                      ),
-                      bottomLeft:
-                      Radius.circular(
-                      4,
-                      ),
-                      ),
-                      border:
-                      Border.all(
-                      color:
-                      const Color(
-                      0xffE9E9E9,
-                      ),
-                      ),
-                      ),
-                      child:
-                      Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                      children: [
-                      Text(
-                      parsed
-                          .answer,
-                      style:
-                      const TextStyle(
-                      fontFamily:
-                      'Tajawal',
-                      color:
-                      Color(
-                      0xff181C1F,
-                      ),
-                      fontSize:
-                      15,
-                      height:
-                      1.6,
-                      ),
-                      ),
-                      if (parsed
-                          .segments
-                          .isNotEmpty) ...[
-                      const SizedBox(
-                      height:
-                      14,
-                      ),
-                      const Divider(
-                      height:
-                      1,
-                      color:
-                      Color(
-                      0xffEEEEEE,
-                      ),
-                      ),
-                      const SizedBox(
-                      height:
-                      10,
-                      ),
-                      const Row(
-                      children: [
-                      Icon(
-                      Icons
-                          .play_circle_outline_rounded,
-                      size:
-                      19,
-                      color:
-                      Color(
-                      0xff2A9D8F,
-                      ),
-                      ),
-                      SizedBox(
-                      width:
-                      6,
-                      ),
-                      Text(
-                      'من الفيديو',
-                      style:
-                      TextStyle(
-                      fontFamily:
-                      'Tajawal',
-                      fontWeight:
-                      FontWeight.bold,
-                      fontSize:
-                      13,
-                      color:
-                      Color(
-                      0xff2A9D8F,
-                      ),
-                      ),
-                      ),
-                      ],
-                      ),
-                      const SizedBox(
-                      height:
-                      8,
-                      ),
-                      ...parsed
-                          .segments
-                          .map(
-                      (
-                      segment,
-                      ) {
-                      return Container(
-                      width:
-                      double.infinity,
-                      margin:
-                      const EdgeInsets.only(
-                      bottom:
-                      7,
-                      ),
-                      child:
-                      OutlinedButton.icon(
-                      onPressed:
-                      () {
-                      _openVideoSegment(
-                      startSeconds:
-                      segment.startSeconds,
-                      endSeconds:
-                      segment.endSeconds,
-                      );
-                      },
-                      style:
-                      OutlinedButton.styleFrom(
-                      foregroundColor:
-                      const Color(
-                      0xff2A9D8F,
-                      ),
-                      side:
-                      const BorderSide(
-                      color:
-                      Color(
-                      0xff2A9D8F,
-                      ),
-                      ),
-                      padding:
-                      const EdgeInsets.symmetric(
-                      horizontal:
-                      12,
-                      vertical:
-                      9,
-                      ),
-                      shape:
-                      RoundedRectangleBorder(
-                      borderRadius:
-                      BorderRadius.circular(
-                      12,
-                      ),
-                      ),
-                      ),
-                      icon:
-                      const Icon(
-                      Icons
-                          .play_arrow_rounded,
-                      size:
-                      20,
-                      ),
-                      label:
-                      Text(
-                      'مشاهدة الجزء '
-                      '${segment.startLabel} - '
-                      '${segment.endLabel}',
-                      style:
-                      const TextStyle(
-                      fontFamily:
-                      'Tajawal',
-                      fontSize:
-                      13,
-                      fontWeight:
-                      FontWeight.bold,
-                      ),
-                      ),
-                      ),
-                      );
-                      },
-                      ),
-                      ],
-                      ],
-                      ),
-                      ),
+                        alignment:
+                        Alignment
+                            .centerLeft,
+                        child:
+                        Container(
+                          constraints:
+                          BoxConstraints(
+                            maxWidth:
+                            MediaQuery.of(
+                              context,
+                            ).size.width *
+                                0.82,
+                          ),
+                          margin:
+                          const EdgeInsets
+                              .only(
+                            bottom:
+                            12,
+                          ),
+                          padding:
+                          const EdgeInsets
+                              .symmetric(
+                            horizontal:
+                            16,
+                            vertical:
+                            12,
+                          ),
+                          decoration:
+                          BoxDecoration(
+                            color:
+                            Colors.white,
+                            borderRadius:
+                            const BorderRadius
+                                .only(
+                              topLeft:
+                              Radius.circular(
+                                18,
+                              ),
+                              topRight:
+                              Radius.circular(
+                                18,
+                              ),
+                              bottomRight:
+                              Radius.circular(
+                                18,
+                              ),
+                              bottomLeft:
+                              Radius.circular(
+                                4,
+                              ),
+                            ),
+                            border:
+                            Border.all(
+                              color:
+                              const Color(
+                                0xffE9E9E9,
+                              ),
+                            ),
+                          ),
+                          child:
+                          Column(
+                            crossAxisAlignment:
+                            CrossAxisAlignment
+                                .start,
+                            children: [
+                              Text(
+                                parsed
+                                    .answer,
+                                style:
+                                const TextStyle(
+                                  fontFamily:
+                                  'Tajawal',
+                                  color:
+                                  Color(
+                                    0xff181C1F,
+                                  ),
+                                  fontSize:
+                                  15,
+                                  height:
+                                  1.6,
+                                ),
+                              ),
+                              if (parsed
+                                  .segments
+                                  .isNotEmpty) ...[
+                                const SizedBox(
+                                  height:
+                                  14,
+                                ),
+                                const Divider(
+                                  height:
+                                  1,
+                                  color:
+                                  Color(
+                                    0xffEEEEEE,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height:
+                                  10,
+                                ),
+                                const Row(
+                                  children: [
+                                    Icon(
+                                      Icons.play_circle_outline_rounded,
+                                      size:
+                                      19,
+                                      color:
+                                      Color(
+                                        0xff2A9D8F,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width:
+                                      6,
+                                    ),
+                                    Text(
+                                      'من الفيديو',
+                                      style:
+                                      TextStyle(
+                                        fontFamily:
+                                        'Tajawal',
+                                        fontWeight:
+                                        FontWeight.bold,
+                                        fontSize:
+                                        13,
+                                        color:
+                                        Color(
+                                          0xff2A9D8F,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height:
+                                  8,
+                                ),
+                                ...parsed
+                                    .segments
+                                    .map(
+                                      (
+                                      segment,
+                                      ) {
+                                    return Container(
+                                      width:
+                                      double.infinity,
+                                      margin:
+                                      const EdgeInsets.only(
+                                        bottom:
+                                        7,
+                                      ),
+                                      child:
+                                      OutlinedButton.icon(
+                                        onPressed:
+                                            () {
+                                          _openVideoSegment(
+                                            startSeconds:
+                                            segment.startSeconds,
+                                            endSeconds:
+                                            segment.endSeconds,
+                                          );
+                                        },
+                                        style:
+                                        OutlinedButton.styleFrom(
+                                          foregroundColor:
+                                          const Color(
+                                            0xff2A9D8F,
+                                          ),
+                                          side:
+                                          const BorderSide(
+                                            color:
+                                            Color(
+                                              0xff2A9D8F,
+                                            ),
+                                          ),
+                                          padding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal:
+                                            12,
+                                            vertical:
+                                            9,
+                                          ),
+                                          shape:
+                                          RoundedRectangleBorder(
+                                            borderRadius:
+                                            BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                        ),
+                                        icon:
+                                        const Icon(
+                                          Icons.play_arrow_rounded,
+                                          size:
+                                          20,
+                                        ),
+                                        label:
+                                        Text(
+                                          'مشاهدة الجزء '
+                                              '${segment.startLabel} - '
+                                              '${segment.endLabel}',
+                                          style:
+                                          const TextStyle(
+                                            fontFamily:
+                                            'Tajawal',
+                                            fontSize:
+                                            13,
+                                            fontWeight:
+                                            FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
                       );
                     },
                   ),
                 ),
 
-                if (provider
-                    .errorMessage !=
+                if (provider.errorMessage !=
                     null)
                   Container(
                     width:
@@ -896,8 +850,7 @@ class _ChatPageState
                       ),
                     ),
                     child: Text(
-                      provider
-                          .errorMessage!,
+                      provider.errorMessage!,
                       textAlign:
                       TextAlign.center,
                       style:
@@ -922,12 +875,9 @@ class _ChatPageState
                   ),
                   decoration:
                   const BoxDecoration(
-                    color:
-                    Colors.white,
-                    border:
-                    Border(
-                      top:
-                      BorderSide(
+                    color: Colors.white,
+                    border: Border(
+                      top: BorderSide(
                         color:
                         Color(
                           0xffEEEEEE,
@@ -937,167 +887,345 @@ class _ChatPageState
                   ),
                   child: SafeArea(
                     top: false,
-                    child: Row(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.end,
+                    child: Column(
+                      mainAxisSize:
+                      MainAxisSize.min,
                       children: [
-                        Expanded(
-                          child:
-                          Container(
-                            decoration:
-                            BoxDecoration(
-                              color:
-                              const Color(
-                                0xffF6F8F8,
-                              ),
+                        Row(
+                          children: [
+                            InkWell(
+                              onTap:
+                              provider.canSend
+                                  ? provider
+                                  .toggleWebSearch
+                                  : null,
                               borderRadius:
                               BorderRadius.circular(
-                                24,
+                                20,
                               ),
-                              border:
-                              Border.all(
-                                color:
-                                const Color(
-                                  0xffE5E5E5,
+                              child:
+                              AnimatedContainer(
+                                duration:
+                                const Duration(
+                                  milliseconds:
+                                  200,
                                 ),
-                              ),
-                            ),
-                            child: Row(
-                              crossAxisAlignment:
-                              CrossAxisAlignment.end,
-                              children: [
-                                IconButton(
-                                  onPressed:
-                                  provider.canSend
-                                      ? provider
-                                      .toggleWebSearch
-                                      : null,
-                                  tooltip:
+                                padding:
+                                const EdgeInsets.symmetric(
+                                  horizontal:
+                                  12,
+                                  vertical:
+                                  8,
+                                ),
+                                decoration:
+                                BoxDecoration(
+                                  color:
                                   provider.webSearch
-                                      ? 'إيقاف بحث الويب'
-                                      : 'تفعيل بحث الويب',
-                                  icon:
-                                  Icon(
-                                    provider.webSearch
-                                        ? Icons
-                                        .language_rounded
-                                        : Icons
-                                        .language_outlined,
+                                      ? const Color(
+                                    0xff2A9D8F,
+                                  )
+                                      : const Color(
+                                    0xffF4FAF9,
+                                  ),
+                                  borderRadius:
+                                  BorderRadius.circular(
+                                    20,
+                                  ),
+                                  border:
+                                  Border.all(
                                     color:
                                     provider.webSearch
                                         ? const Color(
                                       0xff2A9D8F,
                                     )
                                         : const Color(
-                                      0xff777777,
+                                      0xffCFE4E1,
                                     ),
                                   ),
+                                  boxShadow:
+                                  provider.webSearch
+                                      ? [
+                                    BoxShadow(
+                                      color: const Color(
+                                        0xff2A9D8F,
+                                      ).withValues(
+                                        alpha: 0.18,
+                                      ),
+                                      blurRadius:
+                                      7,
+                                      offset:
+                                      const Offset(
+                                        0,
+                                        2,
+                                      ),
+                                    ),
+                                  ]
+                                      : null,
                                 ),
-                                Expanded(
-                                  child:
-                                  TextField(
-                                    cursorColor:
-                                    const Color(
-                                      0xff2A9D8F,
+                                child:
+                                Row(
+                                  mainAxisSize:
+                                  MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      provider.webSearch
+                                          ? Icons
+                                          .language_rounded
+                                          : Icons
+                                          .language_outlined,
+                                      size:
+                                      18,
+                                      color:
+                                      provider.webSearch
+                                          ? Colors.white
+                                          : const Color(
+                                        0xff2A9D8F,
+                                      ),
                                     ),
-                                    controller:
-                                    _controller,
-                                    enabled:
-                                    provider.canSend,
-                                    minLines:
-                                    1,
-                                    maxLines:
-                                    5,
-                                    textInputAction:
-                                    TextInputAction.newline,
-                                    style:
-                                    const TextStyle(
-                                      fontFamily:
-                                      'Tajawal',
-                                      fontSize:
-                                      15,
+                                    const SizedBox(
+                                      width:
+                                      6,
                                     ),
-                                    decoration:
-                                    const InputDecoration(
-                                      hintText:
-                                      'اكتب سؤالك...',
-                                      hintStyle:
+                                    Text(
+                                      'بحث الويب',
+                                      style:
                                       TextStyle(
                                         fontFamily:
                                         'Tajawal',
+                                        fontSize:
+                                        12,
+                                        fontWeight:
+                                        FontWeight.bold,
                                         color:
-                                        Color(
-                                          0xff999999,
+                                        provider.webSearch
+                                            ? Colors.white
+                                            : const Color(
+                                          0xff264653,
                                         ),
                                       ),
-                                      border:
-                                      InputBorder.none,
-                                      contentPadding:
-                                      EdgeInsets.symmetric(
-                                        horizontal:
-                                        8,
-                                        vertical:
-                                        13,
-                                      ),
                                     ),
+                                    if (provider
+                                        .webSearch) ...[
+                                      const SizedBox(
+                                        width:
+                                        5,
+                                      ),
+                                      const Icon(
+                                        Icons
+                                            .check_circle_rounded,
+                                        size:
+                                        16,
+                                        color:
+                                        Colors.white,
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 8,
+                            ),
+                            AnimatedSwitcher(
+                              duration:
+                              const Duration(
+                                milliseconds:
+                                200,
+                              ),
+                              child:
+                              provider.webSearch
+                                  ? const Text(
+                                'مفعّل',
+                                key: ValueKey(
+                                  'web-search-on',
+                                ),
+                                style:
+                                TextStyle(
+                                  fontFamily:
+                                  'Tajawal',
+                                  fontSize:
+                                  11,
+                                  fontWeight:
+                                  FontWeight.bold,
+                                  color:
+                                  Color(
+                                    0xff2A9D8F,
                                   ),
                                 ),
-                              ],
+                              )
+                                  : const Text(
+                                'غير مفعّل',
+                                key: ValueKey(
+                                  'web-search-off',
+                                ),
+                                style:
+                                TextStyle(
+                                  fontFamily:
+                                  'Tajawal',
+                                  fontSize:
+                                  11,
+                                  color:
+                                  Color(
+                                    0xff888888,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
 
                         const SizedBox(
-                          width: 8,
+                          height: 9,
                         ),
 
-                        GestureDetector(
-                          onTap:
-                          provider.canSend
-                              ? _sendMessage
-                              : null,
-                          child:
-                          AnimatedContainer(
-                            duration:
-                            const Duration(
-                              milliseconds:
-                              200,
-                            ),
-                            width: 48,
-                            height: 48,
-                            decoration:
-                            BoxDecoration(
-                              color:
-                              provider.canSend
-                                  ? const Color(
-                                0xff2A9D8F,
-                              )
-                                  : Colors.grey,
-                              shape:
-                              BoxShape.circle,
-                            ),
-                            child:
-                            provider.isSending
-                                ? const Padding(
-                              padding:
-                              EdgeInsets.all(
-                                14,
-                              ),
+                        Row(
+                          crossAxisAlignment:
+                          CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
                               child:
-                              CircularProgressIndicator(
-                                strokeWidth:
-                                2,
-                                color:
-                                Colors.white,
+                              Container(
+                                decoration:
+                                BoxDecoration(
+                                  color:
+                                  const Color(
+                                    0xffF6F8F8,
+                                  ),
+                                  borderRadius:
+                                  BorderRadius.circular(
+                                    24,
+                                  ),
+                                  border:
+                                  Border.all(
+                                    color:
+                                    provider.webSearch
+                                        ? const Color(
+                                      0xff9FD3CC,
+                                    )
+                                        : const Color(
+                                      0xffE5E5E5,
+                                    ),
+                                  ),
+                                ),
+                                child:
+                                TextField(
+                                  cursorColor:
+                                  const Color(
+                                    0xff2A9D8F,
+                                  ),
+                                  controller:
+                                  _controller,
+                                  enabled:
+                                  provider.canSend,
+                                  minLines:
+                                  1,
+                                  maxLines:
+                                  5,
+                                  textInputAction:
+                                  TextInputAction
+                                      .newline,
+                                  style:
+                                  const TextStyle(
+                                    fontFamily:
+                                    'Tajawal',
+                                    fontSize:
+                                    15,
+                                  ),
+                                  decoration:
+                                  InputDecoration(
+                                    hintText:
+                                    provider.webSearch
+                                        ? 'اسألني وسأبحث لك على الويب...'
+                                        : 'اسألني عن محتوى المحاضرة...',
+                                    hintStyle:
+                                    const TextStyle(
+                                      fontFamily:
+                                      'Tajawal',
+                                      color:
+                                      Color(
+                                        0xff999999,
+                                      ),
+                                    ),
+                                    prefixIcon:
+                                    provider.webSearch
+                                        ? const Icon(
+                                      Icons.language_rounded,
+                                      size:
+                                      20,
+                                      color:
+                                      Color(
+                                        0xff2A9D8F,
+                                      ),
+                                    )
+                                        : null,
+                                    border:
+                                    InputBorder.none,
+                                    contentPadding:
+                                    const EdgeInsets.symmetric(
+                                      horizontal:
+                                      14,
+                                      vertical:
+                                      13,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            )
-                                : const Icon(
-                              Icons
-                                  .send_rounded,
-                              color:
-                              Colors.white,
                             ),
-                          ),
+
+                            const SizedBox(
+                              width: 8,
+                            ),
+
+                            GestureDetector(
+                              onTap:
+                              provider.canSend
+                                  ? _sendMessage
+                                  : null,
+                              child:
+                              AnimatedContainer(
+                                duration:
+                                const Duration(
+                                  milliseconds:
+                                  200,
+                                ),
+                                width:
+                                48,
+                                height:
+                                48,
+                                decoration:
+                                BoxDecoration(
+                                  color:
+                                  provider.canSend
+                                      ? const Color(
+                                    0xff2A9D8F,
+                                  )
+                                      : Colors.grey,
+                                  shape:
+                                  BoxShape.circle,
+                                ),
+                                child:
+                                provider.isSending
+                                    ? const Padding(
+                                  padding:
+                                  EdgeInsets.all(
+                                    14,
+                                  ),
+                                  child:
+                                  CircularProgressIndicator(
+                                    strokeWidth:
+                                    2,
+                                    color:
+                                    Colors.white,
+                                  ),
+                                )
+                                    : const Icon(
+                                  Icons.send_rounded,
+                                  color:
+                                  Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

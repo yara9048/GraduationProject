@@ -511,7 +511,7 @@ class _ProfilePageState
                       profileItem(
                         Icons
                             .school_outlined,
-                        'الدورات المسجلة',
+                        'سجل المشاهدات',
                         onTap: () {
                           widget
                               .onCoursesPressed

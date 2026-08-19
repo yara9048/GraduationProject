@@ -28,7 +28,6 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-
       _loadPageData();
     });
   }
@@ -42,11 +41,11 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
     if (oldWidget.id != widget.id) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-
         _loadPageData();
       });
     }
   }
+
   Future<void> _loadPageData() async {
     await Future.wait([
       context.read<DisplayVideosProvider>().getVideos(
@@ -58,6 +57,7 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
       ),
     ]);
   }
+
   String formatDuration(dynamic value) {
     if (value == null) {
       return 'غير محددة';
@@ -73,6 +73,7 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
 
     return '${duration.toInt()} دقيقة';
   }
+
   Future<void> _openPlaylistDetails() async {
     final detailsProvider =
     context.read<PlaylistDetailsProvider>();
@@ -144,14 +145,18 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
   Widget build(BuildContext context) {
     final DisplayVideosProvider videosProvider =
     context.watch<DisplayVideosProvider>();
+
+    final PlaylistDetailsProvider detailsProvider =
+    context.watch<PlaylistDetailsProvider>();
+
     final bool subscriptionRequired =
         videosProvider.subscriptionRequired;
 
     final String cleanedErrorMessage =
         videosProvider.cleanedErrorMessage;
-    final PlaylistDetailsProvider detailsProvider =
-    context.watch<PlaylistDetailsProvider>();
+
     Widget pageContent;
+
     if (videosProvider.isLoading) {
       pageContent = const Center(
         child: SizedBox(
@@ -173,7 +178,8 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: MediaQuery.sizeOf(context).height - 180,
+              minHeight:
+              MediaQuery.sizeOf(context).height - 180,
             ),
             child: Center(
               child: Column(
@@ -184,8 +190,10 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                     height: 90,
                     decoration: BoxDecoration(
                       color: subscriptionRequired
-                          ? const Color(0xffE9C46A).withValues(alpha: 0.15)
-                          : Colors.red.withValues(alpha: 0.1),
+                          ? const Color(0xffE9C46A)
+                          .withValues(alpha: 0.15)
+                          : Colors.red
+                          .withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -199,7 +207,6 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
                   Text(
                     subscriptionRequired
                         ? 'المحتوى يحتاج إلى اشتراك'
@@ -212,9 +219,7 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                       color: Color(0xff264653),
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
                   Text(
                     subscriptionRequired
                         ? 'يجب أن يكون لديك اشتراك فعّال في قائمة التشغيل حتى تتمكن من مشاهدة الفيديوهات.'
@@ -227,14 +232,13 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                       color: Color(0xff6C7A7A),
                     ),
                   ),
-
                   const SizedBox(height: 26),
-
                   if (subscriptionRequired)
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: _openPlaylistDetails,
+                        onPressed:
+                        _openPlaylistDetails,
                         icon: const Icon(
                           Icons.info_outline,
                           color: Colors.white,
@@ -249,29 +253,36 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                             color: Colors.white,
                           ),
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xff2A9D8F),
-                          foregroundColor: Colors.white,
+                        style:
+                        ElevatedButton.styleFrom(
+                          backgroundColor:
+                          const Color(
+                              0xff2A9D8F),
+                          foregroundColor:
+                          Colors.white,
                           elevation: 0,
-                          padding: const EdgeInsets.symmetric(
+                          padding:
+                          const EdgeInsets.symmetric(
                             vertical: 14,
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                          shape:
+                          RoundedRectangleBorder(
+                            borderRadius:
+                            BorderRadius.circular(
+                                14),
                           ),
                         ),
                       ),
                     ),
-
                   if (subscriptionRequired)
                     const SizedBox(height: 12),
-
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: () {
                         context
-                            .read<DisplayVideosProvider>()
+                            .read<
+                            DisplayVideosProvider>()
                             .getVideos(
                           id: widget.id,
                         );
@@ -289,39 +300,31 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                           color: Color(0xff2A9D8F),
                         ),
                       ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
+                      style:
+                      OutlinedButton.styleFrom(
+                        padding:
+                        const EdgeInsets.symmetric(
                           vertical: 13,
                         ),
                         side: const BorderSide(
                           color: Color(0xff2A9D8F),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                        shape:
+                        RoundedRectangleBorder(
+                          borderRadius:
+                          BorderRadius.circular(
+                              14),
                         ),
                       ),
                     ),
                   ),
-
-                  if (!subscriptionRequired) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      cleanedErrorMessage,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontFamily: 'Tajawal',
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
           ),
         ),
       );
-    } else if (videosProvider.hasVideos) {
+    } else if (!videosProvider.hasVideos) {
       pageContent = RefreshIndicator(
         color: const Color(0xff2A9D8F),
         onRefresh: () async {
@@ -442,7 +445,8 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
             top: 10,
             bottom: 30,
           ),
-          itemCount: videosProvider.videos.length,
+          itemCount:
+          videosProvider.videos.length,
           itemBuilder: (context, index) {
             final video =
             videosProvider.videos[index];
@@ -455,7 +459,9 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                 imagePath: video.thumbnail,
                 title: video.title,
                 description: video.description,
-                duration:formatDuration(video.duration.toString()),views: video.views,
+                duration:
+                formatDuration(video.duration),
+                views: video.views,
                 status: video.status,
                 onTap: () {
                   Navigator.push(
@@ -466,7 +472,8 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                             videoId: video.id,
                             playlistId:
                             video.playlist,
-                            videoName: video.title,
+                            videoName:
+                            video.title,
                           ),
                     ),
                   );
@@ -558,12 +565,14 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                   child:
                   CircularProgressIndicator(
                     strokeWidth: 3,
-                    color: Color(0xff2A9D8F),
+                    color:
+                    Color(0xff2A9D8F),
                   ),
                 ),
               )
                   : IconButton(
-                onPressed: _openPlaylistDetails,
+                onPressed:
+                _openPlaylistDetails,
                 icon: Icon(
                   Icons.info_outline,
                   color: detailsProvider
@@ -572,19 +581,21 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                       detailsProvider
                           .playListDetails !=
                           null
-                      ? const Color(0xff2A9D8F)
+                      ? const Color(
+                      0xff2A9D8F)
                       : Colors.grey,
                   size: 30,
                 ),
               ),
             ),
-        Padding(
-          padding: const EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 120
-          ),child: pageContent,
-          )
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 120,
+              ),
+              child: pageContent,
+            ),
           ],
         ),
       ),
