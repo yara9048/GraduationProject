@@ -36,11 +36,15 @@ class _FavouritePageState
     context.watch<DisplayFavouriteProvider>();
 
     final favouriteVideos = provider.favourites
-        .where((item) => item.videoDetail != null)
+        .where(
+          (item) => item.videoDetail != null,
+    )
         .toList();
 
     final favouritePlaylists = provider.favourites
-        .where((item) => item.playlistDetail != null)
+        .where(
+          (item) => item.playlistDetail != null,
+    )
         .toList();
 
     if (provider.isLoading) {
@@ -188,29 +192,27 @@ class _FavouritePageState
                           return SizedBox(
                             width: 200,
                             child: Align(
-                              alignment: Alignment.topRight,
-                              child: VideoCardTemplate(
-                                key: ValueKey(video.id),
+                              alignment:
+                              Alignment.topRight,
+                              child:
+                              VideoCardTemplate(
+                                key: ValueKey(
+                                  video.id,
+                                ),
                                 videoId: video.id,
-                                onTap: () {
-                                  final playlistId =
-                                      favouriteItem
-                                          .playlistDetail
-                                          ?.id;
 
-                                  if (playlistId ==
-                                      null) {
-                                    ScaffoldMessenger
-                                        .of(context)
-                                        .showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'لا يوجد رقم قائمة تشغيل لهذا الفيديو',
-                                        ),
-                                      ),
-                                    );
-                                    return;
-                                  }
+                                onTap: () {
+                                  final int
+                                  playlistId = video.playlist ?? 0;
+                                      video.playlist;
+
+                                  debugPrint(
+                                    'videoId = ${video.id}',
+                                  );
+
+                                  debugPrint(
+                                    'playlistId = $playlistId',
+                                  );
 
                                   Navigator.push(
                                     context,
@@ -228,15 +230,26 @@ class _FavouritePageState
                                     ),
                                   );
                                 },
-                                imagePath: video.thumbnail ??
-                                'assets/Images/photo_2026-07-23_00-20-19.jpg',
-                                title: video.title,
+
+                                imagePath:
+                                video.thumbnail ??
+                                    'assets/Images/photo_2026-07-23_00-20-19.jpg',
+
+                                title:
+                                video.title,
+
                                 description:
                                 video.description,
+
                                 duration:
                                 '${video.duration} دقيقة',
-                                views: video.views,
-                                status: video.status,
+
+                                views:
+                                video.views,
+
+                                status:
+                                video.status,
+
                                 onRemovedFromFavourite:
                                     () async {
                                   await context
@@ -284,19 +297,21 @@ class _FavouritePageState
                     )
                   else
                     SizedBox(
-                      // ضروري لأن القائمة أفقية
                       height: 260,
                       child: ListView.separated(
                         scrollDirection:
                         Axis.horizontal,
+
                         itemCount:
                         favouritePlaylists
                             .length,
+
                         separatorBuilder:
                             (_, __) =>
                         const SizedBox(
                           width: 16,
                         ),
+
                         itemBuilder:
                             (context, index) {
                           final favouriteItem =
@@ -326,16 +341,29 @@ class _FavouritePageState
                               key: ValueKey(
                                 playlist.id,
                               ),
+
                               playlistId:
                               playlist.id,
-                              imagePath: playlist.thumbnail ??
-                              'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
+
+                              imagePath:
+                              playlist
+                                  .thumbnail ??
+                                  'assets/Images/Gemini_Generated_Image_hy81hehy81hehy81 1.png',
+
                               title:
                               playlist.name,
-                              description: playlist.subjectDetail!.name,
+
+                              description:
+                              playlist
+                                  .subjectDetail!
+                                  .name,
+
                               durationText:
                               '${playlist.totalDuration ?? 0} دقيقة',
-                              progress: progress,
+
+                              progress:
+                              progress,
+
                               onRemovedFromFavourite:
                                   () async {
                                 await context

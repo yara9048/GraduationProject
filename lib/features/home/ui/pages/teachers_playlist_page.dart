@@ -103,7 +103,12 @@ class _TeachersPlaylistPageState
               ),
             ),
 
-            const Center(child: Text("لا توجد بيانات")),
+            const Center(child: Text("لا توجد قوائم تشغيل",style: TextStyle(
+              fontFamily: "Tajawal",
+              fontSize: 15,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),),),
           ],
         ),
       );

@@ -108,7 +108,7 @@ class _AllSubjectsPageState extends State<AllSubjectsPage> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: ListView.builder(
-                            itemCount:subjects.length<3? subjects.length : 3,
+                            itemCount:subjects.length,
                             itemBuilder: (context, index) {
                               final sub = subjects[index];
                               return SizedBox(

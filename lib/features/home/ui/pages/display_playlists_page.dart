@@ -66,7 +66,12 @@ class _DisplayPlaylistsPageState extends State<DisplayPlaylistsPage> {
                         fontFamily: "Tajawal",fontSize: 20),),
             ),
             const Center(
-              child: Text("لا توجد بيانات"),
+              child: Text("لا توجد قوائم تشغيل",style: TextStyle(
+                fontFamily: "Tajawal",
+                fontSize: 15,
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),),
             ),
           ],
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/watching_history_provider.dart';
 import 'package:graduationprojct/features/home/ui/pages/main_navigation_page.dart';
+import 'package:graduationprojct/features/home/ui/pages/video_details_page.dart';
 import 'package:provider/provider.dart';
 
 import '../widgets/watching_history_card.dart';
@@ -59,7 +60,21 @@ class _WatchingHistoryPageState extends State<WatchingHistoryPage> {
                     final history = playlists[index];
                     return WatchingHistoryCard(
                       history: history,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                VideoDetailsPage(
+                                  videoId: history.videoDetail.id,
+                                  playlistId:
+                                  history.courseDetail.id,
+                                  videoName:
+                                  history.videoDetail.title,
+                                ),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

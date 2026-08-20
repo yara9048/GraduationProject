@@ -1099,8 +1099,10 @@ class _McqScreenState
           child: Text(
             'لا توجد أسئلة',
             style: TextStyle(
-              fontFamily:
-              'Tajawal',
+              fontFamily: "Tajawal",
+              fontSize: 15,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),

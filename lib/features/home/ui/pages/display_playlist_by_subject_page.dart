@@ -26,7 +26,7 @@ class _DisplayPlaylistBySubjectPageState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DisplayPlaylistBySubjectProvider>().getPlaylists(
-        id: widget.id,
+        subjectId: widget.id,
       );
       context.read<TeachersProvider>().getTeachers(
         subjectId: widget.id,
@@ -105,7 +105,12 @@ class _DisplayPlaylistBySubjectPageState
               ),
             ),
 
-            const Center(child: Text("لا توجد بيانات")),
+            const Center(child: Text("لا توجد قوائم تشغيل",style: TextStyle(
+              fontFamily: "Tajawal",
+              fontSize: 15,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),)),
           ],
         ),
       );
@@ -166,11 +171,35 @@ class _DisplayPlaylistBySubjectPageState
               left: 16,
               child: SizedBox(
                 height: 110,
-                child: ListView.builder(
+                child: teachersProvider.isLoading
+                    ? const Center(
+                  child: SizedBox(
+                    width: 26,
+                    height: 26,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: Color(0xff2A9D8F),
+                    ),
+                  ),
+                )
+                    : teachers.isEmpty
+                    ? const Center(
+                  child: Text(
+                    "لا يوجد أساتذة لهذه المادة",
+                    style: TextStyle(
+                      fontFamily: "Tajawal",
+                      fontSize: 15,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                )
+                    : ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: teachers.length,
                   itemBuilder: (context, index) {
                     final teacher = teachers[index];
+
                     return TeacherCard(
                       subjectId: widget.id,
                       name: teacher.name,
@@ -180,8 +209,7 @@ class _DisplayPlaylistBySubjectPageState
                   },
                 ),
               ),
-            ),
-            Positioned.fill(
+            ),            Positioned.fill(
               top: 230,
               left: 16,
               right: 16,

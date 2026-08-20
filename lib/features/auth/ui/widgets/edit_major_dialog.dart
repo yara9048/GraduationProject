@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/auth/ui/widgets/snack_bar.dart';
+import 'package:graduationprojct/features/home/data/services/display_subjects_no_query_service.dart';
+import 'package:graduationprojct/features/home/providers/display_subjects_no_query_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_subjects_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -38,7 +40,7 @@ class _EditMajorDialogState extends State<EditMajorDialog> {
         if (!mounted) return;
 
         final subjectsProvider =
-        context.read<DisplaySubjectsProvider>();
+        context.read<DisplaySubjectsNoQueryProvider>();
 
         if (subjectsProvider.subjects.isEmpty) {
           await subjectsProvider.getSubjects();
@@ -54,7 +56,7 @@ class _EditMajorDialogState extends State<EditMajorDialog> {
   }
 
   void _setCurrentMajor(
-      DisplaySubjectsProvider subjectsProvider,
+      DisplaySubjectsNoQueryProvider subjectsProvider,
       ) {
     if (_initialMajorSet) {
       return;
@@ -187,7 +189,7 @@ class _EditMajorDialogState extends State<EditMajorDialog> {
   Widget build(BuildContext context) {
     final subjectsProvider =
     context.watch<
-        DisplaySubjectsProvider>();
+        DisplaySubjectsNoQueryProvider>();
 
     if (!subjectsProvider.isLoading &&
         subjectsProvider.subjects.isNotEmpty &&
@@ -286,7 +288,7 @@ class _EditMajorDialogState extends State<EditMajorDialog> {
 
 
   Widget _buildMajorField(
-      DisplaySubjectsProvider subjectsProvider,
+      DisplaySubjectsNoQueryProvider subjectsProvider,
       ) {
 
     if (subjectsProvider.isLoading) {
@@ -339,7 +341,7 @@ class _EditMajorDialogState extends State<EditMajorDialog> {
 
               _setCurrentMajor(
                 context.read<
-                    DisplaySubjectsProvider>(),
+                    DisplaySubjectsNoQueryProvider>(),
               );
             },
             icon: const Icon(

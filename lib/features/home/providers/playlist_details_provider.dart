@@ -390,7 +390,7 @@ class PlaylistDetailsProvider
             ?.rating;
 
     if (value == null) {
-      return 'لا يوجد';
+      return ' لا يوجد تقييم';
     }
 
     return formatNumber(

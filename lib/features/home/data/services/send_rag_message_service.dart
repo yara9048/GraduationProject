@@ -13,15 +13,15 @@ class SendRagMessageService {
 
   Future<SendRagMessage> sendRag({
     required String token,
-    required String text,
-    required int chatId,
+    required String question,
+    required int videoId,
   }) async {
     try {
       final response = await _dio.post(
-        'messages/',
+        'chats/ask-service/',
         data: {
-          'text':text,
-          'chat':chatId
+          'question':question,
+          'video_id':videoId
         },
         options: Options(
           headers: {

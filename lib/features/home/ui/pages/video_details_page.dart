@@ -117,6 +117,7 @@ class _VideoDetailsPageState extends State<VideoDetailsPage> {
     if (!mounted) return;
 
     setState(() {
+      isFavorite = details?.isFavourite ?? false;
       _videoInitialized = true;
     });
   }

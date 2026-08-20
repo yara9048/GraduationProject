@@ -25,8 +25,9 @@ class SendRagMessageProvider with ChangeNotifier {
   SendRagMessage? get response => _response;
 
   Future<void> sendRag({
-    required String text,
-    required int chatId,
+    required String question,
+    required int videoId,
+
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -44,8 +45,8 @@ class SendRagMessageProvider with ChangeNotifier {
 
       _response = await _service.sendRag(
         token: token,
-        text:text,
-        chatId:chatId,
+        question:question,
+        videoId:videoId,
       );
 
       _isSuccess = true;

@@ -36,7 +36,9 @@ class VideoDetailsModel {
 
   final int mcqCount;
   final String accessStatus;
+  final String userStatus;
   final bool canWatch;
+  final bool isFavourite;
 
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -60,7 +62,9 @@ class VideoDetailsModel {
     required this.attachments,
     required this.mcqCount,
     required this.accessStatus,
+    required this.userStatus,
     required this.canWatch,
+    required this.isFavourite,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -69,9 +73,12 @@ class VideoDetailsModel {
       Map<String, dynamic> json,
       ) {
     return VideoDetailsModel(
-      id: _parseInt(json['id']),
+      id: _parseInt(
+        json['id'],
+      ),
 
-      title: json['title']?.toString() ?? '',
+      title:
+      json['title']?.toString() ?? '',
 
       description:
       json['description']?.toString() ?? '',
@@ -80,7 +87,8 @@ class VideoDetailsModel {
         json['playlist'],
       ),
 
-      playlistDetail: json['playlist_detail'] is Map<String, dynamic>
+      playlistDetail:
+      json['playlist_detail'] is Map<String, dynamic>
           ? PlaylistDetail.fromJson(
         json['playlist_detail'],
       )
@@ -90,7 +98,8 @@ class VideoDetailsModel {
         json['owner'],
       ),
 
-      ownerDetail: json['owner_detail'] is Map<String, dynamic>
+      ownerDetail:
+      json['owner_detail'] is Map<String, dynamic>
           ? OwnerDetail.fromJson(
         json['owner_detail'],
       )
@@ -139,8 +148,15 @@ class VideoDetailsModel {
       accessStatus:
       json['access_status']?.toString() ?? '',
 
+      userStatus:
+      json['user_status']?.toString() ?? '',
+
       canWatch: _parseBool(
         json['can_watch'],
+      ),
+
+      isFavourite: _parseBool(
+        json['is_favourite'],
       ),
 
       createdAt: _parseDateTime(
@@ -179,13 +195,17 @@ class VideoDetailsModel {
       'transcript': transcript,
 
       'attachments': attachments
-          .map((e) => e.toJson())
+          .map(
+            (e) => e.toJson(),
+      )
           .toList(),
 
       'mcqCount': mcqCount,
 
       'access_status': accessStatus,
+      'user_status': userStatus,
       'can_watch': canWatch,
+      'is_favourite': isFavourite,
 
       'created_at':
       createdAt?.toIso8601String(),
@@ -293,7 +313,8 @@ class PlaylistDetail {
       id: VideoDetailsModel._parseInt(
         json['id'],
       ),
-      name: json['name']?.toString() ?? '',
+      name:
+      json['name']?.toString() ?? '',
     );
   }
 
@@ -309,11 +330,13 @@ class OwnerDetail {
   final int id;
   final String name;
   final String email;
+  final String? image;
 
   const OwnerDetail({
     required this.id,
     required this.name,
     required this.email,
+    required this.image,
   });
 
   factory OwnerDetail.fromJson(
@@ -323,9 +346,17 @@ class OwnerDetail {
       id: VideoDetailsModel._parseInt(
         json['id'],
       ),
-      name: json['name']?.toString() ?? '',
+
+      name:
+      json['name']?.toString() ?? '',
+
       email:
       json['email']?.toString() ?? '',
+
+      image:
+      VideoDetailsModel._parseNullableString(
+        json['image'],
+      ),
     );
   }
 
@@ -334,6 +365,7 @@ class OwnerDetail {
       'id': id,
       'name': name,
       'email': email,
+      'image': image,
     };
   }
 }

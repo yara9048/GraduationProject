@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+
 import '../../auth/providers/profile_provider.dart';
 import 'display_facourite_provider.dart';
 import 'display_playlists_provider.dart';
-import 'filtered_playlist_provider.dart';
+import 'display_subjects_provider.dart';
+import 'now_showing_playlist_provider.dart';
+import 'playlist_by_class_provider.dart';
+import 'wallet_provider.dart';
+import 'wallet_transactions_provider.dart';
 
 class MainNavigationProvider with ChangeNotifier {
   int _currentIndex = 0;
@@ -12,9 +17,13 @@ class MainNavigationProvider with ChangeNotifier {
   Future<void> changeTab({
     required int index,
     required DisplayPlaylistsProvider displayPlaylistsProvider,
-    required FilteredPlaylistProvider filteredPlaylistProvider,
+    required PlaylistByClassProvider playlistByClassProvider,
     required DisplayFavouriteProvider displayFavouriteProvider,
     required ProfileProvider profileProvider,
+    required NowShowingPlaylistProvider nowShowingPlaylistProvider,
+    required DisplaySubjectsProvider displaySubjectsProvider,
+    required WalletProvider walletProvider,
+    required WalletTransactionsProvider walletTransactionsProvider,
   }) async {
     if (_currentIndex != index) {
       _currentIndex = index;
@@ -24,25 +33,38 @@ class MainNavigationProvider with ChangeNotifier {
     await refreshSelectedPage(
       index: index,
       displayPlaylistsProvider: displayPlaylistsProvider,
-      filteredPlaylistProvider: filteredPlaylistProvider,
+      playlistByClassProvider: playlistByClassProvider,
       displayFavouriteProvider: displayFavouriteProvider,
       profileProvider: profileProvider,
+      nowShowingPlaylistProvider: nowShowingPlaylistProvider,
+      displaySubjectsProvider: displaySubjectsProvider,
+      walletProvider: walletProvider,
+      walletTransactionsProvider: walletTransactionsProvider,
     );
   }
 
   Future<void> refreshSelectedPage({
     required int index,
     required DisplayPlaylistsProvider displayPlaylistsProvider,
-    required FilteredPlaylistProvider filteredPlaylistProvider,
+    required PlaylistByClassProvider playlistByClassProvider,
     required DisplayFavouriteProvider displayFavouriteProvider,
     required ProfileProvider profileProvider,
+    required NowShowingPlaylistProvider nowShowingPlaylistProvider,
+    required DisplaySubjectsProvider displaySubjectsProvider,
+    required WalletProvider walletProvider,
+    required WalletTransactionsProvider walletTransactionsProvider,
   }) async {
     switch (index) {
       case 0:
+        playlistByClassProvider.reset();
+
         await Future.wait([
+          playlistByClassProvider.getPlaylists(),
+          nowShowingPlaylistProvider.getPlaylists(),
+          displaySubjectsProvider.getSubjects(),
           displayPlaylistsProvider.getPlayLists(),
-          filteredPlaylistProvider.getFilteredPlaylists(),
         ]);
+
         break;
 
       case 1:
@@ -54,6 +76,10 @@ class MainNavigationProvider with ChangeNotifier {
         break;
 
       case 3:
+        await Future.wait([
+          walletProvider.getWallet(),
+          walletTransactionsProvider.getTransactions(),
+        ]);
         break;
 
       case 4:

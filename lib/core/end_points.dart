@@ -10,7 +10,6 @@ class ApiEndpoints {
   static const profile = 'profile/';
   static const courses = 'courses/';
   static const walletTransactions = 'wallet-transactions/';
-  static const filteredPlaylists = 'courses/for_you/';
   static const subjects = 'subjects/';
   static const favourites = 'favorites/';
   static const ratings = 'ratings/';

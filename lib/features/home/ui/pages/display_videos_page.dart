@@ -462,7 +462,7 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
                 duration:
                 formatDuration(video.duration),
                 views: video.views,
-                status: video.status,
+                status: video.userStatus,
                 onTap: () {
                   Navigator.push(
                     context,

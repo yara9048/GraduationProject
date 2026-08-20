@@ -7,9 +7,9 @@ import '../../../auth/ui/pages/profile/profile_page.dart';
 import '../../providers/display_facourite_provider.dart';
 import '../../providers/display_playlists_provider.dart';
 import '../../providers/display_subjects_provider.dart';
-import '../../providers/filtered_playlist_provider.dart';
 import '../../providers/main_navigation_provider.dart';
 import '../../providers/now_showing_playlist_provider.dart';
+import '../../providers/playlist_by_class_provider.dart';
 import '../../providers/wallet_provider.dart';
 import '../../providers/wallet_transactions_provider.dart';
 import 'display_playlists_page.dart';
@@ -46,21 +46,28 @@ class _MainNavigationPageState
       ProfilePage(),
     ];
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback(
+          (_) async {
+        if (!mounted) return;
 
-      final safeInitialIndex =
-      widget.initialIndex >= 0 &&
-          widget.initialIndex < _pages.length
-          ? widget.initialIndex
-          : 0;
+        final safeInitialIndex =
+        widget.initialIndex >= 0 &&
+            widget.initialIndex < _pages.length
+            ? widget.initialIndex
+            : 0;
 
-      _changeTab(safeInitialIndex);
-    });
+        await _changeTab(
+          safeInitialIndex,
+        );
+      },
+    );
   }
 
-  Future<void> _changeTab(int index) async {
-    if (index < 0 || index >= _pages.length) {
+  Future<void> _changeTab(
+      int index,
+      ) async {
+    if (index < 0 ||
+        index >= _pages.length) {
       return;
     }
 
@@ -71,66 +78,40 @@ class _MainNavigationPageState
       index: index,
 
       displayPlaylistsProvider:
-      context.read<DisplayPlaylistsProvider>(),
+      context.read<
+          DisplayPlaylistsProvider>(),
 
-      filteredPlaylistProvider:
-      context.read<FilteredPlaylistProvider>(),
+      playlistByClassProvider:
+      context.read<
+          PlaylistByClassProvider>(),
 
       displayFavouriteProvider:
-      context.read<DisplayFavouriteProvider>(),
+      context.read<
+          DisplayFavouriteProvider>(),
 
       profileProvider:
       context.read<ProfileProvider>(),
+
+      nowShowingPlaylistProvider:
+      context.read<
+          NowShowingPlaylistProvider>(),
+
+      displaySubjectsProvider:
+      context.read<
+          DisplaySubjectsProvider>(),
+
+      walletProvider:
+      context.read<WalletProvider>(),
+
+      walletTransactionsProvider:
+      context.read<
+          WalletTransactionsProvider>(),
     );
-
-
-    if (!mounted) return;
-
-
-    switch (index) {
-
-      case 0:
-        context.read<NowShowingPlaylistProvider>().getPlaylists();
-        context.read<FilteredPlaylistProvider>().getFilteredPlaylists();
-        context.read<DisplaySubjectsProvider>().getSubjects();
-        break;
-      case 1:
-        context
-            .read<DisplayPlaylistsProvider>()
-            .getPlayLists();
-        break;
-
-
-      case 2:
-        context
-            .read<DisplayFavouriteProvider>()
-            .getFavourites();
-
-        break;
-
-
-      case 3:
-        context
-            .read<WalletProvider>()
-            .getWallet();
-
-        context
-            .read<WalletTransactionsProvider>()
-            .getTransactions();
-
-        break;
-
-
-      case 4:
-        context
-            .read<ProfileProvider>()
-            .getProfile();
-
-        break;
-    }
   }
 
-  Future<void> _onTabPressed(int index) async {
+  Future<void> _onTabPressed(
+      int index,
+      ) async {
     await _changeTab(index);
   }
 
@@ -139,7 +120,8 @@ class _MainNavigationPageState
     final currentIndex = context.select<
         MainNavigationProvider,
         int>(
-          (provider) => provider.currentIndex,
+          (provider) =>
+      provider.currentIndex,
     );
 
     final safeCurrentIndex =
@@ -153,83 +135,108 @@ class _MainNavigationPageState
       child: Scaffold(
         backgroundColor: Colors.white,
         extendBody: false,
+
         body: IndexedStack(
           index: safeCurrentIndex,
           children: _pages,
         ),
+
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border(
               top: BorderSide(
-                color: const Color(0xff2A9D8F)
-                    .withValues(alpha: 0.12),
+                color:
+                const Color(
+                  0xff2A9D8F,
+                ).withValues(
+                  alpha: 0.12,
+                ),
               ),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(
+                color:
+                Colors.black.withValues(
                   alpha: 0.07,
                 ),
                 blurRadius: 12,
-                offset: const Offset(0, -3),
+                offset:
+                const Offset(0, -3),
               ),
             ],
           ),
           child: SafeArea(
             top: false,
             child: CustomNavigationBar(
-              currentIndex: safeCurrentIndex,
+              currentIndex:
+              safeCurrentIndex,
               onTap: _onTabPressed,
               iconSize: 28,
               isFloating: false,
               elevation: 0,
-              backgroundColor: Colors.white,
+              backgroundColor:
+              Colors.white,
               selectedColor:
-              const Color(0xff2A9D8F),
+              const Color(
+                0xff2A9D8F,
+              ),
               unSelectedColor:
-              const Color(0xff9AB5B1),
+              const Color(
+                0xff9AB5B1,
+              ),
               strokeColor:
-              const Color(0xffE9C46A),
+              const Color(
+                0xffE9C46A,
+              ),
               scaleFactor: 0.15,
               items: [
                 CustomNavigationBarItem(
                   icon: const Icon(
                     Icons.home_outlined,
                   ),
-                  selectedIcon: const Icon(
+                  selectedIcon:
+                  const Icon(
                     Icons.home_rounded,
                   ),
                 ),
                 CustomNavigationBarItem(
                   icon: const Icon(
-                    Icons.playlist_play_outlined,
+                    Icons
+                        .playlist_play_outlined,
                   ),
-                  selectedIcon: const Icon(
+                  selectedIcon:
+                  const Icon(
                     Icons.playlist_play,
                   ),
                 ),
                 CustomNavigationBarItem(
                   icon: const Icon(
-                    Icons.favorite_border_rounded,
+                    Icons
+                        .favorite_border_rounded,
                   ),
-                  selectedIcon: const Icon(
+                  selectedIcon:
+                  const Icon(
                     Icons.favorite_rounded,
                   ),
                 ),
                 CustomNavigationBarItem(
                   icon: const Icon(
-                    Icons.monetization_on_outlined,
+                    Icons
+                        .monetization_on_outlined,
                   ),
-                  selectedIcon: const Icon(
+                  selectedIcon:
+                  const Icon(
                     Icons.monetization_on,
                   ),
                 ),
                 CustomNavigationBarItem(
                   icon: const Icon(
-                    Icons.person_outline_rounded,
+                    Icons
+                        .person_outline_rounded,
                   ),
-                  selectedIcon: const Icon(
+                  selectedIcon:
+                  const Icon(
                     Icons.person_rounded,
                   ),
                 ),

@@ -21,7 +21,7 @@ class DisplayPlaylistBySubjectProvider with ChangeNotifier {
   List<DisplayPlayListBySubjectModel> get playlists => _playlists;
 
   Future<void> getPlaylists({
-    required int id,
+    required int subjectId,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -35,24 +35,18 @@ class DisplayPlaylistBySubjectProvider with ChangeNotifier {
       final token =
       prefs.getString("auth_token");
 
-      final classId =
-      prefs.getInt("class_id");
-
       if (token == null ||
-          token.isEmpty ||
-          classId == null) {
+          token.isEmpty ) {
         throw Exception(
           "Authentication token or class id not found",
         );
       }
 
-      print("Class ID: $classId");
 
       _playlists =
       await _service.getPlaylists(
         token: token,
-        id: id,
-        classId: classId,
+        subjectId: subjectId,
       );
 
       _isSuccess = true;

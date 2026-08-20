@@ -289,11 +289,11 @@ class _PaymentPageState extends State<PaymentPage> {
                     return const Center(
                       child: Text(
                         'لا يوجد سجل عمليات دفع',
-
                         style: TextStyle(
-                          fontFamily: 'Tajawal',
-                          fontSize: 14,
-                          color: Color(0xff839493),
+                          fontFamily: "Tajawal",
+                          fontSize: 15,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     );

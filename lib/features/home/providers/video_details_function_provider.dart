@@ -295,13 +295,6 @@ class VideoDetailsFunctionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // ========================================
-  // Initialize player
-  //
-  // لا يوجد أي استخدام لـ:
-  // controller.value.duration
-  // ========================================
-
   Future<bool> _initializeController(
       String videoUrl,
       ) async {

@@ -1,13 +1,11 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/models/send_rag_message_model.dart';
 import '../data/models/send_web_search_model.dart';
 import '../data/models/view_chat_model.dart';
 import '../data/services/send_rag_message_service.dart';
 import '../data/services/send_web_search_message_service.dart';
-import '../data/services/view_chat_service.dart';
 
 class ChatLogicMessage {
   final String type;
@@ -19,6 +17,7 @@ class ChatLogicMessage {
   });
 
   bool get isUser => type == 'user';
+
   bool get isAi => !isUser;
 }
 
@@ -47,48 +46,53 @@ class ParsedAiMessage {
 }
 
 class ChatLogicProvider extends ChangeNotifier {
-  final ViewChatService _viewChatService = ViewChatService();
-  final SendRagMessageService _ragService = SendRagMessageService();
+  final SendRagMessageService _ragService =
+  SendRagMessageService();
+
   final SendWebSearchMessageService _webService =
   SendWebSearchMessageService();
 
   ViewChatModel? _chat;
+
   ViewChatModel? get chat => _chat;
 
   int? _chatId;
+
   int? get chatId => _chatId;
 
   int? _videoId;
+
   int? get videoId => _videoId;
 
   final List<ChatLogicMessage> _messages = [];
+
   List<ChatLogicMessage> get messages =>
       List.unmodifiable(_messages);
 
   bool get hasMessages => _messages.isNotEmpty;
 
   bool _isSending = false;
+
   bool get isSending => _isSending;
 
   bool _isWaitingForAi = false;
+
   bool get isWaitingForAi => _isWaitingForAi;
 
   bool _isPolling = false;
-  bool get isPolling => _isPolling;
 
-  bool _isCheckingPoll = false;
+  bool get isPolling => _isPolling;
 
   bool get canSend =>
       !_isSending && !_isWaitingForAi;
 
   bool _webSearch = false;
+
   bool get webSearch => _webSearch;
 
   String? _errorMessage;
-  String? get errorMessage => _errorMessage;
 
-  Timer? _pollingTimer;
-  int _aiMessagesBeforeSend = 0;
+  String? get errorMessage => _errorMessage;
 
   Future<String> _getToken() async {
     final prefs =
@@ -119,15 +123,17 @@ class ChatLogicProvider extends ChangeNotifier {
     _chat = initialChat;
 
     _messages.clear();
-    _readChatMessages(initialChat);
+
+    _readChatMessages(
+      initialChat,
+    );
 
     _isSending = false;
     _isWaitingForAi = false;
     _isPolling = false;
-    _isCheckingPoll = false;
+
     _errorMessage = null;
     _webSearch = false;
-    _aiMessagesBeforeSend = 0;
 
     notifyListeners();
   }
@@ -138,57 +144,77 @@ class ChatLogicProvider extends ChangeNotifier {
     }
 
     _webSearch = !_webSearch;
+
     notifyListeners();
   }
 
-  void setWebSearch(bool value) {
+  void setWebSearch(
+      bool value,
+      ) {
     if (!canSend) {
       return;
     }
 
     _webSearch = value;
+
     notifyListeners();
   }
 
   Future<void> sendMessage({
     required String text,
   }) async {
-    final cleanText = text.trim();
+    final cleanText =
+    text.trim();
 
     if (cleanText.isEmpty ||
         !canSend) {
       return;
     }
 
-    if (_chatId == null) {
-      _setError('Chat ID غير موجود');
-      return;
-    }
-
     if (_videoId == null) {
-      _setError('Video ID غير موجود');
+      _setError(
+        'Video ID غير موجود',
+      );
+
       return;
     }
 
     _errorMessage = null;
 
     if (_webSearch) {
-      await _sendWebMessage(cleanText);
+      if (_chatId == null) {
+        _setError(
+          'Chat ID غير موجود',
+        );
+
+        return;
+      }
+
+      await _sendWebMessage(
+        cleanText,
+      );
     } else {
-      await _sendRagMessage(cleanText);
+      await _sendRagMessage(
+        cleanText,
+      );
     }
   }
 
   Future<void> _sendRagMessage(
       String text,
       ) async {
-    _isSending = true;
-    _errorMessage = null;
+    if (_videoId == null) {
+      _setError(
+        'Video ID غير موجود',
+      );
 
-    _aiMessagesBeforeSend =
-        _messages
-            .where((message) => message.isAi)
-            .length;
+      return;
+    }
+
+    _isSending = true;
+    _isWaitingForAi = true;
+
+    _errorMessage = null;
 
     _messages.add(
       ChatLogicMessage(
@@ -200,30 +226,118 @@ class ChatLogicProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final token = await _getToken();
+      final token =
+      await _getToken();
 
+      final SendRagMessage response =
       await _ragService.sendRag(
         token: token,
-        text: text,
-        chatId: _chatId!,
+        question: text,
+        videoId: _videoId!,
       );
 
+      final String aiMessage =
+      _buildRagResponseText(
+        response,
+      );
+
+      if (aiMessage
+          .trim()
+          .isNotEmpty) {
+        _messages.add(
+          ChatLogicMessage(
+            type: 'ai',
+            text: aiMessage,
+          ),
+        );
+      }
+
       _isSending = false;
-      _isWaitingForAi = true;
+      _isWaitingForAi = false;
 
       notifyListeners();
-
-      _startPolling();
     } catch (e) {
       _isSending = false;
       _isWaitingForAi = false;
-      _setError(e.toString());
+
+      _setError(
+        e.toString(),
+      );
     }
+  }
+
+  String _buildRagResponseText(
+      SendRagMessage response,
+      ) {
+    final StringBuffer buffer =
+    StringBuffer();
+
+    buffer.writeln(
+      'ANSWER: ${response.answer.trim()}',
+    );
+
+    if (response.whereInVideo.isNotEmpty) {
+      buffer.writeln();
+
+      buffer.writeln(
+        'PRECISE TIMESTAMPS:',
+      );
+
+      for (final item
+      in response.whereInVideo) {
+        final String start =
+        _secondsToParserTimestamp(
+          item.start,
+        );
+
+        final String end =
+        _secondsToParserTimestamp(
+          item.end,
+        );
+
+        buffer.writeln(
+          '[$start --> $end]',
+        );
+      }
+    }
+
+    return buffer
+        .toString()
+        .trim();
+  }
+
+  String _secondsToParserTimestamp(
+      double totalSeconds,
+      ) {
+    double safeSeconds =
+        totalSeconds;
+
+    if (safeSeconds < 0) {
+      safeSeconds = 0;
+    }
+
+    final int minutes =
+        safeSeconds ~/ 60;
+
+    final double seconds =
+        safeSeconds -
+            (minutes * 60);
+
+    return '${minutes.toString().padLeft(2, '0')}:'
+        '${seconds.toStringAsFixed(2).padLeft(5, '0')}';
   }
 
   Future<void> _sendWebMessage(
       String text,
       ) async {
+    if (_chatId == null) {
+      _setError(
+        'Chat ID غير موجود',
+      );
+
+      return;
+    }
+
     _isSending = true;
     _errorMessage = null;
 
@@ -237,7 +351,8 @@ class ChatLogicProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final token = await _getToken();
+      final token =
+      await _getToken();
 
       final SendWebSearchModel response =
       await _webService.sendWeb(
@@ -247,7 +362,9 @@ class ChatLogicProvider extends ChangeNotifier {
       );
 
       final aiText =
-      _extractWebResponse(response);
+      _extractWebResponse(
+        response,
+      );
 
       if (aiText != null &&
           aiText.trim().isNotEmpty) {
@@ -259,9 +376,12 @@ class ChatLogicProvider extends ChangeNotifier {
         );
       }
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage =
+          e.toString();
     } finally {
       _isSending = false;
+      _isWaitingForAi = false;
+
       notifyListeners();
     }
   }
@@ -269,53 +389,78 @@ class ChatLogicProvider extends ChangeNotifier {
   ParsedAiMessage parseAiMessage(
       String text,
       ) {
-    final cleanText = text.trim();
+    final cleanText =
+    text.trim();
 
-    if (!cleanText.contains('ANSWER:')) {
+    if (!cleanText.contains(
+      'ANSWER:',
+    )) {
       return ParsedAiMessage(
         answer: cleanText,
         segments: const [],
       );
     }
 
-    String answer = cleanText;
+    String answer =
+        cleanText;
 
-    final answerRegex = RegExp(
+    final answerRegex =
+    RegExp(
       r'ANSWER:\s*(.*?)(?=\s*QUESTION TYPE:|\s*PRECISE TIMESTAMPS:|\s*Context words:|$)',
       dotAll: true,
     );
 
     final answerMatch =
-    answerRegex.firstMatch(cleanText);
+    answerRegex.firstMatch(
+      cleanText,
+    );
 
     if (answerMatch != null) {
       answer =
-          answerMatch.group(1)?.trim() ??
+          answerMatch
+              .group(1)
+              ?.trim() ??
               cleanText;
     }
 
-    final List<VideoSegment> segments = [];
+    final List<VideoSegment>
+    segments = [];
 
-    final timestampRegex = RegExp(
+    final timestampRegex =
+    RegExp(
       r'\[(\d{1,3}):(\d{2}(?:\.\d+)?)\s*-->\s*(\d{1,3}):(\d{2}(?:\.\d+)?)\]',
     );
 
     for (final match
-    in timestampRegex.allMatches(cleanText)) {
+    in timestampRegex.allMatches(
+      cleanText,
+    )) {
       final int startMinutes =
-          int.tryParse(match.group(1) ?? '0') ??
+          int.tryParse(
+            match.group(1) ??
+                '0',
+          ) ??
               0;
 
       final double startSecondsPart =
-          double.tryParse(match.group(2) ?? '0') ??
+          double.tryParse(
+            match.group(2) ??
+                '0',
+          ) ??
               0;
 
       final int endMinutes =
-          int.tryParse(match.group(3) ?? '0') ??
+          int.tryParse(
+            match.group(3) ??
+                '0',
+          ) ??
               0;
 
       final double endSecondsPart =
-          double.tryParse(match.group(4) ?? '0') ??
+          double.tryParse(
+            match.group(4) ??
+                '0',
+          ) ??
               0;
 
       final double startSeconds =
@@ -328,8 +473,10 @@ class ChatLogicProvider extends ChangeNotifier {
 
       segments.add(
         VideoSegment(
-          startSeconds: startSeconds,
-          endSeconds: endSeconds,
+          startSeconds:
+          startSeconds,
+          endSeconds:
+          endSeconds,
           startLabel:
           _formatTimestampLabel(
             startMinutes,
@@ -361,93 +508,13 @@ class ChatLogicProvider extends ChangeNotifier {
         '${secondValue.toString().padLeft(2, '0')}';
   }
 
-  void _startPolling() {
-    stopPolling(
-      keepWaitingState: true,
-    );
-
-    _isPolling = true;
-    _isWaitingForAi = true;
-
-    notifyListeners();
-
-    _pollingTimer = Timer.periodic(
-      const Duration(seconds: 3),
-          (_) async {
-        await _checkForNewAiMessage();
-      },
-    );
-  }
-
-  Future<void> _checkForNewAiMessage() async {
-    if (!_isPolling ||
-        _isCheckingPoll) {
-      return;
-    }
-
-    _isCheckingPoll = true;
-
-    try {
-      await _loadChatFromView(
-        notify: false,
-      );
-
-      final currentAiCount =
-          _messages
-              .where((message) => message.isAi)
-              .length;
-
-      if (currentAiCount >
-          _aiMessagesBeforeSend) {
-        stopPolling();
-
-        _isWaitingForAi = false;
-
-        notifyListeners();
-        return;
-      }
-
-      notifyListeners();
-    } catch (e) {
-      debugPrint(
-        'POLLING ERROR = $e',
-      );
-    } finally {
-      _isCheckingPoll = false;
-    }
-  }
-
-  Future<void> _loadChatFromView({
-    bool notify = true,
-  }) async {
-    if (_videoId == null) {
-      throw Exception(
-        'Video id not found',
-      );
-    }
-
-    final token = await _getToken();
-
-    final result =
-    await _viewChatService.getChat(
-      token: token,
-      videoId: _videoId!,
-    );
-
-    _chat = result;
-
-    _readChatMessages(result);
-
-    if (notify) {
-      notifyListeners();
-    }
-  }
-
   void _readChatMessages(
       ViewChatModel model,
       ) {
     try {
-      final dynamic dynamicModel = model;
+      final dynamic dynamicModel =
+          model;
+
       final dynamic json =
       dynamicModel.toJson();
 
@@ -456,7 +523,9 @@ class ChatLogicProvider extends ChangeNotifier {
       }
 
       final rawMessages =
-      _findMessages(json);
+      _findMessages(
+        json,
+      );
 
       if (rawMessages == null) {
         return;
@@ -465,13 +534,16 @@ class ChatLogicProvider extends ChangeNotifier {
       final List<ChatLogicMessage>
       newMessages = [];
 
-      for (final item in rawMessages) {
+      for (final item
+      in rawMessages) {
         if (item is! Map) {
           continue;
         }
 
         final text =
-        _findMessageText(item);
+        _findMessageText(
+          item,
+        );
 
         if (text == null ||
             text.trim().isEmpty) {
@@ -479,12 +551,16 @@ class ChatLogicProvider extends ChangeNotifier {
         }
 
         final sender =
-        _findSender(item);
+        _findSender(
+          item,
+        );
 
         newMessages.add(
           ChatLogicMessage(
             type:
-            _normalizeSender(sender),
+            _normalizeSender(
+              sender,
+            ),
             text: text.trim(),
           ),
         );
@@ -492,7 +568,9 @@ class ChatLogicProvider extends ChangeNotifier {
 
       _messages
         ..clear()
-        ..addAll(newMessages);
+        ..addAll(
+          newMessages,
+        );
     } catch (e) {
       debugPrint(
         'READ CHAT ERROR = $e',
@@ -503,13 +581,15 @@ class ChatLogicProvider extends ChangeNotifier {
   List<dynamic>? _findMessages(
       Map<dynamic, dynamic> json,
       ) {
-    final messages = json['messages'];
+    final messages =
+    json['messages'];
 
     if (messages is List) {
       return messages;
     }
 
-    final chat = json['chat'];
+    final chat =
+    json['chat'];
 
     if (chat is Map) {
       final chatMessages =
@@ -520,10 +600,13 @@ class ChatLogicProvider extends ChangeNotifier {
       }
     }
 
-    final data = json['data'];
+    final data =
+    json['data'];
 
     if (data is Map) {
-      return _findMessages(data);
+      return _findMessages(
+        data,
+      );
     }
 
     return null;
@@ -565,7 +648,9 @@ class ChatLogicProvider extends ChangeNotifier {
       String? sender,
       ) {
     final value =
-    sender?.toLowerCase().trim();
+    sender
+        ?.toLowerCase()
+        .trim();
 
     if (value == 'user' ||
         value == 'student' ||
@@ -590,7 +675,9 @@ class ChatLogicProvider extends ChangeNotifier {
         return null;
       }
 
-      return _findWebAnswer(json);
+      return _findWebAnswer(
+        json,
+      );
     } catch (e) {
       debugPrint(
         'WEB RESPONSE ERROR = $e',
@@ -618,25 +705,31 @@ class ChatLogicProvider extends ChangeNotifier {
 
     if (direct is Map) {
       final nested =
-      _findWebAnswer(direct);
+      _findWebAnswer(
+        direct,
+      );
 
       if (nested != null) {
         return nested;
       }
     }
 
-    final data = json['data'];
+    final data =
+    json['data'];
 
     if (data is Map) {
       final nested =
-      _findWebAnswer(data);
+      _findWebAnswer(
+        data,
+      );
 
       if (nested != null) {
         return nested;
       }
     }
 
-    final text = json['text'];
+    final text =
+    json['text'];
 
     if (text is String &&
         text.trim().isNotEmpty) {
@@ -649,23 +742,22 @@ class ChatLogicProvider extends ChangeNotifier {
   void _setError(
       String message,
       ) {
-    _errorMessage = message;
+    _errorMessage =
+        message;
+
     notifyListeners();
   }
 
   void clearError() {
     _errorMessage = null;
+
     notifyListeners();
   }
 
   void stopPolling({
     bool keepWaitingState = false,
   }) {
-    _pollingTimer?.cancel();
-    _pollingTimer = null;
-
     _isPolling = false;
-    _isCheckingPoll = false;
 
     if (!keepWaitingState) {
       _isWaitingForAi = false;
@@ -684,11 +776,9 @@ class ChatLogicProvider extends ChangeNotifier {
     _isSending = false;
     _isWaitingForAi = false;
     _isPolling = false;
-    _isCheckingPoll = false;
 
     _errorMessage = null;
     _webSearch = false;
-    _aiMessagesBeforeSend = 0;
 
     notifyListeners();
   }
@@ -696,6 +786,7 @@ class ChatLogicProvider extends ChangeNotifier {
   @override
   void dispose() {
     stopPolling();
+
     super.dispose();
   }
 }

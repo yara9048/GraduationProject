@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/home/providers/display_subjects_provider.dart';
-import 'package:graduationprojct/features/home/providers/filtered_playlist_provider.dart';
 import 'package:graduationprojct/features/auth/ui/pages/profile/profile_page.dart';
+import 'package:graduationprojct/features/home/providers/playlist_by_class_provider.dart';
 import 'package:graduationprojct/features/home/ui/pages/all_subjects_page.dart';
 import 'package:graduationprojct/features/home/ui/pages/notification_page.dart';
 import 'package:graduationprojct/features/home/ui/widgets/new_added_course_template.dart';
@@ -25,19 +25,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<NowShowingPlaylistProvider>().getPlaylists();
-      context.read<FilteredPlaylistProvider>().getFilteredPlaylists();
-      context.read<DisplaySubjectsProvider>().getSubjects();
-    });
-  }
 
   Widget build(BuildContext context) {
-    final filterProvider = context.watch<FilteredPlaylistProvider>();
-    final filteredPlaylists = filterProvider.filtered_playlists;
+    final filterProvider = context.watch<PlaylistByClassProvider>();
+    final filteredPlaylists = filterProvider.playlists;
     final nowShowingProvider = context.watch<NowShowingPlaylistProvider>();
     final nowShowingPlaylists = nowShowingProvider.playlists;
     final subjectsProvider = context.watch<DisplaySubjectsProvider>();
@@ -189,11 +180,12 @@ class _HomePageState extends State<HomePage> {
                                 if (nowShowingPlaylists.isEmpty) {
                                   return const Center(
                                     child: Text(
-                                      "لا توجد بيانات",
+                                      "لا توجد قوائم تشغيل",
                                       style: TextStyle(
                                         fontFamily: "Tajawal",
-                                        fontSize: 16,
+                                        fontSize: 15,
                                         color: Colors.grey,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   );
@@ -268,7 +260,7 @@ class _HomePageState extends State<HomePage> {
                             padding: const EdgeInsets.only(right: 10.0),
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
-                              itemCount: subjects.length,
+                                itemCount:subjects.length<3? subjects.length : 3,
                               itemBuilder: (context, index) {
                                 final sub = subjects[index];
                                 return Padding(
@@ -326,9 +318,13 @@ class _HomePageState extends State<HomePage> {
                                 if (filteredPlaylists.isEmpty) {
                                   return const Center(
                                     child: Text(
-                                      "لا توجد بيانات",
-                                      style: TextStyle(fontFamily: "Tajawal"),
-                                    ),
+                                      "لا توجد قوائم تشغيل",
+                                      style: TextStyle(
+                                        fontFamily: "Tajawal",
+                                        fontSize: 15,
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.w500,
+                                      ),                                    ),
                                   );
                                 }
 

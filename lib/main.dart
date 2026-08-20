@@ -17,12 +17,12 @@ import 'package:graduationprojct/features/home/providers/display_playlist_by_sub
 import 'package:graduationprojct/features/home/providers/display_playlists_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_subjects_provider.dart';
 import 'package:graduationprojct/features/home/providers/display_videos_provider.dart';
-import 'package:graduationprojct/features/home/providers/filtered_playlist_provider.dart';
 import 'package:graduationprojct/features/home/providers/funding_request_provider.dart';
 import 'package:graduationprojct/features/home/providers/get_video_progress_provider.dart';
 import 'package:graduationprojct/features/home/providers/main_navigation_provider.dart';
 import 'package:graduationprojct/features/home/providers/notifications_provider.dart';
 import 'package:graduationprojct/features/home/providers/now_showing_playlist_provider.dart';
+import 'package:graduationprojct/features/home/providers/playlist_by_class_provider.dart';
 import 'package:graduationprojct/features/home/providers/playlist_by_teachers_provider.dart';
 import 'package:graduationprojct/features/home/providers/playlist_details_provider.dart';
 import 'package:graduationprojct/features/home/providers/playlist_search_provider.dart';
@@ -50,6 +50,7 @@ import 'features/auth/providers/log_out_provider.dart';
 import 'features/auth/providers/send_otp_provider.dart';
 import 'features/auth/providers/sign_in_provider.dart';
 import 'features/auth/ui/pages/sign_up/splash_page.dart';
+import 'features/home/providers/display_subjects_no_query_provider.dart';
 import 'features/home/providers/functions_for_playlist_details_provider.dart';
 import 'features/home/providers/mcq_quiz_provider.dart';
 import 'features/home/providers/pdf_viewer_provider.dart';
@@ -275,10 +276,6 @@ class MyApp extends StatelessWidget {
         ),
 
         ChangeNotifierProvider(
-          create: (_) => FilteredPlaylistProvider(),
-        ),
-
-        ChangeNotifierProvider(
           create: (_) => AddVideoToFavProvider(),
         ),
 
@@ -321,7 +318,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => FundingRequestProvider(),
         ),
-
+        ChangeNotifierProvider(
+          create: (_) => PlaylistByClassProvider(),
+        ),
         ChangeNotifierProvider(
           create: (_) => DisplayPlaylistBySubjectProvider(),
         ),
@@ -337,7 +336,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => RefundRequestProvider(),
         ),
-
+        ChangeNotifierProvider(
+          create: (_) => DisplaySubjectsNoQueryProvider(),
+        ),
         ChangeNotifierProvider(
           create: (_) => SubscriptionsProvider(),
         ),
