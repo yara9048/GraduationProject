@@ -32,7 +32,23 @@ class DisplaySubjectsProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      _subjects = await _service.getSubjects();
+      final prefs =
+      await SharedPreferences.getInstance();
+
+      final token =
+      prefs.getString("auth_token");
+
+      final classId =
+      prefs.getInt("class_id");
+
+      if (token == null ||
+          token.isEmpty ||
+          classId == null) {
+        throw Exception(
+          "Authentication token or class id not found",
+        );
+      }
+      _subjects = await _service.getSubjects(token: token, classId: classId);
 
       _isSuccess = true;
     } catch (e) {

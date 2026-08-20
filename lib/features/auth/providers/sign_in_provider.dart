@@ -38,6 +38,7 @@ class SignInProvider with ChangeNotifier {
 
       final String accessToken = user.access.trim();
       final String refreshToken = user.refresh.trim();
+      final int classId = user.user.classId;
 
       if (accessToken.isEmpty) {
         throw Exception('لم يتم إرجاع access token من السيرفر');
@@ -46,7 +47,9 @@ class SignInProvider with ChangeNotifier {
       if (refreshToken.isEmpty) {
         throw Exception('لم يتم إرجاع refresh token من السيرفر');
       }
-
+      if (classId.isNaN) {
+        throw Exception('لم يتم إرجاعclassid من السيرفر');
+      }
       final prefs = await SharedPreferences.getInstance();
 
       final bool accessSaved = await prefs.setString(
@@ -61,15 +64,22 @@ class SignInProvider with ChangeNotifier {
 
       final bool userIdSaved = await prefs.setInt(
         'user_pk',
-        user.user.pk,
+        user.user.id,
       );
 
-      if (!accessSaved || !refreshSaved || !userIdSaved) {
+      final bool subjectIdSaves = await prefs.setInt(
+        'class_id',
+        user.user.classId,
+      );
+
+      if (!accessSaved || !refreshSaved || !userIdSaved || !subjectIdSaves) {
         throw Exception('فشل حفظ بيانات تسجيل الدخول');
       }
 
       print('Access Token saved');
       print('Refresh Token saved');
+      print('user id saved');
+      print('class id saved');
 
       _isSuccess = true;
 

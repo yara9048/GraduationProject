@@ -33,29 +33,57 @@ class SignInModel {
 }
 
 class User {
-  int pk;
+  int id;
   String email;
   String firstName;
   String lastName;
+  String role;
+  String major;
+  int classId;
+  String image;
+  dynamic fcmToken;
+  bool isActive;
+  DateTime dateJoined;
 
   User({
-    required this.pk,
+    required this.id,
     required this.email,
     required this.firstName,
     required this.lastName,
+    required this.role,
+    required this.major,
+    required this.classId,
+    required this.image,
+    required this.fcmToken,
+    required this.isActive,
+    required this.dateJoined,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-    pk: json["pk"],
+    id: json["id"],
     email: json["email"],
     firstName: json["first_name"],
     lastName: json["last_name"],
+    role: json["role"],
+    major: json["major"],
+    classId: json["class_id"],
+    image: json["image"],
+    fcmToken: json["fcm_token"],
+    isActive: json["is_active"],
+    dateJoined: DateTime.parse(json["date_joined"]),
   );
 
   Map<String, dynamic> toJson() => {
-    "pk": pk,
+    "id": id,
     "email": email,
     "first_name": firstName,
     "last_name": lastName,
+    "role": role,
+    "major": major,
+    "class_id": classId,
+    "image": image,
+    "fcm_token": fcmToken,
+    "is_active": isActive,
+    "date_joined": dateJoined.toIso8601String(),
   };
 }

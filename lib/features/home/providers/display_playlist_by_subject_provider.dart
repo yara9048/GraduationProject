@@ -1,13 +1,12 @@
 import 'package:flutter/cupertino.dart';
-import 'package:graduationprojct/features/home/data/services/display_playlist_by_subject_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/models/display_favourite_model.dart';
 import '../data/models/display_playlist_by_subject_model.dart';
-import '../data/services/display_favourite_service.dart';
+import '../data/services/display_playlist_by_subject_service.dart';
 
 class DisplayPlaylistBySubjectProvider with ChangeNotifier {
-  final DisplayPlaylistBySubjectService _service = DisplayPlaylistBySubjectService();
+  final DisplayPlaylistBySubjectService _service =
+  DisplayPlaylistBySubjectService();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -21,22 +20,40 @@ class DisplayPlaylistBySubjectProvider with ChangeNotifier {
 
   List<DisplayPlayListBySubjectModel> get playlists => _playlists;
 
-  Future<void> getPlaylists({required int id}) async {
+  Future<void> getPlaylists({
+    required int id,
+  }) async {
     _isLoading = true;
     _errorMessage = null;
     _isSuccess = false;
     notifyListeners();
 
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs =
+      await SharedPreferences.getInstance();
 
-      final token = prefs.getString("auth_token");
+      final token =
+      prefs.getString("auth_token");
 
-      if (token == null || token.isEmpty) {
-        throw Exception("Authentication token not found");
+      final classId =
+      prefs.getInt("class_id");
+
+      if (token == null ||
+          token.isEmpty ||
+          classId == null) {
+        throw Exception(
+          "Authentication token or class id not found",
+        );
       }
 
-      _playlists = await _service.getPlaylists(token: token, id: id);
+      print("Class ID: $classId");
+
+      _playlists =
+      await _service.getPlaylists(
+        token: token,
+        id: id,
+        classId: classId,
+      );
 
       _isSuccess = true;
     } catch (e) {

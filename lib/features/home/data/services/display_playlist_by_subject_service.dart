@@ -6,7 +6,7 @@ import '../models/display_favourite_model.dart';
 import '../models/display_playlist_by_subject_model.dart';
 
 class DisplayPlaylistBySubjectService {
-  Future<List<DisplayPlayListBySubjectModel>> getPlaylists({required String token, required int id}) async {
+  Future<List<DisplayPlayListBySubjectModel>> getPlaylists({required String token, required int id, required int classId}) async {
     final response = await DioHelper().get(
       ApiEndpoints.coursesBySubject(id),
       options: Options(
@@ -14,6 +14,7 @@ class DisplayPlaylistBySubjectService {
           "Authorization": "Bearer $token",
         },
       ),
+        query: {'class_id':classId}
     );
 
     print(response.data);
