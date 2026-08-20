@@ -1219,9 +1219,6 @@ class _VideoDetailsPageState extends State<VideoDetailsPage> {
                     ),
                   ),
 
-                  const SizedBox(
-                    height: 100,
-                  ),
                 ],
               ),
             ),
