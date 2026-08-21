@@ -18,84 +18,89 @@ class SummaryPage extends StatefulWidget {
   });
 
   @override
-  State<SummaryPage> createState() =>
-      _SummaryPageState();
+  State<SummaryPage> createState() => _SummaryPageState();
 }
 
-class _SummaryPageState
-    extends State<SummaryPage> {
+class _SummaryPageState extends State<SummaryPage> {
+  bool _isMindMapInteracting = false;
+
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance
-        .addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
           (_) {
-        context
-            .read<AiFeaturesProvider>()
-            .getAiFeatures(
+        if (!mounted) return;
+
+        context.read<AiFeaturesProvider>().getAiFeatures(
           videoId: widget.id,
         );
       },
     );
   }
 
+  // =====================================================
+  // MindMap Interaction
+  // =====================================================
+
+  void _onMindMapInteractionChanged(bool isInteracting) {
+    if (!mounted) return;
+
+    if (_isMindMapInteracting == isInteracting) {
+      return;
+    }
+
+    setState(() {
+      _isMindMapInteracting = isInteracting;
+    });
+  }
+
+  // =====================================================
+  // Back
+  // =====================================================
+
   void _goBack() {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            VideoDetailsPage(
-              videoId: widget.id,
-              videoName: widget.name,
-              playlistId:
-              widget.playlistId,
-            ),
+        builder: (_) => VideoDetailsPage(
+          videoId: widget.id,
+          videoName: widget.name,
+          playlistId: widget.playlistId,
+        ),
       ),
     );
   }
 
   @override
-  Widget build(
-      BuildContext context,
-      ) {
-    final provider =
-    context.watch<
-        AiFeaturesProvider>();
+  Widget build(BuildContext context) {
+    final provider = context.watch<AiFeaturesProvider>();
 
-    // ================================================
+    // =====================================================
     // Loading
-    // ================================================
+    // =====================================================
 
     if (provider.isLoading) {
       return const Scaffold(
-        backgroundColor:
-        Colors.white,
+        backgroundColor: Colors.white,
         body: Center(
-          child:
-          CircularProgressIndicator(
+          child: CircularProgressIndicator(
             strokeWidth: 3,
-            color:
-            Color(
-              0xff2A9D8F,
-            ),
+            color: Color(0xff2A9D8F),
           ),
         ),
       );
     }
 
-    // ================================================
+    // =====================================================
     // Error
-    // ================================================
+    // =====================================================
 
-    if (provider.errorMessage !=
-        null) {
+    if (provider.errorMessage != null) {
       return Directionality(
-        textDirection:
-        TextDirection.rtl,
+        textDirection: TextDirection.rtl,
         child: Scaffold(
-          backgroundColor:
-          Colors.white,
+          backgroundColor: Colors.white,
           body: SafeArea(
             child: Column(
               children: [
@@ -103,108 +108,63 @@ class _SummaryPageState
 
                 Expanded(
                   child: Center(
-                    child:
-                    Padding(
-                      padding:
-                      const EdgeInsets
-                          .all(
-                        24,
-                      ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
                       child: Column(
-                        mainAxisSize:
-                        MainAxisSize
-                            .min,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
                             width: 70,
                             height: 70,
-                            decoration:
-                            BoxDecoration(
-                              color:
-                              Colors.red
-                                  .withValues(
-                                alpha:
-                                0.08,
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(
+                                alpha: 0.08,
                               ),
-                              borderRadius:
-                              BorderRadius
-                                  .circular(
-                                22,
-                              ),
+                              borderRadius: BorderRadius.circular(22),
                             ),
-                            child:
-                            const Icon(
-                              Icons
-                                  .error_outline_rounded,
-                              color:
-                              Colors.red,
+                            child: const Icon(
+                              Icons.error_outline_rounded,
+                              color: Colors.red,
                               size: 36,
                             ),
                           ),
 
-                          const SizedBox(
-                            height: 18,
-                          ),
+                          const SizedBox(height: 18),
 
                           Text(
-                            provider
-                                .errorMessage!,
-                            textAlign:
-                            TextAlign
-                                .center,
-                            style:
-                            const TextStyle(
-                              fontFamily:
-                              'Tajawal',
-                              fontSize:
-                              15,
-                              height:
-                              1.7,
-                              color:
-                              Color(
-                                0xff264653,
-                              ),
+                            provider.errorMessage!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontFamily: 'Tajawal',
+                              fontSize: 15,
+                              height: 1.7,
+                              color: Color(0xff264653),
                             ),
                           ),
 
-                          const SizedBox(
-                            height: 20,
-                          ),
+                          const SizedBox(height: 20),
 
                           ElevatedButton.icon(
-                            onPressed:
-                                () {
+                            onPressed: () {
                               context
-                                  .read<
-                                  AiFeaturesProvider>()
+                                  .read<AiFeaturesProvider>()
                                   .getAiFeatures(
-                                videoId:
-                                widget.id,
+                                videoId: widget.id,
                               );
                             },
-                            icon:
-                            const Icon(
-                              Icons
-                                  .refresh_rounded,
+                            icon: const Icon(
+                              Icons.refresh_rounded,
                             ),
-                            label:
-                            const Text(
+                            label: const Text(
                               'إعادة المحاولة',
                             ),
-                            style:
-                            ElevatedButton
-                                .styleFrom(
-                              backgroundColor:
-                              const Color(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(
                                 0xff2A9D8F,
                               ),
-                              foregroundColor:
-                              Colors.white,
-                              shape:
-                              RoundedRectangleBorder(
-                                borderRadius:
-                                BorderRadius
-                                    .circular(
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
                                   14,
                                 ),
                               ),
@@ -222,59 +182,46 @@ class _SummaryPageState
       );
     }
 
-    // ================================================
+    // =====================================================
     // Data
-    // ================================================
+    // =====================================================
 
-    final simple =
-    provider.getSummaryByType(
+    final simple = provider.getSummaryByType(
       "simple",
     );
 
-    final mindMap =
-    provider.getSummaryByType(
+    final mindMap = provider.getSummaryByType(
       "mind_map",
     );
 
-    final String simpleText =
-    simple != null
-        ? provider
-        .getSummaryText(
-      simple,
-    )
+    final String simpleText = simple != null
+        ? provider.getSummaryText(simple)
         : "";
 
-    final String mindMapUrl =
-    mindMap != null
-        ? provider
-        .getMindMapUrl(
-      mindMap,
-    )
+    final String mindMapUrl = mindMap != null
+        ? provider.getMindMapUrl(mindMap)
         : "";
 
-    // ================================================
-    // Screen
-    // ================================================
+    // =====================================================
+    // Page
+    // =====================================================
 
     return Directionality(
-      textDirection:
-      TextDirection.rtl,
+      textDirection: TextDirection.rtl,
       child: DefaultTabController(
         length: 2,
         child: Scaffold(
-          backgroundColor:
-          Colors.white,
+          backgroundColor: Colors.white,
           body: Stack(
             children: [
-              // ========================================
-              // Background
-              // ========================================
+              // =============================================
+              // Background decoration
+              // =============================================
 
               Positioned(
                 top: 0,
                 left: 0,
-                child:
-                Image.asset(
+                child: Image.asset(
                   'assets/Images/Ellipse 4.png',
                 ),
               ),
@@ -282,164 +229,116 @@ class _SummaryPageState
               Positioned(
                 bottom: 0,
                 right: 0,
-                child:
-                Image.asset(
+                child: Image.asset(
                   'assets/Images/Ellipse 7.png',
                 ),
               ),
 
+              // =============================================
+              // Content
+              // =============================================
+
               SafeArea(
                 child: Column(
                   children: [
-                    // ==================================
-                    // Top bar
-                    // ==================================
-
                     _buildTopBar(),
 
+                    // =========================================
+                    // Header
+                    // =========================================
+
                     Padding(
-                      padding:
-                      const EdgeInsets
-                          .fromLTRB(
+                      padding: const EdgeInsets.fromLTRB(
                         18,
                         18,
                         18,
                         0,
                       ),
-                      child:
-                      _buildHeaderCard(),
+                      child: _buildHeaderCard(),
                     ),
 
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
+
+                    // =========================================
+                    // Tabs
+                    // =========================================
 
                     Padding(
-                      padding:
-                      const EdgeInsets
-                          .only(
-                        left:
-                        18,
+                      padding: const EdgeInsets.only(
+                        left: 18,
                         right: 18,
                       ),
-                      child:
-                      Container(
+                      child: Container(
                         height: 48,
-                        padding:
-                        const EdgeInsets
-                            .all(
-                          4,
-                        ),
-                        decoration:
-                        BoxDecoration(
-                          color:
-                          const Color(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: const Color(
                             0xffF2F7F6,
                           ),
-                          borderRadius:
-                          BorderRadius
-                              .circular(
+                          borderRadius: BorderRadius.circular(
                             16,
                           ),
-                          border:
-                          Border.all(
-                            color:
-                            const Color(
+                          border: Border.all(
+                            color: const Color(
                               0xffE0ECEA,
                             ),
                           ),
                         ),
-                        child:
-                        TabBar(
-                          indicatorSize:
-                          TabBarIndicatorSize
-                              .tab,
-                          dividerColor:
-                          Colors
-                              .transparent,
-                          splashBorderRadius:
-                          BorderRadius
-                              .circular(
+                        child: TabBar(
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          dividerColor: Colors.transparent,
+                          splashBorderRadius: BorderRadius.circular(
                             13,
                           ),
-                          indicator:
-                          BoxDecoration(
-                            color:
-                            const Color(
+                          indicator: BoxDecoration(
+                            color: const Color(
                               0xff2A9D8F,
                             ),
-                            borderRadius:
-                            BorderRadius
-                                .circular(
+                            borderRadius: BorderRadius.circular(
                               13,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color:
-                                const Color(
+                                color: const Color(
                                   0xff2A9D8F,
                                 ).withValues(
-                                  alpha:
-                                  0.20,
+                                  alpha: 0.20,
                                 ),
-                                blurRadius:
-                                10,
-                                offset:
-                                const Offset(
+                                blurRadius: 10,
+                                offset: const Offset(
                                   0,
                                   4,
                                 ),
                               ),
                             ],
                           ),
-                          labelColor:
-                          Colors.white,
-                          unselectedLabelColor:
-                          const Color(
+                          labelColor: Colors.white,
+                          unselectedLabelColor: const Color(
                             0xff6C7A7A,
                           ),
-                          labelStyle:
-                          const TextStyle(
-                            fontFamily:
-                            'Tajawal',
-                            fontSize:
-                            13,
-                            fontWeight:
-                            FontWeight
-                                .bold,
+                          labelStyle: const TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
                           ),
                           unselectedLabelStyle:
                           const TextStyle(
-                            fontFamily:
-                            'Tajawal',
-                            fontSize:
-                            13,
-                            fontWeight:
-                            FontWeight
-                                .w600,
+                            fontFamily: 'Tajawal',
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
                           ),
-                          tabs:
-                          const [
+                          tabs: const [
                             Tab(
-                              iconMargin:
-                              EdgeInsets
-                                  .zero,
-                              child:
-                              Row(
+                              iconMargin: EdgeInsets.zero,
+                              child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment
-                                    .center,
+                                MainAxisAlignment.center,
                                 children: [
                                   Icon(
-                                    Icons
-                                        .notes_rounded,
-                                    size:
-                                    18,
+                                    Icons.notes_rounded,
+                                    size: 18,
                                   ),
-                                  SizedBox(
-                                    width:
-                                    6,
-                                  ),
+                                  SizedBox(width: 6),
                                   Text(
                                     'ملخص مبسط',
                                   ),
@@ -447,25 +346,16 @@ class _SummaryPageState
                               ),
                             ),
                             Tab(
-                              iconMargin:
-                              EdgeInsets
-                                  .zero,
-                              child:
-                              Row(
+                              iconMargin: EdgeInsets.zero,
+                              child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment
-                                    .center,
+                                MainAxisAlignment.center,
                                 children: [
                                   Icon(
-                                    Icons
-                                        .account_tree_outlined,
-                                    size:
-                                    18,
+                                    Icons.account_tree_outlined,
+                                    size: 18,
                                   ),
-                                  SizedBox(
-                                    width:
-                                    6,
-                                  ),
+                                  SizedBox(width: 6),
                                   Text(
                                     'خريطة ذهنية',
                                   ),
@@ -477,73 +367,79 @@ class _SummaryPageState
                       ),
                     ),
 
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
+
+                    // =========================================
+                    // Tab Content
+                    // =========================================
 
                     Expanded(
-                      child:
-                      TabBarView(
-                        children: [
-                          // ============================
-                          // Simple summary
-                          // ============================
+                      child: TabBarView(
+                        // أثناء التعامل مع MindMap
+                        // نوقف Swipe بين Tabs أيضاً.
+                        physics: _isMindMapInteracting
+                            ? const NeverScrollableScrollPhysics()
+                            : const BouncingScrollPhysics(),
 
-                          simpleText
-                              .isNotEmpty
+                        children: [
+                          // ====================================
+                          // Simple Summary
+                          // ====================================
+
+                          simpleText.isNotEmpty
                               ? SingleChildScrollView(
                             physics:
                             const BouncingScrollPhysics(),
                             padding:
-                            const EdgeInsets
-                                .fromLTRB(
+                            const EdgeInsets.fromLTRB(
                               0,
                               4,
                               0,
                               28,
                             ),
-                            child:
-                            SummaryCard(
-                              data:
-                              simpleText,
+                            child: SummaryCard(
+                              data: simpleText,
                             ),
                           )
                               : _buildEmptyState(
-                            icon:
-                            Icons
-                                .notes_rounded,
+                            icon: Icons.notes_rounded,
                             title:
                             'لا يوجد ملخص مبسط',
                             subtitle:
                             'لم يتم إنشاء ملخص مبسط لهذا الفيديو بعد.',
                           ),
 
-                          // ============================
-                          // Mind map
-                          // ============================
+                          // ====================================
+                          // MindMap
+                          // ====================================
 
-                          mindMapUrl
-                              .isNotEmpty
+                          mindMapUrl.isNotEmpty
                               ? SingleChildScrollView(
+                            // أهم تعديل:
+                            // يتوقف Scroll الخارجي أثناء
+                            // لمس وتحريك الـ MindMap.
                             physics:
-                            const BouncingScrollPhysics(),
+                            _isMindMapInteracting
+                                ? const NeverScrollableScrollPhysics()
+                                : const BouncingScrollPhysics(),
+
                             padding:
-                            const EdgeInsets
-                                .fromLTRB(
+                            const EdgeInsets.fromLTRB(
                               0,
                               4,
                               0,
                               28,
                             ),
-                            child:
-                            MindMapCard(
-                              svgUrl:
-                              mindMapUrl,
+
+                            child: MindMapCard(
+                              svgUrl: mindMapUrl,
+
+                              onInteractionChanged:
+                              _onMindMapInteractionChanged,
                             ),
                           )
                               : _buildEmptyState(
-                            icon:
-                            Icons
+                            icon: Icons
                                 .account_tree_outlined,
                             title:
                             'لا توجد خريطة ذهنية',
@@ -571,53 +467,42 @@ class _SummaryPageState
     return SizedBox(
       height: 65,
       child: Padding(
-        padding:
-        const EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
           horizontal: 8,
         ),
         child: Row(
           children: [
             InkWell(
               onTap: _goBack,
-              borderRadius:
-              BorderRadius.circular(
+              borderRadius: BorderRadius.circular(
                 12,
               ),
-              child:
-              const Padding(
-                padding:
-                EdgeInsets.symmetric(
+              child: const Padding(
+                padding: EdgeInsets.symmetric(
                   horizontal: 8,
                   vertical: 6,
                 ),
                 child: Row(
-                  mainAxisSize:
-                  MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons
-                          .arrow_back_ios_new_rounded,
-                      textDirection:
-                      TextDirection.rtl,
-                      color:
-                      Color(
+                      Icons.arrow_back_ios_new_rounded,
+                      textDirection: TextDirection.rtl,
+                      color: Color(
                         0xff2A9D8F,
                       ),
                       size: 20,
                     ),
-SizedBox(width: 15,),
+
+                    SizedBox(width: 15),
+
                     Text(
                       'ملخص الفيديو',
-                      style:
-                      TextStyle(
-                        fontFamily:
-                        'Tajawal',
+                      style: TextStyle(
+                        fontFamily: 'Tajawal',
                         fontSize: 18,
-                        fontWeight:
-                        FontWeight
-                            .bold,
-                        color:
-                        Color(
+                        fontWeight: FontWeight.bold,
+                        color: Color(
                           0xff2A9D8F,
                         ),
                       ),
@@ -632,17 +517,19 @@ SizedBox(width: 15,),
     );
   }
 
+  // =====================================================
+  // Header Card
+  // =====================================================
+
   Widget _buildHeaderCard() {
     return Container(
       width: double.infinity,
-      padding:
-      const EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: 18,
         vertical: 18,
       ),
       decoration: BoxDecoration(
-        gradient:
-        const LinearGradient(
+        gradient: const LinearGradient(
           colors: [
             Color(
               0xff2A9D8F,
@@ -651,26 +538,21 @@ SizedBox(width: 15,),
               0xff21867A,
             ),
           ],
-          begin:
-          Alignment.topRight,
-          end:
-          Alignment.bottomLeft,
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
         ),
-        borderRadius:
-        BorderRadius.circular(
+        borderRadius: BorderRadius.circular(
           22,
         ),
         boxShadow: [
           BoxShadow(
-            color:
-            const Color(
+            color: const Color(
               0xff2A9D8F,
             ).withValues(
               alpha: 0.20,
             ),
             blurRadius: 16,
-            offset:
-            const Offset(
+            offset: const Offset(
               0,
               7,
             ),
@@ -686,32 +568,22 @@ SizedBox(width: 15,),
           Container(
             width: 56,
             height: 56,
-            decoration:
-            BoxDecoration(
-              color:
-              Colors.white
-                  .withValues(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(
                 alpha: 0.17,
               ),
-              borderRadius:
-              BorderRadius
-                  .circular(
+              borderRadius: BorderRadius.circular(
                 17,
               ),
             ),
-            child:
-            const Icon(
-              Icons
-                  .auto_awesome_rounded,
-              color:
-              Colors.white,
+            child: const Icon(
+              Icons.auto_awesome_rounded,
+              color: Colors.white,
               size: 28,
             ),
           ),
 
-          const SizedBox(
-            width: 13,
-          ),
+          const SizedBox(width: 13),
 
           // ============================================
           // Text
@@ -720,46 +592,30 @@ SizedBox(width: 15,),
           Expanded(
             child: Column(
               crossAxisAlignment:
-              CrossAxisAlignment
-                  .start,
+              CrossAxisAlignment.start,
               children: [
                 const Text(
                   'ملخص الدرس',
-                  style:
-                  TextStyle(
-                    fontFamily:
-                    'Tajawal',
+                  style: TextStyle(
+                    fontFamily: 'Tajawal',
                     fontSize: 12,
-                    fontWeight:
-                    FontWeight
-                        .w600,
-                    color:
-                    Colors.white70,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white70,
                   ),
                 ),
 
-                const SizedBox(
-                  height: 4,
-                ),
+                const SizedBox(height: 4),
 
                 Text(
                   widget.name,
                   maxLines: 2,
-                  overflow:
-                  TextOverflow
-                      .ellipsis,
-                  style:
-                  const TextStyle(
-                    fontFamily:
-                    'Tajawal',
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'Tajawal',
                     fontSize: 18,
-                    height:
-                    1.45,
-                    fontWeight:
-                    FontWeight
-                        .bold,
-                    color:
-                    Colors.white,
+                    height: 1.45,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
               ],
@@ -771,7 +627,7 @@ SizedBox(width: 15,),
   }
 
   // =====================================================
-  // Empty state
+  // Empty State
   // =====================================================
 
   Widget _buildEmptyState({
@@ -781,81 +637,59 @@ SizedBox(width: 15,),
   }) {
     return Center(
       child: Padding(
-        padding:
-        const EdgeInsets.all(
+        padding: const EdgeInsets.all(
           30,
         ),
         child: Column(
-          mainAxisSize:
-          MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               width: 68,
               height: 68,
-              decoration:
-              BoxDecoration(
-                color:
-                const Color(
+              decoration: BoxDecoration(
+                color: const Color(
                   0xff2A9D8F,
                 ).withValues(
-                  alpha:
-                  0.08,
+                  alpha: 0.08,
                 ),
-                borderRadius:
-                BorderRadius
-                    .circular(
+                borderRadius: BorderRadius.circular(
                   20,
                 ),
               ),
-              child:
-              Icon(
+              child: Icon(
                 icon,
                 size: 32,
-                color:
-                const Color(
+                color: const Color(
                   0xff2A9D8F,
                 ),
               ),
             ),
 
-            const SizedBox(
-              height: 16,
-            ),
+            const SizedBox(height: 16),
 
             Text(
               title,
-              textAlign:
-              TextAlign.center,
-              style:
-              const TextStyle(
-                fontFamily:
-                'Tajawal',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Tajawal',
                 fontSize: 16,
-                fontWeight:
-                FontWeight.bold,
-                color:
-                Color(
+                fontWeight: FontWeight.bold,
+                color: Color(
                   0xff264653,
                 ),
               ),
             ),
 
-            const SizedBox(
-              height: 6,
-            ),
+            const SizedBox(height: 6),
 
             Text(
               subtitle,
-              textAlign:
-              TextAlign.center,
-              style:
-              const TextStyle(
-                fontFamily:
-                'Tajawal',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Tajawal',
                 fontSize: 13,
                 height: 1.6,
-                color:
-                Color(
+                color: Color(
                   0xff7B8B8A,
                 ),
               ),
