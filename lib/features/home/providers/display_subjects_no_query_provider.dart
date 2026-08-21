@@ -33,18 +33,7 @@ class DisplaySubjectsNoQueryProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final prefs =
-      await SharedPreferences.getInstance();
-
-      final token =
-      prefs.getString("auth_token");
-      if (token == null ||
-          token.isEmpty){
-        throw Exception(
-          "Authentication token or class id not found",
-        );
-      }
-      _subjects = await _service.getSubjects(token: token);
+      _subjects = await _service.getSubjects();
 
       _isSuccess = true;
     } catch (e) {

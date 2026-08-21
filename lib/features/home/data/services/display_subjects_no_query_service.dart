@@ -5,16 +5,9 @@ import '../../../../core/end_points.dart';
 import '../models/display_subjects_model.dart';
 
 class DisplaySubjectsNoQueryService {
-  Future<List<DisplaySubjectsModel>> getSubjects({
-    required String token,
-  }) async {
+  Future<List<DisplaySubjectsModel>> getSubjects() async {
     final response = await DioHelper().get(
       ApiEndpoints.subjects,
-      options: Options(
-        headers: {
-          "Authorization": "Bearer $token",
-        },
-      ),
     );
 
     print('SUBJECT RESPONSE: ${response.data}');

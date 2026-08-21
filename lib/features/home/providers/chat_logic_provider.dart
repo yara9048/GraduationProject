@@ -241,9 +241,7 @@ class ChatLogicProvider extends ChangeNotifier {
         response,
       );
 
-      if (aiMessage
-          .trim()
-          .isNotEmpty) {
+      if (aiMessage.trim().isNotEmpty) {
         _messages.add(
           ChatLogicMessage(
             type: 'ai',
@@ -325,6 +323,26 @@ class ChatLogicProvider extends ChangeNotifier {
 
     return '${minutes.toString().padLeft(2, '0')}:'
         '${seconds.toStringAsFixed(2).padLeft(5, '0')}';
+  }
+
+  String _secondsToDisplayTimestamp(
+      double totalSeconds,
+      ) {
+    double safeSeconds =
+        totalSeconds;
+
+    if (safeSeconds < 0) {
+      safeSeconds = 0;
+    }
+
+    final int minutes =
+        safeSeconds ~/ 60;
+
+    final int seconds =
+    (safeSeconds % 60).floor();
+
+    return '${minutes.toString().padLeft(2, '0')}:'
+        '${seconds.toString().padLeft(2, '0')}';
   }
 
   Future<void> _sendWebMessage(
@@ -423,8 +441,7 @@ class ChatLogicProvider extends ChangeNotifier {
               cleanText;
     }
 
-    final List<VideoSegment>
-    segments = [];
+    final List<VideoSegment> segments = [];
 
     final timestampRegex =
     RegExp(
@@ -437,29 +454,25 @@ class ChatLogicProvider extends ChangeNotifier {
     )) {
       final int startMinutes =
           int.tryParse(
-            match.group(1) ??
-                '0',
+            match.group(1) ?? '0',
           ) ??
               0;
 
       final double startSecondsPart =
           double.tryParse(
-            match.group(2) ??
-                '0',
+            match.group(2) ?? '0',
           ) ??
               0;
 
       final int endMinutes =
           int.tryParse(
-            match.group(3) ??
-                '0',
+            match.group(3) ?? '0',
           ) ??
               0;
 
       final double endSecondsPart =
           double.tryParse(
-            match.group(4) ??
-                '0',
+            match.group(4) ?? '0',
           ) ??
               0;
 
@@ -491,10 +504,155 @@ class ChatLogicProvider extends ChangeNotifier {
       );
     }
 
+    final List<VideoSegment>
+    finalSegments =
+    _mergeSegmentsIfWithinOneMinute(
+      segments,
+    );
+
     return ParsedAiMessage(
       answer: answer,
-      segments: segments,
+      segments: finalSegments,
     );
+  }
+
+  List<VideoSegment>
+  _mergeSegmentsIfWithinOneMinute(
+      List<VideoSegment> segments,
+      ) {
+    if (segments.length <= 1) {
+      return segments;
+    }
+
+    final List<VideoSegment>
+    sortedSegments =
+    List<VideoSegment>.from(
+      segments,
+    )
+      ..sort(
+            (a, b) =>
+            a.startSeconds.compareTo(
+              b.startSeconds,
+            ),
+      );
+
+    final VideoSegment first =
+        sortedSegments.first;
+
+    final VideoSegment last =
+        sortedSegments.last;
+
+    final double totalDifference =
+        last.endSeconds -
+            first.startSeconds;
+
+    if (totalDifference < 60) {
+      return [
+        VideoSegment(
+          startSeconds:
+          first.startSeconds,
+          endSeconds:
+          last.endSeconds,
+          startLabel:
+          _secondsToDisplayTimestamp(
+            first.startSeconds,
+          ),
+          endLabel:
+          _secondsToDisplayTimestamp(
+            last.endSeconds,
+          ),
+        ),
+      ];
+    }
+
+    return sortedSegments;
+  }
+
+  String _buildHistoryAiMessage(
+      Message message,
+      ) {
+    final String originalText =
+    message.text.trim();
+
+    if (originalText.contains(
+      'PRECISE TIMESTAMPS:',
+    )) {
+      return originalText;
+    }
+
+    final ServiceResponse?
+    serviceResponse =
+        message.metadata.serviceResponse;
+
+    String answer =
+        originalText;
+
+    if (answer.isEmpty) {
+      answer =
+          serviceResponse?.answer?.trim() ??
+              '';
+    }
+
+    final List<VideoSource> sources;
+
+    if (message
+        .metadata
+        .whereInVideo
+        .isNotEmpty) {
+      sources =
+          message.metadata.whereInVideo;
+    } else if (serviceResponse != null &&
+        serviceResponse
+            .whereInVideo
+            .isNotEmpty) {
+      sources =
+          serviceResponse.whereInVideo;
+    } else if (serviceResponse != null &&
+        serviceResponse
+            .citations
+            .isNotEmpty) {
+      sources =
+          serviceResponse.citations;
+    } else {
+      sources = const [];
+    }
+
+    if (sources.isEmpty) {
+      return answer;
+    }
+
+    final StringBuffer buffer =
+    StringBuffer();
+
+    buffer.writeln(
+      'ANSWER: $answer',
+    );
+
+    buffer.writeln();
+
+    buffer.writeln(
+      'PRECISE TIMESTAMPS:',
+    );
+
+    for (final source in sources) {
+      final String start =
+      _secondsToParserTimestamp(
+        source.start,
+      );
+
+      final String end =
+      _secondsToParserTimestamp(
+        source.end,
+      );
+
+      buffer.writeln(
+        '[$start --> $end]',
+      );
+    }
+
+    return buffer
+        .toString()
+        .trim();
   }
 
   String _formatTimestampLabel(
@@ -512,55 +670,33 @@ class ChatLogicProvider extends ChangeNotifier {
       ViewChatModel model,
       ) {
     try {
-      final dynamic dynamicModel =
-          model;
-
-      final dynamic json =
-      dynamicModel.toJson();
-
-      if (json is! Map) {
-        return;
-      }
-
-      final rawMessages =
-      _findMessages(
-        json,
-      );
-
-      if (rawMessages == null) {
-        return;
-      }
-
       final List<ChatLogicMessage>
       newMessages = [];
 
-      for (final item
-      in rawMessages) {
-        if (item is! Map) {
-          continue;
-        }
-
-        final text =
-        _findMessageText(
-          item,
+      for (final message
+      in model.messages) {
+        final String type =
+        _normalizeSender(
+          message.sender,
         );
 
-        if (text == null ||
-            text.trim().isEmpty) {
-          continue;
+        String text =
+        message.text.trim();
+
+        if (type == 'ai') {
+          text =
+              _buildHistoryAiMessage(
+                message,
+              );
         }
 
-        final sender =
-        _findSender(
-          item,
-        );
+        if (text.trim().isEmpty) {
+          continue;
+        }
 
         newMessages.add(
           ChatLogicMessage(
-            type:
-            _normalizeSender(
-              sender,
-            ),
+            type: type,
             text: text.trim(),
           ),
         );

@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:graduationprojct/features/auth/providers/sign_up_provider.dart';
 import 'package:graduationprojct/features/auth/ui/widgets/sign_up_image_picker.dart';
+import 'package:graduationprojct/features/home/providers/display_subjects_no_query_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../home/providers/display_subjects_provider.dart';
@@ -65,7 +66,7 @@ class _SignUpPageState
       if (!mounted) return;
 
       context
-          .read<DisplaySubjectsProvider>()
+          .read<DisplaySubjectsNoQueryProvider>()
           .getSubjects();
     });
   }
@@ -331,7 +332,7 @@ class _SignUpPageState
                       height: 5,
                     ),
                     Consumer<
-                        DisplaySubjectsProvider>(
+                        DisplaySubjectsNoQueryProvider>(
                       builder: (
                           context,
                           subjectsProvider,
@@ -392,7 +393,7 @@ class _SignUpPageState
                                       () {
                                     context
                                         .read<
-                                        DisplaySubjectsProvider>()
+                                        DisplaySubjectsNoQueryProvider>()
                                         .getSubjects();
                                   },
                                   icon:
